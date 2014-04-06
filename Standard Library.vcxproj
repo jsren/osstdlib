@@ -12,7 +12,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="array.h" />
+    <ClInclude Include="collections.h" />
+    <ClInclude Include="collections\linkedlist.h" />
+    <ClInclude Include="collections\list.h" />
+    <ClInclude Include="func.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="memory.h" />
+    <ClInclude Include="point.h" />
+    <ClInclude Include="collections\stack.h" />
+    <ClInclude Include="smartptr.h" />
     <ClInclude Include="std.h" />
     <ClInclude Include="string.h" />
     <ClInclude Include="strops.h" />
@@ -20,7 +28,9 @@
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="impl\string.cpp" />
+    <ClCompile Include="Impl\integer.cpp" />
+    <ClCompile Include="Impl\list.cpp" />
+    <ClCompile Include="Impl\string.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{44E1C228-35DB-4EDC-A6D4-ECA63D35004C}</ProjectGuid>
@@ -48,7 +58,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions);VS</NMakePreprocessorDefinitions>
     <ExecutablePath />
     <IncludePath>$(SolutionDir);$(SolutionDir)\include</IncludePath>
     <ReferencePath />

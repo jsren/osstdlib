@@ -1,8 +1,9 @@
 /* string.cpp - (c) James S Renwick 2013
    -----------------------------------
-   Version 1.0.4
+   Version 1.0.6
 */
-#include "../string.h"
+#include <stdlib/math.h>
+#include <stdlib/string.h>
 
 namespace std
 {
@@ -10,53 +11,59 @@ namespace std
 	// will be over-allocated
 	const UInt maxStrExtra = 120;
 
-	// === CONSTRUCTORS ===
-	String::String(UInt length, UInt realLength) : length(length), realLength(realLength)
+	void String::__resize(UInt length) noexcept
 	{
-		this->data = new char[realLength];
-	}
-	String::String(const char* buffer)
-	{
-		this->length = String::getNullLength(buffer);
-
 		UInt extra = length >> 1;
-		this->realLength = length + (extra < maxStrExtra ? extra : maxStrExtra);
+		this->realLength = length + std::min(extra, maxStrExtra);
 
 		// Account for integer overflow
 		if (this->realLength < length) { this->realLength = length; }
 
+		char* tmpData = this->data;
+
 		this->data = new char[this->realLength];
+
+		// Copy old data if present
+		if (tmpData != nullptr)
+		{
+			for (UInt i = 0; i < this->length; i++) {
+				this->data[i] = tmpData[i];
+			}
+			delete[] tmpData;
+		}
+
+		// The max length of a string is actually UIntMax-1
+		if (this->length == UIntMax) this->length = UIntMax - 1;
+	}
+
+	// === CONSTRUCTORS ===
+	String::String(UInt length, UInt realLength) noexcept : length(length), realLength(realLength)
+	{
+		this->data = new char[realLength];
+	}
+	String::String(const char* buffer) : data(nullptr)
+	{
+		this->length = String::getNullLength(buffer);
+		this->__resize(this->length);
 
 		for (UInt i = 0; i < this->length; i++) {
 			this->data[i] = buffer[i];
 		}
-
-		// The max length of a string is actually UIntMax-1
-		if (this->length == UIntMax) this->length = UIntMax - 1;
 	}
-	String::String(const String& str) : length(str.length), realLength(str.realLength)
+	String::String(const char* buffer, UInt length) noexcept : data(nullptr), length(length)
+	{
+		this->__resize(length);
+
+		for (UInt i = 0; i < this->length; i++) {
+			this->data[i] = buffer[i];
+		}
+	}
+	String::String(const String& str) noexcept : length(str.length), realLength(str.realLength)
 	{
 		this->data = new char[str.realLength];
 
-		for (int i = 0; i < str.length; i++) {
+		for (UInt i = 0; i < str.length; i++) {
 			this->data[i] = str.data[i];
-		}
-
-		// The max length of a string is actually UIntMax-1
-		if (this->length == UIntMax) this->length = UIntMax - 1;
-	}
-	String::String(const char* data, UInt length) : length(length)
-	{
-		UInt extra = length >> 1;
-		this->realLength = length + (extra < maxStrExtra ? extra : maxStrExtra);
-
-		// Account for integer overflow
-		if (this->realLength < length) { this->realLength = length; }
-
-		this->data = new char[this->realLength];
-
-		for (int i = 0; i < length; i++) {
-			this->data[i] = data[i];
 		}
 
 		// The max length of a string is actually UIntMax-1
@@ -64,7 +71,7 @@ namespace std
 	}
 
 	// === METHODS ===
-	bool String::setCharAt(char c, UInt index)
+	bool String::setCharAt(char c, UInt index) noexcept
 	{
 		if (index < this->length)
 		{
@@ -74,26 +81,26 @@ namespace std
 		else return false;
 	}
 
-	String* String::substring(UInt startIndex, UInt length)
+	String* String::substring(UInt startIndex, UInt length) noexcept
 	{
 		if (startIndex > this->length) {
-			return nullptr(String*);
+			return new String(String::Empty);
 		}
 
 		UInt sublen = this->length - startIndex;
-		if (length < sublen) { sublen = length; }
+		if (length > sublen) { length = sublen; }
 
-		return new String(this->data + startIndex, sublen);
+		return new String(this->data + startIndex, length);
 	}
 
-	UInt String::remove(UInt startIndex, UInt length)
+	UInt String::remove(UInt startIndex, UInt length) noexcept
 	{
 		UInt sublen   = this->length - startIndex;
 		UInt endIndex = startIndex + length;
 
 		// Check for valid input
 		if (length == 0 || startIndex > this->length ||
-			endIndex < (startIndex > length ? startIndex : length))
+			endIndex < std::max(startIndex, length))
 		{
 			return 0;
 		}
@@ -111,21 +118,25 @@ namespace std
 
 			char* remStart = this->data + startIndex;
 			
-			for (int i = 0, n = endIndex; n < this->length; i++, n++) {
+			for (UInt i = 0, n = endIndex; n < this->length; i++, n++) {
 				remStart[i] = this->data[n];
 			}
+		}
+		// Too much over-alloc so resize
+		if (this->realLength - length >= maxStrExtra) {
+			this->__resize(this->length);
 		}
 		return length;
 	}
 
-	UInt String::indexOf(const String& substr) const
+	UInt String::indexOf(const String& substr) const noexcept
 	{
 		for (UInt i = 0; i < this->length; i++)
 		{
 			bool found = true;
 			for (UInt n = 0; n < substr.length; n++)
 			{
-				if (this->data[i] != substr.data[n])
+				if (this->data[i+n] != substr.data[n])
 				{
 					found = false;
 					break;
@@ -135,7 +146,7 @@ namespace std
 		}
 		return UIntMax; // -1
 	}
-	UInt String::indexOf(const String& substr, UInt startIndex) const
+	UInt String::indexOf(const String& substr, UInt startIndex) const noexcept
 	{
 		const char* data   = (this->data + startIndex);
 		const UInt  length = this->length - startIndex;
@@ -156,7 +167,7 @@ namespace std
 		return UIntMax; // -1
 	}
 
-	bool String::startsWith(const String& prefix) const
+	bool String::startsWith(const String& prefix) const noexcept
 	{
 		if (prefix.length > this->length) return false;
 
@@ -165,7 +176,7 @@ namespace std
 		}
 		return true;
 	}
-	bool String::startsWith(const char* prefix, UInt length) const
+	bool String::startsWith(const char* prefix, UInt length) const noexcept
 	{
 		if (length > this->length) return false;
 
@@ -175,24 +186,29 @@ namespace std
 		return true;
 	}
 
-	bool String::endsWith(const String& suffix) const
+	bool String::endsWith(const String& suffix) const noexcept
 	{
 		if (suffix.length > this->length) return false;
 
-		for (UInt n = suffix.length; n != 0; n--) {
-			if (this->data[n-1] != suffix.data[n-1]) return false;
+		char* end1 = this->data + this->length - 1;
+		char* end2 = suffix.data + suffix.length - 1;
+
+		for (UInt n = 0; n != suffix.length; ++n) {
+			if (*(end1 - n) != *(end2 - n)) return false;
 		}
+		return true;
 	}
-	bool String::endsWith(const char* suffix, UInt length) const
+	bool String::endsWith(const char* suffix, UInt length) const noexcept
 	{
 		if (length > this->length) return false;
 
 		for (UInt n = length; n != 0; n--) {
 			if (this->data[n-1] != suffix[n-1]) return false;
 		}
+		return true;
 	}
 
-	void String::freeToSize()
+	void String::freeToSize() noexcept
 	{
 		char* buffer = new char[this->length];
 
@@ -204,93 +220,84 @@ namespace std
 		this->data = buffer;
 	}
 
-	UInt String::getNullLength(const char* data)
+	UInt String::getNullLength(const char* data) noexcept
 	{
-		for (UInt i; i < UIntMax; i++) {
+		for (UInt i = 0; i < UIntMax; i++) {
 			if (data[i] == '\0') return i;
 		}
+		return UIntMax;
 	}
 
 	// === OPERATORS ===
 
-	void String::operator +=(char c1)
+	String* String::operator +=(char c1) noexcept
 	{
-		if (this->realLength - this->length >= 1) {
-			this->data[this->length] = c1;
+		// Check for max string length
+		if (this->length == UIntMax - 1) {
+			return nullptr;
 		}
-		this->length++;
+		// Resize as necessary
+		if (this->realLength - this->length == 0) {
+			this->__resize(this->length + 1);
+		}
+		this->data[this->length++] = c1;
 
-		// The max length of a string is actually UIntMax-1
-		if (this->length == UIntMax) this->length = UIntMax - 1;
+		// Return this
+		return this;
 	}
-	void String::operator +=(const char* s1)
+	String* String::operator +=(const char* s1) noexcept
 	{
-		UInt length = String::getNullLength(s1);
+		UInt appendLen = String::getNullLength(s1);
+		UInt newLen    = this->length + appendLen;
 
-		char* append = this->data + this->length;
-
-		// If resize required, re-alloc
-		if (this->realLength - this->length < length)
+		// Resize as required
+		if (appendLen > this->realLength - this->length)
 		{
-			// Get new data array length
-			this->realLength = this->length + length;
-			UInt excess = this->realLength >> 1;
-			this->realLength += (excess < maxStrExtra ? excess : maxStrExtra);
-
-			// Account for integer overflow
-			if (this->realLength < length) { this->realLength = length; }
-
-			char* buffer = new char[this->realLength];
-			
-			for (UInt i = 0; i < this->length; i++) {
-				buffer[i] = this->data[i];
+			// Catch overflow
+			if (newLen < std::max(this->length, appendLen)) {
+				return nullptr;
 			}
-			delete[] this->data;
-			this->data = buffer;
+			else this->__resize(newLen);
 		}
+
 		// Copy other string
-		for (UInt i = 0; i < length; i++) {
+		char* append = this->data + this->length;
+		
+		for (UInt i = 0; i < appendLen; i++) {
 			append[i] = s1[i];
 		}
-		this->length += length;
+		this->length = newLen;
 
-		// The max length of a string is actually UIntMax-1
-		if (this->length == UIntMax) this->length = UIntMax - 1;
+		// Return this
+		return this;
 	}
-	void String::operator +=(const String& s1)
+	String* String::operator +=(const String& s1) noexcept
 	{
+		UInt newLen = this->length - s1.length;
+
+		// Resize as required
+		if (s1.length > this->realLength - this->length)
+		{
+			// Catch overflow
+			if (newLen < std::max(this->length, s1.length)) {
+				return nullptr;
+			}
+			else this->__resize(newLen);
+		}
+
+		// Copy other string
 		char* append = this->data + this->length;
 
-		// If resize required, re-alloc
-		if (this->realLength - this->length < s1.length)
-		{
-			// Get new data array length
-			this->realLength = this->length + s1.length;
-			UInt excess = this->realLength >> 1;
-			this->realLength += (excess < maxStrExtra ? excess : maxStrExtra);
-
-			// Account for integer overflow
-			if (this->realLength < length) { this->realLength = length; }
-
-			char* buffer = new char[this->realLength];
-			
-			for (UInt i = 0; i < this->length; i++) {
-				buffer[i] = this->data[i];
-			}
-			delete[] this->data;
-			this->data = buffer;
-		}
-		// Copy other string
 		for (UInt i = 0; i < s1.length; i++) {
 			append[i] = s1[i];
 		}
-		this->length += s1.length;
+		this->length = newLen;
 
-		// The max length of a string is actually UIntMax-1
-		if (this->length == UIntMax) this->length = UIntMax - 1;
+		// Return this
+		return this;
 	}
 
-	bool String::operator ==(const String* s1) const
+	bool String::operator ==(const String* s1) const noexcept
 	{
 		if (s1->getLength() != this->length) return false;
 
@@ -300,12 +307,12 @@ namespace std
 		return true;
 	}
 
-	String* String::operator +(char c) const
+	String* String::operator +(char c) const noexcept
 	{
 		String* output;
 
 		if (this->length == UIntMax - 1) { 
-			return nullptr(String*); 
+			return nullptr; 
 		}
 		else if (this->realLength != UIntMax -1) {
 			output = new String(this->realLength + 1, this->length + 1);
@@ -320,20 +327,20 @@ namespace std
 
 		return output;
 	}
-	String* String::operator +(const String& s1) const
+	String* String::operator +(const String& s1) const noexcept
 	{
 		UInt newLen     = this->length + s1.length;
 		UInt extra      = newLen >> 1;
-		UInt newRealLen = newLen + (extra < maxStrExtra ? extra : maxStrExtra);
+		UInt newRealLen = newLen + std::min(extra, maxStrExtra);
 
 		// Check that the new length is not too large
-		if (newLen < (this->length > s1.length ? this->length : s1.length)) {
-			return nullptr(String*);
+		if (newLen < std::max(this->length, s1.length)) {
+			return nullptr;
 		}
 		// Account for integer overflow
 		else if (newRealLen < newLen) { newRealLen = newLen; }
 
-
+		// Copy data to new string
 		String* output = new String(newLen, newRealLen);
 
 		for (UInt i = 0; i < this->length; i++) {
@@ -347,22 +354,22 @@ namespace std
 		}
 		return output;
 	}
-	String* String::operator +(const char* s1) const
+	String* String::operator +(const char* s1) const noexcept
 	{
 		UInt s1Length = String::getNullLength(s1);
 
 		UInt newLen     = this->length + s1Length;
 		UInt extra      = newLen >> 1;
-		UInt newRealLen = newLen + (extra < maxStrExtra ? extra : maxStrExtra);
+		UInt newRealLen = newLen + std::min(extra, maxStrExtra);
 
 		// Check that the new length is not too large
-		if (newLen < (this->length > s1Length ? this->length : s1Length)) {
-			return nullptr(String*);
+		if (newLen < std::max(this->length, s1Length)) {
+			return nullptr;
 		}
 		// Account for integer overflow
 		else if (newRealLen < newLen) { newRealLen = newLen; }
 
-
+		// Copy data to new string
 		String* output = new String(newLen, newRealLen);
 
 		for (UInt i = 0; i < this->length; i++) {

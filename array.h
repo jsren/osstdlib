@@ -1,6 +1,6 @@
 /* array.h - (c) James S Renwick 2013
    ----------------------------------
-   Version 1.0.1
+   Version 1.0.4
 */
 #pragma once
 #include "std.h"
@@ -24,21 +24,23 @@ namespace std
 		~Array();
 
 		/* Gets the number of items in the array. */
-		UInt getLength() const;
+		UInt getLength() const noexcept;
 
 		/* Gets the item at the specified index. */
-		T getItem(UInt index) const;
+		const T getItem(UInt index) const noexcept;
 		/* Sets the item at the specified index. */
-		void setItem(UInt index, T item);
+		bool setItem(UInt index, const T item) noexcept;
 
 		/* Shallow-copies the members of the current array to a destination array. */
 		void copyTo(Array<T>& destination) const;
 
 	public:
-		/* Gets the item at the specified index. */
-		inline T operator[] (UInt index) const { return this->getItem(index); }
+		/* Gets the item at the specified index. No bounds check is performed. */
+		inline T& operator[] (UInt index) noexcept { return arrayData[index]; }
+		/* Gets the item at the specified index. No bounds check is performed. */
+		inline T const& operator[] (UInt index) const noexcept { return arrayData[index]; }
 
-		/* Resizes the current array, trimming items if smaller. */
+		/* Resizes the given array, trimming items if smaller. */
 		static Array<T>* resize(const Array<T>& arr, UInt newSize);
 	};
 
@@ -56,30 +58,35 @@ namespace std
 	}
 
 	template <class T>
-	inline UInt Array<T>::getLength() const
+	inline UInt Array<T>::getLength() const noexcept
 	{
 		return this->length;
 	}
 
 	template <class T>
-	inline T Array<T>::getItem(UInt index) const
+	inline const T Array<T>::getItem(UInt index) const noexcept
 	{
 		return this->arrayData[index];
 	}
 
 	template <class T>
-	inline void Array<T>::setItem(UInt index, T item)
+	inline bool Array<T>::setItem(UInt index, const T item) noexcept
 	{
-		this->arrayData[index] = item;
+		if (index < this->length)
+		{
+			this->arrayData[index] = item;
+			return true;
+		}
+		else return false;
 	}
 
 	template <class T>
 	void Array<T>::copyTo(Array<T>& destination) const
 	{
-		UInt l = length > destination->length ? length : destination->length;
+		UInt l = length > destination.length ? length : destination.length;
 		for (UInt i = 0; i < l; i++)
 		{
-			destination->arrayData[i] = this->arrayData[i];
+			destination.arrayData[i] = this->arrayData[i];
 		}
 	}
 

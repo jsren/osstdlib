@@ -1,10 +1,9 @@
 /* string.h - (c) James S Renwick 2013
    -----------------------------------
-   Version 1.0.4
+   Version 1.0.6
 */
 #pragma once
 #include <stdlib/std.h>
-#include <stdlib/array.h>
 
 /*
 ==========================================
@@ -31,18 +30,20 @@ namespace std
 		UInt length;
 		UInt realLength;
 
+		explicit String() noexcept {};
+
 		String(UInt, UInt);
 
-	public:
+		void __resize(UInt);
 
-		String() : data(nullptr(char*)), length(0), realLength(0) { };
+	public:
 
 		String(const char* data);
 		String(const String& str);
 		String(const char* data, UInt length);
 
 		/* Gets the length, in characters, of this string. */
-		inline UInt getLength() const { return this->length; }
+		inline UInt getLength() const noexcept { return this->length; }
 
 
 		/*
@@ -51,7 +52,7 @@ namespace std
 
 		index - The index of the character to retrieve.
 		*/
-		inline char getCharAt(UInt index) const { return this->data[index]; }
+		inline char getCharAt(UInt index) const noexcept{ return this->data[index]; }
 
 
 		/*
@@ -61,13 +62,15 @@ namespace std
 		character - The new value.
 		index     - The index of the character to set.
 		*/
-		bool setCharAt(char character, UInt index);
+		bool setCharAt(char character, UInt index) noexcept;
 
 
 		/*
 		Creates a new String which is a substring of the current string.
 		Should the given length go beyond the string length, the substring
-		will be taken from the given index until the end of the string.
+		will be taken from the given index until the end of the string. If
+		the start index is beyond the string, an empty string will be 
+		returned.
 
 		startIndex - The index from which the substring should be taken.
 		length     - The length, in characters, of the substring.
@@ -91,7 +94,7 @@ namespace std
 
 		substr - The substring for which to search.
 		*/
-		UInt indexOf(const String& substr) const;
+		UInt indexOf(const String& substr) const noexcept;
 		/*
 		Returns the index within the string of the given substring,
 		or -1 (UIntMax) if not found.
@@ -99,7 +102,7 @@ namespace std
 		substr     - The substring for which to search.
 		startIndex - The index (inclusive) at which to begin the search.
 		*/
-		UInt indexOf(const String& substr, UInt startIndex) const;
+		UInt indexOf(const String& substr, UInt startIndex) const noexcept;
 
 
 		/*
@@ -107,14 +110,14 @@ namespace std
 
 		prefix - The prefix for which to test.
 		*/
-		bool startsWith(const String& prefix) const;
+		bool startsWith(const String& prefix) const noexcept;
 		/*
 		Tests whether the string starts with the given character array.
 
 		prefix - The prefix for which to test.
 		length - The length of the character array.
 		*/
-		bool startsWith(const char* prefix, UInt length) const;
+		bool startsWith(const char* prefix, UInt length) const noexcept;
 
 
 		/*
@@ -122,14 +125,14 @@ namespace std
 
 		suffix - The suffix for which to test.
 		*/
-		bool endsWith(const String& suffix) const;
+		bool endsWith(const String& suffix) const noexcept;
 		/*
 		Tests whether the string ends with the given character array.
 
 		suffix - The suffix for which to test.
 		length - The length of the character array.
 		*/
-		bool endsWith(const char* suffix, UInt length) const;
+		bool endsWith(const char* suffix, UInt length) const noexcept;
 
 
 		/*
@@ -141,9 +144,9 @@ namespace std
 
 
 		// === OPERATORS === 
-		void operator +=(char c1);
-		void operator +=(const char* s1);
-		void operator +=(const String& s1);
+		String* operator +=(char c1);
+		String* operator +=(const char* s1);
+		String* operator +=(const String& s1);
 
 		bool operator ==(const String* s1) const;
 

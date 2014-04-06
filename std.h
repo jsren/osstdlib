@@ -1,11 +1,62 @@
+/* std.h - (c) James S Renwick 2013 
+   --------------------------------
+   Version 2.0.1
+*/
 #pragma once
 
 /*
 	This file contains the standard library type definitions.
 */
 
+// Compiler-specific defines
+#ifdef __GNUG__
+#define GCC
+#endif
+
 #define null 0
-#define ptrnull (void*)-1
+
+#ifdef VS
+/* Guarantees that the function will never throw an exception. */
+#define noexcept throw()
+#endif
+
+#pragma region GCC Specific
+
+// We may need to define size_t to keep GCC happy
+#ifdef GCC
+typedef unsigned int size_t;
+#endif
+
+/* NULLPTR DEFINITION */
+#ifdef GCC
+namespace std
+{
+	class nullptr_t
+	{
+	private:
+		unsigned : sizeof(void*);
+
+	public:
+		template<typename T>
+		operator T*() const { return (T*)-1; }
+
+		template<typename T, typename Y>
+		operator T Y::*() const { return -1; }
+
+		void operator&() const = delete;
+		operator void*() const { return (void*)-1; }
+
+		bool operator==(const nullptr_t&) const { return true; }
+		bool operator!=(const nullptr_t&) const { return false; }
+	};
+}
+
+#define nullptr (std::nullptr_t())
+#endif
+
+#pragma endregion
+
+#pragma region Integer Type Definitions
 
 typedef unsigned char byte;
 typedef signed   char sbyte;
@@ -18,12 +69,6 @@ typedef unsigned long      UInt32;
 typedef unsigned short     UInt16;
 typedef unsigned long long UInt64;
 
-namespace std
-{
-	typedef Int64  Long;
-	typedef Int16  Short;
-	typedef UInt64 ULong;
-	typedef UInt16 UShort;
 
 #if BITS64
 	typedef Int64  Int;
@@ -33,65 +78,37 @@ namespace std
 	typedef UInt32 UInt;
 #endif
 
-	/* The maximum UInt value. */
-	const UInt UIntMax = (UInt)-1;
-
+// Define named integer types
+namespace std
+{
 	typedef byte  Byte;
 	typedef sbyte SByte;
 
-	// Gets the null pointer for the specified pointer type.
-	#define nullptr(T) (T)(void*)-1
+	typedef Int64  Long;
+	typedef Int16  Short;
+	typedef UInt64 ULong;
+	typedef UInt16 UShort;
 
-	// Converts the given address into a pointer-to-T.
-	#define raw_ref(T,address) (T*)(void*)address
-	// Converts the data at the given address into a value of type T.
-	#define raw_deref(T,address) *(raw_ref(T,address))
+	/* The maximum Int value. */
+	const Int  IntMax = -1 >> 1;
+	/* The maximum UInt value. */
+	const UInt UIntMax = (UInt)-1;
+	
+	/* The maximum Short value. */
+	const Short  ShortMax = -1 >> 1;
+	/* The maximum UShort value. */
+	const UShort UShortMax = (UShort)-1;
 
-	// Efficiently zeroes an area of memory. Returns 0 if successful.
-	UInt zero(void* address, UInt size)
-	{
-		byte* bptr  = (byte*)address;
-
-		// If very small, zero byte-by-byte
-		if (size < (sizeof(UInt) << 4))
-		{
-			for (UInt i = 0; i < size; i++)	{
-				bptr[i] = 0;
-			}
-			return 0; // Finished
-		}
-
-		// ======================================================
-		
-		// (Q/D)word-align address
-		UInt iaddr = (UInt) address;
-		UInt trim = sizeof(UInt) - (iaddr % sizeof(UInt));
-		size -= trim;
-
-		// Get the number of integers to zero
-		UInt  intCount = size / sizeof(UInt);
-		UInt* iptr     = (UInt*)(bptr + trim);
-
-		// Zero int-wise
-		for (UInt i = 0; i < intCount; i++)
-		{
-			iptr[i] = 0; 
-		}
-		size -= intCount * sizeof(UInt);
-
-		// Zero leading bits
-		for (UInt i = 0; i < trim; i++)	{
-			bptr[i] = 0;
-		}
-
-		// Get trailing pointer
-		bptr = bptr + trim + intCount * sizeof(UInt);
-
-		// Zero trailing bits
-		for (UInt i = 0; i < size; i++)	{
-			bptr[i] = 0;
-		}
-
-		return size; // Return bits not zeroed (should be 0!)
-	}
+	/* The maximum Long value. */
+	const Long  LongtMax = -1 >> 1;
+	/* The maximum ULong value. */
+	const ULong ULongMax = (ULong)-1;
 }
+
+#pragma endregion
+
+
+// Converts the given address into a pointer-to-T.
+#define raw_ref(T,address) (T*)(void*)address
+// Converts the data at the given address into a value of type T.
+#define raw_deref(T,address) *(raw_ref(T,address))

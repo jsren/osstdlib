@@ -1,6 +1,6 @@
 /* uuid.h - (c) James S Renwick 2013
    ---------------------------------
-   Version 1.0.1
+   Version 1.0.3
 */
 #pragma once
 #include "std.h"
@@ -12,7 +12,7 @@ namespace std
 	{
 	public:
 		// The size of a compliant UUID
-		static const std::UInt size = 16;
+		static const UInt size = 16;
 
 		// Represents a UUID's variant.
 		// Taken from "boost/uuid/uuid.hpp".
@@ -40,17 +40,24 @@ namespace std
 		// The uuid's byte data
 		byte data[UUID::size];
 
-		/* Gets if the UUID is a 'nill' UUID. */
-		bool isNillUUID() const
+		explicit UUID(const byte* const data) noexcept
 		{
-			for (std::UInt i = 0; i < size; i++) {
+			for (UInt i = 0; i < UUID::size; i++) {
+				this->data[i] = data[i];
+			}
+		}
+
+		/* Gets if the UUID is a 'nill' UUID. */
+		bool isNillUUID() const noexcept
+		{
+			for (UInt i = 0; i < size; i++) {
 				if (data[i] != 0U) return false; 
 			}
 			return true;
 		}
 
 		/* Gets the variant of the current UUID. */
-		Variant getVariant()
+		Variant getVariant() noexcept
 		{
 			byte variant_value = data[8];
 
@@ -61,7 +68,7 @@ namespace std
 		}
 
 		/* Gets the version of the current UUID. */
-		Version getVersion()
+		Version getVersion() noexcept
 		{
 			switch (data[6] & 0xF0)
 			{
