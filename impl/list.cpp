@@ -69,13 +69,13 @@ namespace std
 	}
 
 	template<class T>
-	const T List<T>::itemAt(UInt index) const noexcept
+	const T List<T>::itemAt(UInt index) const
 	{
 		return this->data[index];
 	}
 
 	template<class T>
-	UInt List<T>::indexOf(const T item) const noexcept
+	UInt List<T>::indexOf(const T item) const
 	{
 		for (UInt i = 0; i < this->length; i++) {
 			if (this->data[i] == item) return i;

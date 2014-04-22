@@ -24,7 +24,7 @@
 
 // We may need to define size_t to keep GCC happy
 #ifdef GCC
-typedef unsigned int size_t;
+typedef long unsigned int size_t;
 #endif
 
 /* NULLPTR DEFINITION */
@@ -93,7 +93,12 @@ namespace std
 	const Int  IntMax = -1 >> 1;
 	/* The maximum UInt value. */
 	const UInt UIntMax = (UInt)-1;
-	
+
+	/* The maximum Int32 value. */
+	const Int32 Int32Max = -1 >> 1;
+	/* The maximum UInt32 value. */
+	const UInt32 UInt32Max = (UInt32)-1;
+
 	/* The maximum Short value. */
 	const Short  ShortMax = -1 >> 1;
 	/* The maximum UShort value. */

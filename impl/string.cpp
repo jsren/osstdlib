@@ -1,6 +1,6 @@
 /* string.cpp - (c) James S Renwick 2013
    -----------------------------------
-   Version 1.0.6
+   Version 1.0.7
 */
 #include <stdlib/math.h>
 #include <stdlib/string.h>
@@ -11,7 +11,7 @@ namespace std
 	// will be over-allocated
 	const UInt maxStrExtra = 120;
 
-	void String::__resize(UInt length) noexcept
+	void String::__resize(UInt length) 
 	{
 		UInt extra = length >> 1;
 		this->realLength = length + std::min(extra, maxStrExtra);
@@ -37,7 +37,7 @@ namespace std
 	}
 
 	// === CONSTRUCTORS ===
-	String::String(UInt length, UInt realLength) noexcept : length(length), realLength(realLength)
+	String::String(UInt length, UInt realLength)  : length(length), realLength(realLength)
 	{
 		this->data = new char[realLength];
 	}
@@ -50,7 +50,7 @@ namespace std
 			this->data[i] = buffer[i];
 		}
 	}
-	String::String(const char* buffer, UInt length) noexcept : data(nullptr), length(length)
+	String::String(const char* buffer, UInt length)  : data(nullptr), length(length)
 	{
 		this->__resize(length);
 
@@ -58,7 +58,7 @@ namespace std
 			this->data[i] = buffer[i];
 		}
 	}
-	String::String(const String& str) noexcept : length(str.length), realLength(str.realLength)
+	String::String(const String& str)  : length(str.length), realLength(str.realLength)
 	{
 		this->data = new char[str.realLength];
 
@@ -71,7 +71,7 @@ namespace std
 	}
 
 	// === METHODS ===
-	bool String::setCharAt(char c, UInt index) noexcept
+	bool String::setCharAt(char c, UInt index) 
 	{
 		if (index < this->length)
 		{
@@ -81,7 +81,7 @@ namespace std
 		else return false;
 	}
 
-	String* String::substring(UInt startIndex, UInt length) noexcept
+	String* String::substring(UInt startIndex, UInt length) 
 	{
 		if (startIndex > this->length) {
 			return new String(String::Empty);
@@ -93,7 +93,7 @@ namespace std
 		return new String(this->data + startIndex, length);
 	}
 
-	UInt String::remove(UInt startIndex, UInt length) noexcept
+	UInt String::remove(UInt startIndex, UInt length) 
 	{
 		UInt sublen   = this->length - startIndex;
 		UInt endIndex = startIndex + length;
@@ -129,7 +129,7 @@ namespace std
 		return length;
 	}
 
-	UInt String::indexOf(const String& substr) const noexcept
+	UInt String::indexOf(const String& substr) const 
 	{
 		for (UInt i = 0; i < this->length; i++)
 		{
@@ -146,7 +146,7 @@ namespace std
 		}
 		return UIntMax; // -1
 	}
-	UInt String::indexOf(const String& substr, UInt startIndex) const noexcept
+	UInt String::indexOf(const String& substr, UInt startIndex) const 
 	{
 		const char* data   = (this->data + startIndex);
 		const UInt  length = this->length - startIndex;
@@ -167,7 +167,7 @@ namespace std
 		return UIntMax; // -1
 	}
 
-	bool String::startsWith(const String& prefix) const noexcept
+	bool String::startsWith(const String& prefix) const 
 	{
 		if (prefix.length > this->length) return false;
 
@@ -176,7 +176,7 @@ namespace std
 		}
 		return true;
 	}
-	bool String::startsWith(const char* prefix, UInt length) const noexcept
+	bool String::startsWith(const char* prefix, UInt length) const 
 	{
 		if (length > this->length) return false;
 
@@ -186,7 +186,7 @@ namespace std
 		return true;
 	}
 
-	bool String::endsWith(const String& suffix) const noexcept
+	bool String::endsWith(const String& suffix) const 
 	{
 		if (suffix.length > this->length) return false;
 
@@ -198,7 +198,7 @@ namespace std
 		}
 		return true;
 	}
-	bool String::endsWith(const char* suffix, UInt length) const noexcept
+	bool String::endsWith(const char* suffix, UInt length) const 
 	{
 		if (length > this->length) return false;
 
@@ -208,7 +208,7 @@ namespace std
 		return true;
 	}
 
-	void String::freeToSize() noexcept
+	void String::freeToSize()
 	{
 		char* buffer = new char[this->length];
 
@@ -220,7 +220,7 @@ namespace std
 		this->data = buffer;
 	}
 
-	UInt String::getNullLength(const char* data) noexcept
+	UInt String::getNullLength(const char* data)
 	{
 		for (UInt i = 0; i < UIntMax; i++) {
 			if (data[i] == '\0') return i;
@@ -230,7 +230,7 @@ namespace std
 
 	// === OPERATORS ===
 
-	String* String::operator +=(char c1) noexcept
+	String* String::operator +=(char c1)
 	{
 		// Check for max string length
 		if (this->length == UIntMax - 1) {
@@ -245,7 +245,7 @@ namespace std
 		// Return this
 		return this;
 	}
-	String* String::operator +=(const char* s1) noexcept
+	String* String::operator +=(const char* s1)
 	{
 		UInt appendLen = String::getNullLength(s1);
 		UInt newLen    = this->length + appendLen;
@@ -271,9 +271,9 @@ namespace std
 		// Return this
 		return this;
 	}
-	String* String::operator +=(const String& s1) noexcept
+	String* String::operator +=(const String& s1)
 	{
-		UInt newLen = this->length - s1.length;
+		UInt newLen = this->length + s1.length;
 
 		// Resize as required
 		if (s1.length > this->realLength - this->length)
@@ -297,7 +297,7 @@ namespace std
 		return this;
 	}
 
-	bool String::operator ==(const String* s1) const noexcept
+	bool String::operator ==(const String* s1) const
 	{
 		if (s1->getLength() != this->length) return false;
 
@@ -307,7 +307,7 @@ namespace std
 		return true;
 	}
 
-	String* String::operator +(char c) const noexcept
+	String* String::operator +(char c) const
 	{
 		String* output;
 
@@ -327,7 +327,7 @@ namespace std
 
 		return output;
 	}
-	String* String::operator +(const String& s1) const noexcept
+	String* String::operator +(const String& s1) const
 	{
 		UInt newLen     = this->length + s1.length;
 		UInt extra      = newLen >> 1;
@@ -354,7 +354,7 @@ namespace std
 		}
 		return output;
 	}
-	String* String::operator +(const char* s1) const noexcept
+	String* String::operator +(const char* s1) const
 	{
 		UInt s1Length = String::getNullLength(s1);
 
@@ -382,5 +382,29 @@ namespace std
 			append[i] = s1[i];
 		}
 		return output;
+	}
+
+	String* String::operator =(const char* s1)
+	{
+		UInt newlen = String::getNullLength(s1);
+		if (newlen == UIntMax) return nullptr;
+
+		if ((this->length = newlen) > this->realLength) {
+			this->__resize(this->length);
+		}
+		for (UInt i = 0; i < this->length; i++) {
+			this->data[i] = s1[i];
+		}
+		return this;
+	}
+	String* String::operator =(const String& s1)
+	{
+		if ((this->length = s1.length) > this->realLength) {
+			this->__resize(this->length);
+		}
+		for (UInt i = 0; i < this->length; i++) {
+			this->data[i] = s1.data[i];
+		}
+		return this;
 	}
 }

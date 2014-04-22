@@ -1,6 +1,6 @@
 /* string.h - (c) James S Renwick 2013
    -----------------------------------
-   Version 1.0.6
+   Version 1.0.7
 */
 #pragma once
 #include <stdlib/std.h>
@@ -30,8 +30,9 @@ namespace std
 		UInt length;
 		UInt realLength;
 
-		explicit String() noexcept {};
-
+		explicit String() noexcept : data(nullptr), 
+			length(0), realLength(0) { };
+		
 		String(UInt, UInt);
 
 		void __resize(UInt);
@@ -150,29 +151,40 @@ namespace std
 
 		bool operator ==(const String* s1) const;
 
-		inline char operator [](UInt index) {
+		inline char operator [](UInt index) noexcept {
 			return getCharAt(index);
 		};
-		inline char operator [](UInt index) const {
+		inline char operator [](UInt index) const noexcept {
 			return getCharAt(index);
 		};
 
 		/*
+		Copies the given null-termintated character array
+		to the current string. Returns the current string or nullptr 
+		if the resulting string is too large.
+		*/
+		String* operator =(const char* s1);
+		/*
+		Copies the given string to the current string. Returns the current string.
+		*/
+		String* operator =(const String& s1);
+
+		/*
 		Creates a new string formed from the concatenation of
-		this string and the given character. Returns null if the resulting
+		this string and the given character. Returns nullptr if the resulting
 		string is too large.
 		*/
 		String* operator +(char c) const;
 		/*
 		Creates a new string formed from the concatenation of
-		this string and the given string. Returns null if the resulting
+		this string and the given string. Returns nullptr if the resulting
 		string is too large.
 		*/
 		String* operator +(const String& s2) const;
 		/*
 		Creates a new string formed from the concatenation of
 		this string and the given null-terminated character array. 
-		Returns null if the resulting string is too large.
+		Returns nullptr if the resulting string is too large.
 		*/
 		String* operator +(const char* s2) const;
 
@@ -189,7 +201,7 @@ namespace std
 		
 		data - the byte array for which to get the length
 		*/
-		static UInt getNullLength(const char* data);
+		static UInt getNullLength(const char* data) noexcept;
 
 
 		/*

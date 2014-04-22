@@ -66,6 +66,9 @@ namespace std
 
 	public:
 		/* Creates the first shared_ptr for the given object. */
+		explicit shared_ptr(T* ptr) : ptr(ptr), refCount(new UInt(1)) { }
+
+		/* Creates the first shared_ptr for the given object. */
 		explicit shared_ptr(const T& obj) : ptr(&obj), refCount(new UInt(1)) { }
 
 		/* Creates another shared_ptr pointing to the same object. */

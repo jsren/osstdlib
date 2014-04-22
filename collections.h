@@ -127,9 +127,8 @@ namespace std
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
 			while (enumerator->moveNext()) {
-				if (index++ == 0) { return enumerator->getCurrentItem(); }
+				if (index-- == 0) { return enumerator->getCurrentItem(); }
 			}
-			return -1;
 		}
 
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */
@@ -177,7 +176,7 @@ namespace std
 		adding each item to the destination list. */
 		void filteredCopy(IList<T>& newList, Function<F, bool, T> delegate) const
 		{
-			Enumerator<T>* const enumerator = this->getEnumerator();
+			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
 			while (enumerator->moveNext())
 			{
