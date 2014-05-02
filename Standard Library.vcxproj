@@ -28,8 +28,6 @@
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Impl\integer.cpp" />
-    <ClCompile Include="Impl\list.cpp" />
     <ClCompile Include="Impl\string.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -31,7 +31,7 @@ namespace std
 	class Enumerable
 	{
 	public:
-		/* Creates and returns an enumertor enabling iteration over the list. */
+		/* Creates and returns an enumerator enabling iteration over the list. */
 		virtual Enumerator<T>* getEnumerator() const = 0;
 
 		/* Iterates through each item, applying the given delegate. */
@@ -137,12 +137,12 @@ namespace std
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
 			UInt index = 0;
-			while (enumerator->moveNext())
+			while (enumerator->moveNext() && index != UIntMax)
 			{
-				if (enumerator->getCurrentItem() == item) { return index; }
+				if (enumerator->getCurrentItem() == item) { break; }
 				else index++;
 			}
-			return UIntMax;
+			return index;
 		}
 
 		/* Gets the item at the specified index. */
