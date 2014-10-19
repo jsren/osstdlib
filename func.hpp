@@ -1,5 +1,5 @@
-/* func.h - (c) James S Renwick 2014
-   ---------------------------------
+/* func.hpp - (c) James S Renwick 2014
+   -----------------------------------
    Version 1.0.0
 */
 #pragma once
@@ -37,7 +37,6 @@ namespace std
 			return this->delegate != func.delegate;
 		}
 	};
-
 
 	template<class RT, class... PTs, class T>
 	/* Creates a Function object from the given function pointer

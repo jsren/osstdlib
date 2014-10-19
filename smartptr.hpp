@@ -1,9 +1,9 @@
-/* smartptr.h - (c) James S Renwick 2014 
-   -------------------------------------
+/* smartptr.hpp - (c) James S Renwick 2014 
+   ---------------------------------------
    Version 1.0.0
 */
 #pragma once
-#include "std.h"
+#include "std"
 
 namespace std
 {
@@ -22,7 +22,7 @@ namespace std
 		unique_ptr(T& obj) noexcept : ptr(&obj) { }
 
 		// Move constructor
-		unique_ptr(unique_ptr<T>&& ptr) noexcept
+		inline unique_ptr(unique_ptr<T>&& ptr) noexcept
 		{
 			this->ptr = ptr.ptr;
 			ptr.ptr   = nullptr;
@@ -31,7 +31,7 @@ namespace std
 		unique_ptr(const unique_ptr<T>& ptr) = delete;
 
 		// Move assignment
-		unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
+		inline unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
 		{
 			this->ptr = ptr.ptr;
 			ptr.ptr   = nullptr;
@@ -72,14 +72,14 @@ namespace std
 		explicit shared_ptr(const T& obj) : ptr(&obj), refCount(new UInt(1)) { }
 
 		/* Creates another shared_ptr pointing to the same object. */
-		shared_ptr(const shared_ptr& copy) noexcept : ptr(copy.ptr), refCount(copy.refCount)
+		inline shared_ptr(const shared_ptr& copy) noexcept : ptr(copy.ptr), refCount(copy.refCount)
 		{
 			*(this->refCount)++;
 		}
 
 		/* Destructor. When called, will decrement the object's reference count
 		and destroy the object when the count reaches zero. */
-		~shared_ptr()
+		inline ~shared_ptr()
 		{
 			if (--(*this->refCount) == 0)
 			{ 

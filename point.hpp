@@ -1,10 +1,10 @@
-/* point.h - (c) James S Renwick 2013
-   ----------------------------------
-   Version 1.0.4
+/* point.hpp - (c) James S Renwick 2013
+   ------------------------------------
+   Version 1.0.5
 */
 #pragma once
-#include "std.h"
-#include "math.h"
+#include "std"
+#include "math.hpp"
 
 namespace std
 {
@@ -39,6 +39,10 @@ namespace std
 			this->X /= f;
 			this->Y /= f;
 			return *this;
+		}
+		inline bool operator ==(const Point& point) const noexcept
+		{
+			return this->X == point.X && this->Y == point.Y;
 		}
 	};
 

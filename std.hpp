@@ -1,6 +1,6 @@
-/* std.h - (c) James S Renwick 2013 
-   --------------------------------
-   Version 2.0.1
+/* std.hpp - (c) James S Renwick 2013 
+   ----------------------------------
+   Version 2.0.3
 */
 #pragma once
 
@@ -10,7 +10,9 @@
 
 // Compiler-specific defines
 #ifdef __GNUG__
+#ifndef GCC
 #define GCC
+#endif
 #endif
 
 #define null 0
@@ -18,6 +20,7 @@
 #ifdef VS
 /* Guarantees that the function will never throw an exception. */
 #define noexcept throw()
+
 #endif
 
 #pragma region GCC Specific
@@ -46,8 +49,8 @@ namespace std
 		void operator&() const = delete;
 		operator void*() const { return (void*)-1; }
 
-		bool operator==(const nullptr_t&) const { return true; }
-		bool operator!=(const nullptr_t&) const { return false; }
+		inline bool operator==(const nullptr_t&) const { return true; }
+		inline bool operator!=(const nullptr_t&) const { return false; }
 	};
 }
 
@@ -78,7 +81,7 @@ typedef unsigned long long UInt64;
 	typedef UInt32 UInt;
 #endif
 
-// Define named integer types
+// Define named integer types, à la .NET
 namespace std
 {
 	typedef byte  Byte;
@@ -111,9 +114,3 @@ namespace std
 }
 
 #pragma endregion
-
-
-// Converts the given address into a pointer-to-T.
-#define raw_ref(T,address) (T*)(void*)address
-// Converts the data at the given address into a value of type T.
-#define raw_deref(T,address) *(raw_ref(T,address))

@@ -1,9 +1,9 @@
-/* string.h - (c) James S Renwick 2013
-   -----------------------------------
-   Version 1.0.7
+/* string.hpp - (c) James S Renwick 2013
+   -------------------------------------
+   Version 1.0.8
 */
 #pragma once
-#include <stdlib/std.h>
+#include "std"
 
 /*
 ==========================================
@@ -38,10 +38,19 @@ namespace std
 		void __resize(UInt);
 
 	public:
-
 		String(const char* data);
 		String(const String& str);
 		String(const char* data, UInt length);
+
+		// Move assignment
+		inline String& operator =(String&& string) noexcept
+		{
+			char* tmp   = this->data;
+			this->data  = string.data;
+			string.data = tmp;
+
+			return *this;
+		}
 
 		/* Gets the length, in characters, of this string. */
 		inline UInt getLength() const noexcept { return this->length; }
@@ -238,7 +247,4 @@ namespace std
 			output.realLength = length;
 		}
 	};
-
-	// Empty string definition
-	const String String::Empty = String();
 }

@@ -1,15 +1,18 @@
 /* string.cpp - (c) James S Renwick 2013
-   -----------------------------------
+   -------------------------------------
    Version 1.0.7
 */
-#include <stdlib/math.h>
-#include <stdlib/string.h>
+#include "math.hpp"
+#include "string.hpp"
 
 namespace std
 {
 	// Holds the maximum amount by which the string
 	// will be over-allocated
 	const UInt maxStrExtra = 120;
+
+	// Empty string definition
+	const String String::Empty = String();
 
 	void String::__resize(UInt length) 
 	{

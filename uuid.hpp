@@ -1,9 +1,9 @@
-/* uuid.h - (c) James S Renwick 2013
-   ---------------------------------
+/* uuid.hpp - (c) James S Renwick 2013
+   -----------------------------------
    Version 1.0.3
 */
 #pragma once
-#include "std.h"
+#include "std"
 
 namespace std
 {

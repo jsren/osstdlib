@@ -1,10 +1,10 @@
-/* list.h - (c) James S Renwick 2013
-   ---------------------------------
-   Version 1.1.2
+/* list.hpp - (c) James S Renwick 2013
+   -----------------------------------
+   Version 1.2.0
 */
 #pragma once
-#include "../std.h"
-#include <stdlib/collections.h>
+#include "std"
+#include "collections.hpp"
 
 namespace std
 {
@@ -35,24 +35,16 @@ namespace std
 	public:
 		/* Adds the given item to the list. 
 		Returns true if the item was successfully added. */
-		bool add(const T item) override
+		bool add(const T& item) override
 		{
-			if (this->length == UIntMax - 1) {
-				return false;
-			}
-			else if (this->length == this->realLength) {
-				this->__resize(this->length + 1);
-			}
-
-			this->data[this->length++] = item;
-			return true;
+			return this->insert(this->length, item);
 		}
 
 		/* Removes the item at the given index from the list. 
 		Returns true if the index is valid and the item removed. */
 		bool removeAt(UInt index) override
 		{
-			if (index >= this->length) { return false; }
+			if (index >= this->length) return false;
 
 			for (UInt i = index + 1; i < this->length; i++) {
 				this->data[i - 1] = this->data[i];
@@ -66,16 +58,40 @@ namespace std
 			return true;
 		}
 
+		/* Inserts the item into the list at the given index.
+		Returns true if the index is valid and the item added. */
+		bool insert(UInt index, const T& item)
+		{
+			if (index > this->length) return false;
+
+			// Check if we should resize
+			if (this->length == UIntMax - 1) {
+				return false;
+			}
+			else if (this->length == this->realLength) {
+				this->__resize(this->length + 1);
+			}
+
+			// Move existing elements to make space for insert
+			for (UInt i = this->length; i > index; i--) {
+				this->data[i] = this->data[i - 1];
+			}
+			this->data[index] = item;
+			this->length++;
+			
+			return true;
+		}
+
 		/* Returns the item at the given index. Behaviour undefined for invalid indices. */
-		const T itemAt(UInt index) const noexcept {
+		T& itemAt(UInt index) const noexcept {
 			return this->data[index];
 		}
-		inline const T operator [](UInt index) const {
+		inline T& operator [](UInt index) const {
 			return this->data[index];
 		}
 
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */
-		UInt indexOf(const T item) const noexcept
+		UInt indexOf(const T& item) const noexcept
 		{
 			for (UInt i = 0; i < this->length; i++) {
 				if (this->data[i] == item) return i;
@@ -105,7 +121,7 @@ namespace std
 				return (++this->index) <= (this->list.count());
 			}
 			// Gets the current item.
-			const T getCurrentItem() const
+			T& getCurrentItem() const
 			{
 				     if (index == 0)           return list.itemAt(0);
 				else if (index > list.count()) return list.itemAt(list.count() - 1);
@@ -123,7 +139,7 @@ namespace std
 		void __resize(UInt length)
 		{
 			UInt extra = length >> 1;
-			this->realLength = length + std::min(extra, maxListExtra);
+			this->realLength = length + (extra > maxListExtra ? maxListExtra : extra);
 
 			// Account for integer overflow
 			if (this->realLength < length) { this->realLength = length; }
