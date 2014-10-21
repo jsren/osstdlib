@@ -1,6 +1,6 @@
 /* array.hpp - (c) James S Renwick 2013
    ------------------------------------
-   Version 1.1.3
+   Version 1.1.4
 */
 #pragma once
 #include "std"
@@ -145,7 +145,7 @@ namespace std
 		const Array<T>& arr;
 
 	public:
-		explicit ArrayEnumerator(const Array<T>& arr) noexcept : arr(arr), index(0) { }
+		explicit ArrayEnumerator(const Array<T>& arr) noexcept : index(0), arr(arr) { }
 
 		// Performs a single step of iteration. Returns false if no next item exists. 
 		bool moveNext() noexcept {

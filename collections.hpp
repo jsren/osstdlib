@@ -1,6 +1,6 @@
 /* collections.hpp - (c) James S Renwick 2013
    ------------------------------------------
-   Version 1.2.1
+   Version 1.2.2
 */
 
 #pragma once
@@ -58,6 +58,8 @@ namespace std
 			while (enumerator->moveNext()) {
 				if (index-- == 0) { return enumerator->getCurrentItem(); }
 			}
+			// This is just here to silence compiler warnings.
+			return enumerator->getCurrentItem();
 		}
 
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */

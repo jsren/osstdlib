@@ -1,6 +1,6 @@
 /* uuid.hpp - (c) James S Renwick 2013
    -----------------------------------
-   Version 1.0.3
+   Version 1.0.4
 */
 #pragma once
 #include "std"
@@ -40,6 +40,14 @@ namespace std
 		// The uuid's byte data
 		byte data[UUID::size];
 
+		// Creates an empty UUID
+		UUID() noexcept
+		{
+			for (UInt i = 0; i < UUID::size; i++) {
+				this->data[i] = 0;
+			}
+		}
+
 		explicit UUID(const byte* const data) noexcept
 		{
 			for (UInt i = 0; i < UUID::size; i++) {
@@ -47,8 +55,8 @@ namespace std
 			}
 		}
 
-		/* Gets if the UUID is a 'nill' UUID. */
-		bool isNillUUID() const noexcept
+		/* Gets if the UUID is a 'nil' UUID. */
+		bool isNilUUID() const noexcept
 		{
 			for (UInt i = 0; i < size; i++) {
 				if (data[i] != 0U) return false; 

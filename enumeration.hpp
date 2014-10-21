@@ -1,6 +1,6 @@
 /* enumeration.hpp - (c) James S Renwick 2014
    ------------------------------------------
-   Version 1.1.0
+   Version 1.1.1
 */
 #pragma once
 
@@ -16,7 +16,7 @@ namespace std
 	{
 	public:
 		// Virtual destructor
-		virtual ~Enumerator() noexcept{};
+		virtual ~Enumerator() noexcept { };
 
 	public:
 		// Performs a single step of iteration. Returns false if no next item exists. 
@@ -29,6 +29,9 @@ namespace std
 	class Enumerable
 	{
 	public:
+		// Virtual destructor
+		virtual ~Enumerable() = 0;
+
 		/* Creates and returns an enumerator enabling iteration over the collection. */
 		virtual Enumerator<T>* getEnumerator() const = 0;
 
