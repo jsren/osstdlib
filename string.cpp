@@ -4,6 +4,7 @@
 */
 #include "math.hpp"
 #include "string.hpp"
+#include "memory.hpp"
 
 namespace std
 {
@@ -22,19 +23,13 @@ namespace std
 		// Account for integer overflow
 		if (this->realLength < length) { this->realLength = length; }
 
-		char* tmpData = this->data;
-
-		this->data = new char[this->realLength];
-
-		// Copy old data if present
-		if (tmpData != nullptr)
-		{
-			for (UInt i = 0; i < this->length; i++) {
-				this->data[i] = tmpData[i];
-			}
-			delete[] tmpData;
-		}
-
+        if (this->data != nullptr)
+        {
+            this->data = reinterpret_cast<char*>(
+                reallocate_obj(this->data, this->length, this->realLength));
+        }
+        else this->data = new char[this->realLength];
+        
 		// The max length of a string is actually UIntMax-1
 		if (this->length == UIntMax) this->length = UIntMax - 1;
 	}

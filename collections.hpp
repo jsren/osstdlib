@@ -35,17 +35,14 @@ namespace std
 		/* Returns the number of items in the list. */
 		virtual UInt count() const = 0;
 
-		/* Creates and returns an enumertor enabling iteration over the list. */
-		//virtual Enumerator<T>* getEnumerator();
-
 		/* Gets whether the list contains the given item. */
 		virtual bool contains(const T& item) const
 		{
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
-			while (enumerator->moveNext())
-			{
-				if (enumerator->getCurrentItem() == item) return true;
+			while (enumerator->hasNext()) 
+            {
+				if (item == enumerator->nextItem()) return true;
 			}
 			return false;
 		}
@@ -55,11 +52,10 @@ namespace std
 		{
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
-			while (enumerator->moveNext()) {
-				if (index-- == 0) { return enumerator->getCurrentItem(); }
+			while (enumerator->hasNext()) {
+				if (index-- == 0) return enumerator->nextItem();
 			}
-			// This is just here to silence compiler warnings.
-			return enumerator->getCurrentItem();
+            return enumerator->nextItem();
 		}
 
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */
@@ -68,9 +64,9 @@ namespace std
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
 			UInt index = 0;
-			while (enumerator->moveNext() && index != UIntMax)
+			while (enumerator->hasNext() && index != UIntMax)
 			{
-				if (enumerator->getCurrentItem() == item) { break; }
+				if (enumerator->nextItem() == item) { break; }
 				else index++;
 			}
 			return index;
@@ -97,8 +93,8 @@ namespace std
 		{
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
-			while (enumerator->moveNext()) {
-				destination.add(enumerator->getCurrentItem());
+			while (enumerator->hasNext()) {
+				destination.add(enumerator->nextItem());
 			}
 		}
 
@@ -110,8 +106,9 @@ namespace std
 			Array<T> output(this->count());
 
 			UInt i = 0;
-			while (enumerator->moveNext()) {
-				output.setItem(i++, enumerator->getCurrentItem());
+			while (enumerator->hasNext()) 
+            {
+				output.setItem(i++, enumerator->nextItem());
 			}
 			return output;
 		}
@@ -123,9 +120,9 @@ namespace std
 		{
 			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
 
-			while (enumerator->moveNext())
+			while (enumerator->hasNext())
 			{
-				T& item = enumerator->getCurrentItem();
+				T& item = enumerator->nextItem();
 				if (delegate(item)) { newList.add(item); }
 			}
 		}
@@ -143,7 +140,5 @@ namespace std
 				this->itemAt(j) = tmp;
 			}
 		}
-
 	};
-
 }

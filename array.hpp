@@ -1,6 +1,6 @@
-/* array.hpp - (c) James S Renwick 2013
+/* array.hpp - (c) James S Renwick 2016
    ------------------------------------
-   Version 1.1.4
+   Version 1.1.5
 */
 #pragma once
 #include "std"
@@ -14,18 +14,21 @@ namespace std
 	{
 	private:
 		// The internal data of the array
-		T*   arrayData;
+		T* arrayData;
+        mutable UInt length;
 
 	public:
-		/* The number of items in the array. */
-		mutable UInt length;
-
 		// Creates a new array with the specified fixed capacity.
 		explicit Array(UInt capacity);
 		// Creates a new copy of the given array.
 		Array(const Array<T>& copy);
 		// Destroys the current array.
 		~Array();
+
+        /* The number of items in the array. */
+        inline UInt count() const noexcept {
+            return this->length;
+        }
 
 		/* Gets the item at the specified index. */
 		T& getItem(UInt index) const noexcept;
@@ -34,6 +37,8 @@ namespace std
 
 		/* Creates and returns an enumerator enabling iteration over the array. */
 		Enumerator<T>* getEnumerator() const;
+
+        bool any() const override;
 
 		/* Shallow-copies the members of the current array to a destination array. */
 		void copyTo(Array<T>& destination) const;
@@ -126,7 +131,7 @@ namespace std
 	}
 
 	template <class T>
-	Array<T>& Array<T>::operator =(Array<T>&& array)
+	Array<T>& Array<T>::operator =(Array<T>&& array) noexcept
 	{
 		this->arrayData = array.arrayData;
 		this->length    = array.length;
@@ -147,17 +152,15 @@ namespace std
 	public:
 		explicit ArrayEnumerator(const Array<T>& arr) noexcept : index(0), arr(arr) { }
 
-		// Performs a single step of iteration. Returns false if no next item exists. 
-		bool moveNext() noexcept {
-			return (++this->index) <= (this->arr.length);
-		}
-		// Gets the current item.
-		T& getCurrentItem() const
-		{
-			if (index == 0)              return arr.getItem(0);
-			else if (index > arr.length) return arr.getItem(arr.length - 1);
-			else                         return arr.getItem(index - 1);
-		}
+        // Returns whether a next item is available.
+        bool hasNext() const override {
+            return this->index < this->arr.count();
+        }
+
+        // Gets the next item and advances the enumerator.
+        T &nextItem() override {
+            return this->arr.getItem(this->index++);
+        }
 
 		~ArrayEnumerator() { }
 	};
@@ -167,4 +170,10 @@ namespace std
 	{
 		return new ArrayEnumerator<T>(*this);
 	}
+
+    template <class T>
+    bool Array<T>::any() const
+    {
+        return this->length != 0;
+    }
 }

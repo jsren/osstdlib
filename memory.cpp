@@ -2,6 +2,25 @@
 
 namespace std
 {
+#ifdef DEFAULT_ALLOC
+    void *heap_allocate(UInt size) noexcept 
+    {
+        return new byte[size];
+    }
+#endif
+
+#ifdef DEFAULT_REALLOC
+    void *reallocate_obj(void *source, UInt oldSize, UInt newSize) noexcept
+    {
+        if (newSize == oldSize) return source;
+        byte *out = new byte[newSize];
+
+        copy_memory(source, out, newSize > oldSize ? newSize : oldSize);
+        delete source;
+
+        return out;
+    }
+#endif
 
 	UInt copy_memory(const void* source, void* destination, UInt size) noexcept
 	{
@@ -143,5 +162,4 @@ namespace std
 			return size; // Return bits not zeroed (should be 0!)
 		}
 	}
-
 }

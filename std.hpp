@@ -20,7 +20,7 @@
 #ifdef VS
 /* Guarantees that the function will never throw an exception. */
 #define noexcept throw()
-
+#define __weak __declspec(selectany)
 #endif
 
 #pragma region GCC Specific

@@ -116,16 +116,14 @@ namespace std
 			explicit ListEnum(const List<T>& list) noexcept 
 				: Enumerator<T>(), index(0), list(list) {};
 
-			// Performs a single step of iteration. Returns false if no next item exists. 
-			bool moveNext() noexcept {
-				return (++this->index) <= (this->list.count());
-			}
-			// Gets the current item.
-			T& getCurrentItem() const
-			{
-				     if (index == 0)           return list.itemAt(0);
-				else if (index > list.count()) return list.itemAt(list.count() - 1);
-				else                           return list.itemAt(index - 1);
+            // Returns whether a next item is available.
+            bool hasNext() const override {
+                return this->index < this->list.count();
+            }
+
+			// Gets the next item and advances the enumerator.
+			T &nextItem() override {
+                return this->list.itemAt(this->index++);
 			}
 		};
 

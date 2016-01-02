@@ -8,8 +8,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="array.hpp" />
+    <ClInclude Include="assert.hpp" />
     <ClInclude Include="collections.hpp" />
     <ClInclude Include="enumeration.hpp" />
+    <ClInclude Include="exception.hpp" />
     <ClInclude Include="func.hpp" />
     <ClInclude Include="list.hpp" />
     <ClInclude Include="math.hpp" />
@@ -46,7 +48,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions);VS</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions);VS;DEFAULT_ALLOC</NMakePreprocessorDefinitions>
     <ExecutablePath />
     <IncludePath>$(SolutionDir);$(SolutionDir)\include</IncludePath>
     <ReferencePath />
