@@ -1,6 +1,6 @@
-/* func.hpp - (c) James S Renwick 2014
-   -----------------------------------
-   Version 1.0.0
+/* func.hpp - (c) James S Renwick 2014-2016
+   ----------------------------------------
+   Version 1.1.0
 */
 #pragma once
 
@@ -44,7 +44,7 @@ namespace std
 	   
 	   delegate - The function pointer or lambda from which to create the object.
 	 */
-	static Function<T, RT, PTs...> Delegate(T delegate) noexcept
+	inline static Function<T, RT, PTs...> Func(T delegate) noexcept
 	{
 		return Function<T, RT, PTs...>(delegate);
 	}

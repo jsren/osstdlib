@@ -38,7 +38,7 @@ namespace std
 		/* Gets whether the list contains the given item. */
 		virtual bool contains(const T& item) const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr_from(this->getEnumerator());
 
 			while (enumerator->hasNext()) 
             {
@@ -47,10 +47,20 @@ namespace std
 			return false;
 		}
 
+        virtual T &itemAt(UInt index)
+        {
+            auto enumerator = unique_ptr_from(this->getEnumerator());
+
+            while (enumerator->hasNext()) {
+                if (index-- == 0) return enumerator->nextItem();
+            }
+            return enumerator->nextItem();
+        }
+
 		/* Returns the item at the given index. Behaviour undefined for invalid indices. */
-		virtual T& itemAt(UInt index) const
+		virtual const T &itemAt(UInt index) const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr_from(this->getEnumerator());
 
 			while (enumerator->hasNext()) {
 				if (index-- == 0) return enumerator->nextItem();
@@ -61,7 +71,7 @@ namespace std
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */
 		virtual UInt indexOf(const T& item) const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr_from(this->getEnumerator());
 
 			UInt index = 0;
 			while (enumerator->hasNext() && index != UIntMax)
@@ -91,7 +101,7 @@ namespace std
 		/* Performs a shallow copy, adding each item in this list to the destination list. */
 		virtual void copyTo(IList<T>& destination) const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr_from(this->getEnumerator());
 
 			while (enumerator->hasNext()) {
 				destination.add(enumerator->nextItem());
@@ -101,7 +111,7 @@ namespace std
 		/* Performs a shallow copy, adding each item to a new array and returning the result. */
 		virtual Array<T> toArray() const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr_from(this->getEnumerator());
 
 			Array<T> output(this->count());
 
@@ -118,7 +128,7 @@ namespace std
 		adding each item to the destination list. */
 		void filteredCopy(IList<T>& newList, Function<F, bool, T> delegate) const
 		{
-			unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+			auto enumerator = unique_ptr(this->getEnumerator());
 
 			while (enumerator->hasNext())
 			{

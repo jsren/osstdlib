@@ -19,29 +19,43 @@ namespace std
 
 	public:
 		// Creates a new array with the specified fixed capacity.
-		explicit Array(UInt capacity);
+		explicit inline Array(UInt capacity) : 
+            arrayData(new T[capacity]), length(capacity) { };
+
 		// Creates a new copy of the given array.
 		Array(const Array<T>& copy);
+
 		// Destroys the current array.
-		~Array();
+		inline ~Array() {
+            delete[] this->arrayData;
+        };
 
         /* The number of items in the array. */
         inline UInt count() const noexcept {
             return this->length;
         }
 
+        /* Gets the item at the specified index. */
+        inline T& getItem(UInt index) noexcept {
+            return this->arrayData[index];
+        }
 		/* Gets the item at the specified index. */
-		T& getItem(UInt index) const noexcept;
+        inline const T& getItem(UInt index) const noexcept {
+            return this->arrayData[index];
+        }
 		/* Sets the item at the specified index. */
 		bool setItem(UInt index, const T& item) noexcept;
 
 		/* Creates and returns an enumerator enabling iteration over the array. */
-		Enumerator<T>* getEnumerator() const;
+		Enumerator<T>* getEnumerator() override;
+        const Enumerator<T>* getEnumerator() const override;
 
         bool any() const override;
 
 		/* Shallow-copies the members of the current array to a destination array. */
-		void copyTo(Array<T>& destination) const;
+		UInt copyTo(Array<T>& destination) const;
+        /* Shallow-copies the members of the current array to a destination array. */
+        UInt copyTo(T target[], UInt targetCount) const;
 
 		/* Returns the unsafe C backing-array. */
 		inline const T* getCArray() const { return this->arrayData; }
@@ -54,126 +68,13 @@ namespace std
 
 	public:
 		/* Gets the item at the specified index. No bounds check is performed. */
-		inline T& operator[] (UInt index) const noexcept { return arrayData[index]; }
+		inline T& operator[] (UInt index) noexcept { return arrayData[index]; }
+        inline const T& operator[] (UInt index) const noexcept { return arrayData[index]; }
 
+    public:
 		/* Resizes the given array, trimming items if smaller. */
 		static void resize(Array<T>* arr, UInt newSize);
 	};
-
-	template <class T>
-	inline Array<T>::Array(UInt capacity) : arrayData(new T[capacity]), length(capacity) { }
-
-	template <class T>
-	Array<T>::Array(const Array<T>& copy) : arrayData(new T[copy.length]), length(copy.length)
-	{
-		for (UInt i = 0; i < copy.length; i++) {
-			this->arrayData[i] = copy.arrayData[i];
-		}
-	}
-
-	template <class T>
-	inline Array<T>::~Array()
-	{
-		delete[] this->arrayData;
-	}
-
-	template <class T>
-	inline T& Array<T>::getItem(UInt index) const noexcept
-	{
-		return this->arrayData[index];
-	}
-
-	template <class T>
-	inline bool Array<T>::setItem(UInt index, const T& item) noexcept
-	{
-		if (index < this->length)
-		{
-			this->arrayData[index] = item;
-			return true;
-		}
-		else return false;
-	}
-
-	template <class T>
-	void Array<T>::copyTo(Array<T>& destination) const
-	{
-		UInt l = length > destination.length ? length : destination.length;
-		for (UInt i = 0; i < l; i++)
-		{
-			destination.arrayData[i] = this->arrayData[i];
-		}
-	}
-
-	template <class T>
-	void Array<T>::resize(Array<T>* arr, UInt newSize)
-	{
-		Array<T> newArr(newSize);
-		arr->copyTo(newArr);
-
-		*arr = newArr;
-	}
-
-	template <class T>
-	Array<T>& Array<T>::operator =(const Array<T>& array)
-	{
-		if (this->arrayData != array.arrayData)
-		{
-			T* newData = new T[array.length];
-
-			this->length = array.length;
-
-			delete this->arrayData;
-			this->arrayData = newData;
-
-			array.copyTo(*this);
-		}
-		return *this;
-	}
-
-	template <class T>
-	Array<T>& Array<T>::operator =(Array<T>&& array) noexcept
-	{
-		this->arrayData = array.arrayData;
-		this->length    = array.length;
-		array.ptr       = nullptr;
-		array.length    = 0;
-		return *this;
-	}
-
-
-	template<class T>
-	/* An explicit enumerator for array objects. */
-	class ArrayEnumerator : public Enumerator<T>
-	{
-	private:
-		UInt index;
-		const Array<T>& arr;
-
-	public:
-		explicit ArrayEnumerator(const Array<T>& arr) noexcept : index(0), arr(arr) { }
-
-        // Returns whether a next item is available.
-        bool hasNext() const override {
-            return this->index < this->arr.count();
-        }
-
-        // Gets the next item and advances the enumerator.
-        T &nextItem() override {
-            return this->arr.getItem(this->index++);
-        }
-
-		~ArrayEnumerator() { }
-	};
-
-	template <class T>
-	Enumerator<T>* Array<T>::getEnumerator() const
-	{
-		return new ArrayEnumerator<T>(*this);
-	}
-
-    template <class T>
-    bool Array<T>::any() const
-    {
-        return this->length != 0;
-    }
 }
+
+#include "array.cpp"

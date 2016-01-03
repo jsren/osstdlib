@@ -26,9 +26,12 @@
     <ClInclude Include="version.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="array.cpp">
+      <DeploymentContent>true</DeploymentContent>
+    </ClCompile>
     <ClCompile Include="Impl\math.cpp" />
-    <ClCompile Include="Impl\memory.cpp" />
     <ClCompile Include="Impl\string.cpp" />
+    <ClCompile Include="memory.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{44E1C228-35DB-4EDC-A6D4-ECA63D35004C}</ProjectGuid>

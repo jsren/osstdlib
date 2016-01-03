@@ -1,6 +1,6 @@
-/* smartptr.hpp - (c) James S Renwick 2014 
-   ---------------------------------------
-   Version 1.0.0
+/* smartptr.hpp - (c) James S Renwick 2014-2016
+   --------------------------------------------
+   Version 1.0.1
 */
 #pragma once
 #include "std"
@@ -51,6 +51,16 @@ namespace std
 			if (this->ptr != nullptr) delete this->ptr;
 		}
 	};
+
+    template<class T>
+    inline constexpr unique_ptr<T> unique_ptr_from(T &obj) noexcept {
+        return unique_ptr<T>(obj);
+    }
+
+    template<class T>
+    inline constexpr unique_ptr<T> unique_ptr_from(T *obj) noexcept {
+        return unique_ptr<T>(obj);
+    }
 
 	template<class T>
 	/* 
@@ -113,4 +123,15 @@ namespace std
 		shared_ptr(shared_ptr&& value)             = delete;
 		shared_ptr& operator =(shared_ptr&& value) = delete;
 	};
+
+
+    template<class T>
+    inline constexpr shared_ptr<T> shared_ptr_from(T &obj) noexcept {
+        return shared_ptr<T>(obj);
+    }
+
+    template<class T>
+    inline constexpr shared_ptr<T> shared_ptr_from(T *obj) noexcept {
+        return shared_ptr<T>(obj);
+    }
 }

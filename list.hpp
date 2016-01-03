@@ -83,12 +83,18 @@ namespace std
 		}
 
 		/* Returns the item at the given index. Behaviour undefined for invalid indices. */
-		T& itemAt(UInt index) const noexcept {
+		T& itemAt(UInt index) override {
 			return this->data[index];
 		}
-		inline T& operator [](UInt index) const {
+        const T& itemAt(UInt index) const override {
+            return this->data[index];
+        }
+		inline T& operator [](UInt index) {
 			return this->data[index];
 		}
+        inline const T& operator [](UInt index) const {
+            return this->data[index];
+        }
 
 		/* Returns the index of the given item or -1 (UIntMax) if the item is not found. */
 		UInt indexOf(const T& item) const noexcept
@@ -110,10 +116,10 @@ namespace std
 		class ListEnum : public Enumerator<T>
 		{
 		private:
-			UInt index;
-			const List<T>& list;
+			mutable UInt index;
+			List<T>& list;
 		public:
-			explicit ListEnum(const List<T>& list) noexcept 
+			explicit ListEnum(List<T>& list) noexcept 
 				: Enumerator<T>(), index(0), list(list) {};
 
             // Returns whether a next item is available.
@@ -125,13 +131,20 @@ namespace std
 			T &nextItem() override {
                 return this->list.itemAt(this->index++);
 			}
+            // Gets the next item and advances the enumerator.
+            const T &nextItem() const override {
+                return this->list.itemAt(this->index++);
+            }
 		};
 
 	public:
 		/* Creates and returns an enumertor enabling iteration over the list. */
-		Enumerator<T>* getEnumerator() const override {
+		Enumerator<T>* getEnumerator() override {
 			return new ListEnum(*this);
 		}
+        const Enumerator<T> *getEnumerator() const override {
+            return new ListEnum(*const_cast<List<T>*>(this));
+        }
 
 	private:
 		void __resize(UInt length)

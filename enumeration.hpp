@@ -9,6 +9,17 @@
 
 namespace std
 {
+
+#ifndef NO_FOREACH
+#define foreach(_vardecl, _ptr_enumerable) {\
+    auto __enum = (_ptr_enumerable)->getEnumerator();\
+    while (__enum->hasNext()) {\
+        _vardecl = __enum->nextItem();
+
+#define end_foreach } delete __enum; }
+#endif
+
+
 	template<class T>
 	/* An interface allowing the iteration of the items in a collection.
 	Note that no exception need be thrown if the collection is modified. */
@@ -23,7 +34,13 @@ namespace std
         virtual bool hasNext() const = 0;
         // Gets the next item and advances the enumerator.
         virtual T& nextItem() = 0;
+
+        // Gets the next item and advances the enumerator.
+        virtual const T &nextItem() const {
+             return const_cast<Enumerator<T>*>(this)->nextItem();
+        }
 	};
+
 
 	template<class T>
 	class Enumerable
@@ -32,24 +49,22 @@ namespace std
         virtual ~Enumerable() { };
 
 		/* Creates and returns an enumerator enabling iteration over the collection. */
-		virtual Enumerator<T> *getEnumerator() const = 0;
+        virtual Enumerator<T> *getEnumerator() = 0;
+        virtual const Enumerator<T> *getEnumerator() const = 0;
 
         virtual bool any() const
         {
-            unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+            auto enumerator = unique_ptr_from(this->getEnumerator());
             return enumerator->hasNext();
         }
 
         template<class F>
         bool any(Function<F, bool, T> delegate) const
         {
-            unique_ptr<Enumerator<T>> enumerator = this.getEnumerator();
+            auto enumerator = unique_ptr_from(this->getEnumerator());
 
-            T &item;
-            while (enumerator->hasNext()) 
-            {
-                item = enumerator->nextItem();
-                if (delegate(item)) return true;
+            while (enumerator->hasNext()) {
+                if (delegate(enumerator->nextItem())) return true;
             }
             return false;
         }
@@ -58,11 +73,10 @@ namespace std
 		template<class F>
 		void forEach(Function<F, void, T> delegate) const
 		{
-            unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+            auto enumerator = unique_ptr_from(this->getEnumerator());
 
-            T item;
-			while (enumerator->next(item)) {
-				delegate(item);
+			while (enumerator->hasNext()) {
+				delegate(enumerator->nextItem());
 			}
 		}
 
@@ -70,37 +84,34 @@ namespace std
 		template<class F, class AT>
 		AT aggregate(AT initalValue, Function<F, AT, AT, T> delegate) const
 		{
-            unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
+            auto enumerator  = unique_ptr_from(this->getEnumerator());
+			AT   accumulator = initalValue;
 
-			AT accumulator = initalValue;
-
-            T item;
-			while (enumerator->next(item)) {
-				accumulator = delegate(accumulator, item);
+			while (enumerator->hasNext()) {
+				accumulator = delegate(accumulator, enumerator->nextItem());
 			}
 			return accumulator;
 		}
 
         Enumerable<T> *union_(const Enumerable<T> &enumerable) const
         {
-            unique_ptr<Enumerator<T>> enum1 = this->getEnumerator();
-            IList<T> *list = new List<T>{};
+            auto enum1 = unique_ptr_from(this->getEnumerator());
+            auto *list = new List<T>{};
 
-            T item1;
-            while (enum1->next(item))
+            while (enum1->hasNext())
             {
                 bool add   = false;
-                unique_ptr<Enumerator<T>> enum2 = enumerable.getEnumerator();
+                auto item1 = enum1->nextItem();
+                auto enum2 = unique_ptr_from(enumerable.getEnumerator());
                 
-                T item2;
-                while (enum2->next(item))
+                while (enum2->hasNext())
                 {
-                    if (item1 == item2) {
+                    if (item1 == enum2->nextItem()) {
                         add = true; break;
                     }
                 }
                 if (add && !list->contains(item1)) {
-                    list->add(item);
+                    list->add(item1);
                 }
             }
             return list;
@@ -108,20 +119,21 @@ namespace std
 
         Enumerable<T> *intersection(const Enumerable<T> &enumerable) const
         {
-            unique_ptr<Enumerator<T>> enumerator = this->getEnumerator();
-            IList<T> *list = new List<T>{};
+            auto enumerator = unique_ptr(this->getEnumerator());
+            auto *list = new List<T>{};
 
-            T item; 
-            while (enumerator->next(item))
+            while (enumerator->hasNext())
             {
+                auto &item = enumerator->nextItem();
                 if (!list->contains(item)) list->add(item);
             }
 
             delete enumerator;
             enumerator = enumerable.getEnumerator();
 
-            while (enumerator->next(item))
+            while (enumerator->hasNext())
             {
+                auto &item = enumerator->nextItem();
                 if (!list->contains(item)) list->add(item);
             }
             return list;

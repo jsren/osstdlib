@@ -111,6 +111,22 @@ namespace std
 	const Long  LongtMax = -1 >> 1;
 	/* The maximum ULong value. */
 	const ULong ULongMax = (ULong)-1;
+
+    template<class T>
+    inline constexpr T min(T v1, T v2) noexcept {
+        return v1 <= v2 ? v1 : v2;
+    }
+    template<class T>
+    inline constexpr T max(T v1, T v2) noexcept {
+        return v1 >= v2 ? v1 : v2;
+    }
+
+    template<class T> struct remove_reference { typedef T type; };
+    template<class T> struct remove_reference<T&> { typedef T type; };
+    template<class T> struct remove_reference<T&&> { typedef T type; };
+
+
+
 }
 
 #pragma endregion
