@@ -1,6 +1,6 @@
-/* std.hpp - (c) James S Renwick 2013 
-   ----------------------------------
-   Version 2.0.3
+/* std.hpp - (c) James S Renwick 2013 - 2015 
+   -----------------------------------------
+   Version 2.1.0
 */
 #pragma once
 
@@ -9,29 +9,18 @@
 */
 
 // Compiler-specific defines
-#ifdef __GNUG__
-#ifndef GCC
-#define GCC
-#endif
-#endif
 
-#define null 0
-
-#ifdef VS
-/* Guarantees that the function will never throw an exception. */
-#define noexcept throw()
+#ifdef _MSC_VER
 #define __weak __declspec(selectany)
 #endif
 
 #pragma region GCC Specific
 
 // We may need to define size_t to keep GCC happy
-#ifdef GCC
+#ifdef __GNUG__
 typedef long unsigned int size_t;
-#endif
 
 /* NULLPTR DEFINITION */
-#ifdef GCC
 namespace std
 {
 	class nullptr_t
@@ -93,24 +82,24 @@ namespace std
 	typedef UInt16 UShort;
 
 	/* The maximum Int value. */
-	const Int  IntMax = -1 >> 1;
+	constexpr Int  IntMax = (UInt)-1 >> 1;
 	/* The maximum UInt value. */
-	const UInt UIntMax = (UInt)-1;
+    constexpr UInt UIntMax = (UInt)-1;
 
 	/* The maximum Int32 value. */
-	const Int32 Int32Max = -1 >> 1;
+    constexpr Int32 Int32Max = (UInt32)-1 >> 1;
 	/* The maximum UInt32 value. */
-	const UInt32 UInt32Max = (UInt32)-1;
+    constexpr UInt32 UInt32Max = (UInt32)-1;
 
 	/* The maximum Short value. */
-	const Short  ShortMax = -1 >> 1;
+    constexpr Short  ShortMax = (UShort)-1 >> 1;
 	/* The maximum UShort value. */
-	const UShort UShortMax = (UShort)-1;
+    constexpr UShort UShortMax = (UShort)-1;
 
 	/* The maximum Long value. */
-	const Long  LongtMax = -1 >> 1;
+    constexpr Long  LongtMax = (ULong)-1 >> 1;
 	/* The maximum ULong value. */
-	const ULong ULongMax = (ULong)-1;
+    constexpr ULong ULongMax = (ULong)-1;
 
     template<class T>
     inline constexpr T min(T v1, T v2) noexcept {
@@ -120,13 +109,6 @@ namespace std
     inline constexpr T max(T v1, T v2) noexcept {
         return v1 >= v2 ? v1 : v2;
     }
-
-    template<class T> struct remove_reference { typedef T type; };
-    template<class T> struct remove_reference<T&> { typedef T type; };
-    template<class T> struct remove_reference<T&&> { typedef T type; };
-
-
-
 }
 
 #pragma endregion

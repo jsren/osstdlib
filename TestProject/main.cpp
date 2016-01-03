@@ -1,16 +1,9 @@
 #include "../std"
 #include "../collections"
 #include "../memory.hpp"
+#include "../meta.hpp"
 
 using namespace std;
-
-/*namespace std
-{
-    void *heap_allocate(UInt size) noexcept
-    {
-        return new byte[size];
-    }
-}*/
 
 bool testy(int i)
 {
@@ -18,8 +11,15 @@ bool testy(int i)
 }
 
 
+struct POD
+{
+    int a;
+};
+
 int main(int argc, const char **args)
 {
+    auto v = std::is_pod<POD>::value;
+
     List<int> test{};
     test.getEnumerator();
 

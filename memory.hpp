@@ -16,4 +16,20 @@ namespace std
 
 	// Efficiently zeroes an area of memory. Returns 0 if successful.
 	UInt zero_memory(void* address, UInt size) noexcept;
+
+
+    class Allocator
+    {
+    public:
+        virtual ~Allocator() { }
+
+    public:
+        virtual bool free(void* obj) noexcept = 0;
+        virtual void* allocate(UInt size) noexcept = 0;
+        virtual void* reallocate(void* obj, UInt newSize) noexcept = 0;
+
+        virtual UInt getFreeSpace() noexcept = 0;
+        virtual byte getGranularity() noexcept = 0;
+    };
+
 }
