@@ -9,6 +9,7 @@
   <ItemGroup>
     <ClInclude Include="array.hpp" />
     <ClInclude Include="assert.hpp" />
+    <ClInclude Include="async.hpp" />
     <ClInclude Include="collections.hpp" />
     <ClInclude Include="enumeration.hpp" />
     <ClInclude Include="exception.hpp" />
@@ -27,12 +28,17 @@
     <ClInclude Include="version.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="alloc.cpp">
+      <DeploymentContent>true</DeploymentContent>
+    </ClCompile>
     <ClCompile Include="array.cpp">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
     <ClCompile Include="Impl\math.cpp" />
     <ClCompile Include="Impl\string.cpp" />
-    <ClCompile Include="memory.cpp" />
+    <ClCompile Include="memory.cpp">
+      <DeploymentContent>false</DeploymentContent>
+    </ClCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{44E1C228-35DB-4EDC-A6D4-ECA63D35004C}</ProjectGuid>
