@@ -1,34 +1,27 @@
-/* exception.hpp - (c) James S Renwick 2014
-   ----------------------------------------
-   Version 1.0.0
-*/
 #pragma once
-#include "string.hpp"
+
 
 namespace std
 {
-    class Exception
+    class exception
     {
     private:
-        String message;
+        const char empty[1] = { 0 };
 
     public:
-        virtual ~Exception() noexcept { }
+        exception() noexcept = default;
+        virtual ~exception() = default;
 
-        explicit Exception() noexcept 
-            : message(String::Empty) { }
+        exception(const exception&) noexcept = default;
+        exception& operator=(const exception&) noexcept = default;
 
-        inline Exception(String message) noexcept
-            : message(message) { }
-
-        inline Exception(Exception &ex) noexcept
-            : message(ex.message) { }
-
-    public:
-        inline const String &getMesssage() noexcept {
-            return this->message;
+        inline virtual const char* what() const noexcept {
+            return empty;
         }
     };
-
-    void throwException(Exception &e);
 }
+
+namespace __abi {
+    extern void __throw_exception(const std::exception&) noexcept;
+}
+#define __abi_throw(e) __abi::__throw_exception(e)

@@ -18,15 +18,15 @@ namespace std
 		Version(byte major, byte minor, byte build, byte revision) noexcept;
 
 	public:
-		inline UInt getMajorVersion()  noexcept { return _data[0]; }
-		inline UInt getMinorVersion()  noexcept { return _data[1]; }
-		inline UInt getMajorRevision() noexcept { return _data[2]; }
-		inline UInt getMinorRevision() noexcept { return _data[3]; }
+		inline size_t getMajorVersion()  noexcept { return _data[0]; }
+		inline size_t getMinorVersion()  noexcept { return _data[1]; }
+		inline size_t getMajorRevision() noexcept { return _data[2]; }
+		inline size_t getMinorRevision() noexcept { return _data[3]; }
 	};
 
 	Version::Version(const byte* const data) noexcept
 	{
-		for (UInt i = 0; i < sizeof(this->_data); i++) {
+		for (size_t i = 0; i < sizeof(this->_data); i++) {
 			this->_data[i] = data[i];
 		}
 	}

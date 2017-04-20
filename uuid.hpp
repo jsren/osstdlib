@@ -12,7 +12,7 @@ namespace std
 	{
 	public:
 		// The size of a compliant UUID
-		static const UInt size = 16;
+		static const size_t size = 16;
 
 		// Represents a UUID's variant.
 		// Taken from "boost/uuid/uuid.hpp".
@@ -43,14 +43,14 @@ namespace std
 		// Creates an empty UUID
 		UUID() noexcept
 		{
-			for (UInt i = 0; i < UUID::size; i++) {
+			for (size_t i = 0; i < UUID::size; i++) {
 				this->data[i] = 0;
 			}
 		}
 
 		explicit UUID(const byte* const data) noexcept
 		{
-			for (UInt i = 0; i < UUID::size; i++) {
+			for (size_t i = 0; i < UUID::size; i++) {
 				this->data[i] = data[i];
 			}
 		}
@@ -58,7 +58,7 @@ namespace std
 		/* Gets if the UUID is a 'nil' UUID. */
 		bool isNilUUID() const noexcept
 		{
-			for (UInt i = 0; i < size; i++) {
+			for (size_t i = 0; i < size; i++) {
 				if (data[i] != 0U) return false; 
 			}
 			return true;

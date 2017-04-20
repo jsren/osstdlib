@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,35 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8AD4329A-73E1-497E-8B8C-C7B2FAB20A99}</ProjectGuid>
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{DC7C8DE9-643C-41F8-88D1-EE5429F740D4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>TestProject</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <RootNamespace>osstdlib</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -71,6 +72,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)..</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10586.0\um\x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -87,11 +90,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);DEFAULT_ALLOC</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -104,7 +106,6 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -121,7 +122,6 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,15 +138,51 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Standard Library.vcxproj">
-      <Project>{44e1c228-35db-4edc-a6d4-eca63d35004c}</Project>
-    </ProjectReference>
+    <ClInclude Include="..\algorithm.hpp" />
+    <ClInclude Include="..\allocator.hpp" />
+    <ClInclude Include="..\array.hpp" />
+    <ClInclude Include="..\atomic.hpp" />
+    <ClInclude Include="..\collections.hpp" />
+    <ClInclude Include="..\cstddef.hpp" />
+    <ClInclude Include="..\cstring.hpp" />
+    <ClInclude Include="..\enumeration.hpp" />
+    <ClInclude Include="..\exception.hpp" />
+    <ClInclude Include="..\func.hpp" />
+    <ClInclude Include="..\impl\system_error.hpp" />
+    <ClInclude Include="..\ios.hpp" />
+    <ClInclude Include="..\list.hpp" />
+    <ClInclude Include="..\math.hpp" />
+    <ClInclude Include="..\memory-old.hpp" />
+    <ClInclude Include="..\ostream.hpp" />
+    <ClInclude Include="..\system_error.hpp" />
+    <ClInclude Include="..\type_traits.hpp" />
+    <ClInclude Include="..\new.hpp" />
+    <ClInclude Include="..\point.hpp" />
+    <ClInclude Include="..\set.hpp" />
+    <ClInclude Include="..\memory.hpp" />
+    <ClInclude Include="..\stack.hpp" />
+    <ClInclude Include="..\std.hpp" />
+    <ClInclude Include="..\stdexcept.hpp" />
+    <ClInclude Include="..\string.hpp" />
+    <ClInclude Include="..\string_old.hpp" />
+    <ClInclude Include="..\time.hpp" />
+    <ClInclude Include="..\tuple.hpp" />
+    <ClInclude Include="..\uuid.hpp" />
+    <ClInclude Include="..\version.hpp" />
+    <ClInclude Include="..\_feats.hpp" />
+    <ClInclude Include="..\_intrinsics.hpp" />
+    <ClInclude Include="..\_std.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\cstring.cpp" />
+    <ClCompile Include="..\impl\example.cpp" />
+    <ClCompile Include="..\math.cpp" />
+    <ClCompile Include="..\osstdlib.cpp" />
+    <ClCompile Include="..\string.cpp" />
+    <ClCompile Include="..\string_old.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

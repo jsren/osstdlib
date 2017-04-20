@@ -1,250 +1,200 @@
-/* string.hpp - (c) James S Renwick 2013
-   -------------------------------------
-   Version 1.0.8
-*/
 #pragma once
-#include "std"
+#include "allocator.hpp"
+#include "memory.hpp"
 
-/*
-==========================================
-CONSIDER: String<T>
-          typedef String<char>    string;
-		  typedef String<wchar_t> wstring;
+namespace __std
+{
+    template<typename Char>
+    inline const Char* __get_empty_str();
 
-	Note that this would force function definition to occur
-	within the header file.
-==========================================
-*/
+    template<> inline const char* __get_empty_str<char>() {
+        extern const char* __empty_cstring; return __empty_cstring;
+    }
+    template<> inline const wchar_t* __get_empty_str<wchar_t>() {
+        extern const wchar_t* __empty_wstring; return __empty_wstring;
+    }
+    template<> inline const char16_t* __get_empty_str<char16_t>() {
+        extern const char16_t* __empty_ustring; return __empty_ustring;
+    }
+    template<> inline const char32_t* __get_empty_str<char32_t>() {
+        extern const char32_t* __empty_Ustring; return __empty_Ustring;
+    }
+}
+
 
 namespace std
 {
-	/*
-	Core data type for the handling of mutable text objects.	
-	Backed by a dynamically-sized char array. 
-	This implementation is not threadsafe.
-	*/
-	class String
-	{
-	private:
-		char* data;
-		UInt length;
-		UInt realLength;
-
-		explicit String() noexcept : data(nullptr), 
-			length(0), realLength(0) { };
-		
-		String(UInt, UInt);
-
-		void __resize(UInt);
-
-	public:
-		String(const char* data);
-		String(const String& str);
-		String(const char* data, UInt length);
-
-		// Move assignment
-		inline String& operator =(String&& string) noexcept
-		{
-			char* tmp   = this->data;
-			this->data  = string.data;
-			string.data = tmp;
-
-			return *this;
-		}
-
-		/* Gets the length, in characters, of this string. */
-		inline UInt getLength() const noexcept { return this->length; }
-
-
-		/*
-		Gets the character at the given index. No bounds checking is
-		performed.
-
-		index - The index of the character to retrieve.
-		*/
-		inline char getCharAt(UInt index) const noexcept{ return this->data[index]; }
-
-
-		/*
-		Sets the character at the given index. Returns false if the index
-		does not pass bounds checks.
-
-		character - The new value.
-		index     - The index of the character to set.
-		*/
-		bool setCharAt(char character, UInt index) noexcept;
-
-
-		/*
-		Creates a new String which is a substring of the current string.
-		Should the given length go beyond the string length, the substring
-		will be taken from the given index until the end of the string. If
-		the start index is beyond the string, an empty string will be 
-		returned.
-
-		startIndex - The index from which the substring should be taken.
-		length     - The length, in characters, of the substring.
-		*/
-		String* substring(UInt startIndex, UInt length);
-
-
-		/*
-		Removes the specified number of characters from the string, returning
-		the number of characters actually removed. 
-
-		startIndex - The index, inclusive, from where removal should begin.
-		length     - The number of characters to remove.
-		*/
-		UInt remove(UInt startIndex, UInt length);
-
-
-		/*
-		Returns the index within the string of the given substring,
-		or -1 (UIntMax) if not found.
-
-		substr - The substring for which to search.
-		*/
-		UInt indexOf(const String& substr) const noexcept;
-		/*
-		Returns the index within the string of the given substring,
-		or -1 (UIntMax) if not found.
-
-		substr     - The substring for which to search.
-		startIndex - The index (inclusive) at which to begin the search.
-		*/
-		UInt indexOf(const String& substr, UInt startIndex) const noexcept;
-
-
-		/*
-		Tests whether the string starts with the given substring.
-
-		prefix - The prefix for which to test.
-		*/
-		bool startsWith(const String& prefix) const noexcept;
-		/*
-		Tests whether the string starts with the given character array.
-
-		prefix - The prefix for which to test.
-		length - The length of the character array.
-		*/
-		bool startsWith(const char* prefix, UInt length) const noexcept;
-
-
-		/*
-		Tests whether the string ends with the given substring.
-
-		suffix - The suffix for which to test.
-		*/
-		bool endsWith(const String& suffix) const noexcept;
-		/*
-		Tests whether the string ends with the given character array.
-
-		suffix - The suffix for which to test.
-		length - The length of the character array.
-		*/
-		bool endsWith(const char* suffix, UInt length) const noexcept;
-
-
-		/*
-		Reallocates the string data to the string's length, 
-		potentially freeing unused space.
-		*/
-		void freeToSize();
+    template<typename Char>
+    struct char_traits
+    {
+        using value_type = Char;
+    };
 
 
 
-		// === OPERATORS === 
-		String* operator +=(char c1);
-		String* operator +=(const char* s1);
-		String* operator +=(const String& s1);
+    template<typename Char, typename Traits = char_traits<Char>,
+        typename Allocator = allocator<Char>>
+    class __basic_string_base
+    {
+    protected:
+        using alloc_traits = allocator_traits<Allocator>;
 
-		bool operator ==(const String* s1) const;
+    public:
+        using traits_type     = Traits;
+        using value_type      = typename Traits::value_type;
+        using allocator_type  = Allocator;
+        using size_type       = typename alloc_traits::size_type;
+        using difference_type = typename alloc_traits::difference_type;
+        using reference       = value_type&;
+        using const_reference = const value_type&;
+        using pointer         = typename alloc_traits::pointer;
+        using const_pointer   = typename alloc_traits::const_pointer;
 
-		inline char operator [](UInt index) noexcept {
-			return getCharAt(index);
-		};
-		inline char operator [](UInt index) const noexcept {
-			return getCharAt(index);
-		};
+    protected:
+        size_type _length = 0;
+        pointer _data = nullptr;
 
-		/*
-		Copies the given null-termintated character array
-		to the current string. Returns the current string or nullptr 
-		if the resulting string is too large.
-		*/
-		String* operator =(const char* s1);
-		/*
-		Copies the given string to the current string. Returns the current string.
-		*/
-		String* operator =(const String& s1);
+        __basic_string_base() = default;
+        __basic_string_base(size_type length, pointer data)
+            : _length(length), _data(data) { }
 
-		/*
-		Creates a new string formed from the concatenation of
-		this string and the given character. Returns nullptr if the resulting
-		string is too large.
-		*/
-		String* operator +(char c) const;
-		/*
-		Creates a new string formed from the concatenation of
-		this string and the given string. Returns nullptr if the resulting
-		string is too large.
-		*/
-		String* operator +(const String& s2) const;
-		/*
-		Creates a new string formed from the concatenation of
-		this string and the given null-terminated character array. 
-		Returns nullptr if the resulting string is too large.
-		*/
-		String* operator +(const char* s2) const;
+    public:
+        inline reference operator[](size_type pos) {
+            return _data[pos];
+        }
+        const_reference operator[](size_type pos) const {
+            return _data[pos];
+        }
+
+        inline reference at(size_type pos) {
+            if (pos < 0 || pos >= length()) {
+                __abi::__throw_exception(std::out_of_range("pos"));
+            }
+            else return _data[pos];
+        }
+        const_reference at(size_type pos) const {
+            if (pos < 0 || pos >= length()) {
+                __abi::__throw_exception(std::out_of_range("pos"));
+            }
+            else return _data[pos];
+        }
+
+        inline reference front() {
+            return operator[](0);
+        }
+        inline const_reference front() const {
+            return operator[](0);
+        }
+
+        inline reference back() {
+            return operator[](size() - 1);
+        }
+        inline const_reference back() const {
+            return operator[](size() - 1);
+        }
+
+        inline pointer data() {
+            return _data;
+        }
+        inline const_pointer data() const {
+            return _data;
+        }
+        inline const_pointer c_str() const {
+            return _data;
+        }
+
+        inline size_type length() const noexcept {
+            return _length;
+        }
+        inline size_type size() const noexcept {
+            return _length;
+        }
+    };
 
 
-		// === STATIC MEMBERS === 
 
-		/* The empty string. */
-		static const String Empty;
+    template<typename Char, typename Traits = char_traits<Char>, 
+        typename Allocator = allocator<Char>>
+    class basic_string : public __basic_string_base<Char, Traits, Allocator>
+    {
+    private:
+        allocator_type _alloc;
+
+    public:
+        inline basic_string() noexcept(noexcept(allocator_type()))  { }
+
+        inline explicit basic_string(const allocator_type& alloc) noexcept : _alloc(alloc) { }
+
+        basic_string(size_type length, Char character, const allocator_type& alloc = allocator_type())
+            : __basic_string_base(length, nullptr), _alloc(alloc)
+        {
+            _data = alloc_traits::allocate(_alloc, length+1);
+            _data[length] = '\0';
+        }
+
+        basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
+            : __basic_string_base(length, nullptr), _alloc(alloc)
+        {
+            if (length > 0) {
+                _data = alloc_traits::allocate(_alloc, length+1);
+                std::memcpy(data, cstr, length * sizeof(Char));
+            }
+        }
+
+        inline basic_string(const Char* cstr, const allocator_type& alloc = allocator_type())
+            : basic_string(cstr, std::strlen(cstr), alloc) { }
 
 
-		/* 
-		Gets the length, in bytes, of a null-terminated character array.
-		This length does not include the terminator.
-		
-		data - the byte array for which to get the length
-		*/
-		static UInt getNullLength(const char* data) noexcept;
+        ~basic_string() {
+            if (_data != 0) alloc_traits::deallocate(_alloc, _data, _length+1);
+        }
+    };
 
 
-		/*
-		Replaces "output" with an 'unsafe' string - one whose value is not
-		solely controlled by the string object.
 
-		Note that any String functions which alter the underlying data will also
-		affect the given character array.
+    template<typename Char>
+    class basic_string<Char, char_traits<Char>, allocator<Char>> 
+        : public __basic_string_base<Char, char_traits<Char>, allocator<Char>>
+    {
+    public:
 
-		data   - The array from which the string will be generated.
-		output - The String object to construct.
-		*/
-		inline static void _getUnsafe(char* data, String& output)
-		{
-			output.data       = data;
-			output.length     = getNullLength(data);
-			output.realLength = output.length;
-		}
-		/*
-		Replaces "output" with an 'unsafe' string - one whose value is not
-		solely controlled by the string object.
 
-		Note that any String functions which alter the underlying data will also
-		affect the given character array.
+    public:
+        inline basic_string() noexcept(noexcept(allocator_type())) { }
 
-		data   - The array from which the string will be generated.
-		length - The length, in bytes, of the string.
-		output - The String object to construct.
-		*/
-		inline static void _getUnsafe(char* data, UInt length, String& output)
-		{
-			output.data       = data;
-			output.length     = length;
-			output.realLength = length;
-		}
-	};
+        inline explicit basic_string(const allocator_type& alloc) noexcept : _alloc(alloc) { }
+
+        basic_string(size_type length, Char character, const allocator_type& alloc = allocator_type())
+            : __basic_string_base(length, nullptr)
+        {
+            if (length > 0) {
+                _data = new char[length + 1];
+            }
+        }
+
+        basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
+            :__basic_string_base(length, nullptr)
+        {
+            if (length > 0) {
+                auto* data = new char[length + 1];
+                std::memcpy(data, cstr, length * sizeof(Char));
+                _data = data;
+            }
+        }
+
+        inline basic_string(const Char* cstr, const allocator_type& alloc = allocator_type())
+            : basic_string(cstr, std::strlen(cstr), alloc) { }
+
+
+        ~basic_string() {
+            if (_length != 0) delete[] _data;
+        }
+    };
+
+
+
+    typedef basic_string<char> string;
+    typedef basic_string<wchar_t> wstring;
+    typedef basic_string<char16_t> u16string;
+    typedef basic_string<char32_t> u32string;
 }

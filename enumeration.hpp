@@ -1,142 +1,100 @@
-/* enumeration.hpp - (c) James S Renwick 2016
+/* enumeration.hpp - (c) James S Renwick 2014
    ------------------------------------------
-   Version 1.2.0
+   Version 1.1.1
 */
 #pragma once
 
-#include "std"
-#include "func.hpp"
+#include "_std.hpp"
+#include "meta.hpp"
+#include "smartptr.hpp"
+
 
 namespace std
 {
-
-#ifndef NO_FOREACH
-#define foreach(_vardecl, _ptr_enumerable) {\
-    auto __enum = (_ptr_enumerable)->getEnumerator();\
-    while (__enum->hasNext()) {\
-        _vardecl = __enum->nextItem();
-
-#define end_foreach } delete __enum; }
-#endif
-
-
+	/* An interface allowing the iteration of the items in a collection. */
 	template<class T>
-	/* An interface allowing the iteration of the items in a collection.
-	Note that no exception need be thrown if the collection is modified. */
+	class EnumeratorBase
+	{
+	public:
+		using ElemType = T;
+
+	public:
+		// Virtual destructor
+		virtual ~EnumeratorBase() noexcept = default;
+
+	public:
+		// Performs a single step of iteration. Returns false if no next item exists. 
+		virtual bool next() = 0;
+
+        // Gets the current item.
+        virtual T& current() = 0;
+	};
+
+
+
+	template <class T>
 	class Enumerator
 	{
 	public:
-		// Virtual destructor
-		virtual ~Enumerator() noexcept { };
+		using ElemType = T;
+	private:
+		unique_ptr<EnumeratorBase<T>> pimpl{};
 
 	public:
-        // Returns whether a next item is available.
-        virtual bool hasNext() const = 0;
-        // Gets the next item and advances the enumerator.
-        virtual T& nextItem() = 0;
+		inline Enumerator(EnumeratorBase<T>* pimpl) 
+			: pimpl(pimpl) { }
+		inline Enumerator(unique_ptr<EnumeratorBase<T>> pimpl) 
+			: pimpl(std::move(pimpl)) { }
 
-        // Gets the next item and advances the enumerator.
-        virtual const T &nextItem() const {
-             return const_cast<Enumerator<T>*>(this)->nextItem();
-        }
+	public:
+		// Performs a single step of iteration. Returns false if no next item exists. 
+		inline bool next() _noexc_copy_from(pimpl->next()) {
+			return pimpl->next();
+		}
+		// Gets the current item.
+		T& current() const _noexc_copy_from(pimpl->current()) {
+			return pimpl->current();
+		}
 	};
+
 
 
 	template<class T>
 	class Enumerable
 	{
 	public:
-        virtual ~Enumerable() { };
+        __DefaultCtorCopyMove(Enumerable);
+
+		// Virtual destructor
+		virtual ~Enumerable() noexcept = default;
 
 		/* Creates and returns an enumerator enabling iteration over the collection. */
-        virtual Enumerator<T> *getEnumerator() = 0;
-        virtual const Enumerator<T> *getEnumerator() const = 0;
+		virtual Enumerator<T> getEnumerator() = 0;
 
-        virtual bool any() const
-        {
-            auto enumerator = unique_ptr_from(this->getEnumerator());
-            return enumerator->hasNext();
-        }
-
-        template<class F>
-        bool any(Function<F, bool, T> delegate) const
-        {
-            auto enumerator = unique_ptr_from(this->getEnumerator());
-
-            while (enumerator->hasNext()) {
-                if (delegate(enumerator->nextItem())) return true;
-            }
-            return false;
-        }
+		/* Creates and returns an enumerator enabling iteration over the collection. */
+		virtual Enumerator<const T> getEnumerator() const = 0;
 
 		/* Iterates through each item, applying the given delegate. */
-		template<class F>
-		void forEach(Function<F, void, T> delegate) const
+		template<class Delegate>
+		void forEach(Delegate& delegate) const
 		{
-            auto enumerator = unique_ptr_from(this->getEnumerator());
-
-			while (enumerator->hasNext()) {
-				delegate(enumerator->nextItem());
+			auto enumerator = this->getEnumerator();
+			while (enumerator->next()) {
+				delegate(enumerator->current());
 			}
 		}
 
 		/* Iterates through each item, applying the given delegate. */
-		template<class F, class AT>
-		AT aggregate(AT initalValue, Function<F, AT, AT, T> delegate) const
+		template<class Aggregator, class AT>
+		AT aggregate(Aggregator& aggregator, AT initalValue) const
 		{
-            auto enumerator  = unique_ptr_from(this->getEnumerator());
-			AT   accumulator = initalValue;
+			AT accumulator = initalValue;
+			auto enumerator = this->getEnumerator();
 
-			while (enumerator->hasNext()) {
-				accumulator = delegate(accumulator, enumerator->nextItem());
+			while (enumerator->next()) {
+				accumulator = delegate(enumerator->current(), accumulator);
 			}
 			return accumulator;
 		}
-
-        Enumerable<T> *union_(const Enumerable<T> &enumerable) const
-        {
-            auto enum1 = unique_ptr_from(this->getEnumerator());
-            auto *list = new List<T>{};
-
-            while (enum1->hasNext())
-            {
-                bool add   = false;
-                auto item1 = enum1->nextItem();
-                auto enum2 = unique_ptr_from(enumerable.getEnumerator());
-                
-                while (enum2->hasNext())
-                {
-                    if (item1 == enum2->nextItem()) {
-                        add = true; break;
-                    }
-                }
-                if (add && !list->contains(item1)) {
-                    list->add(item1);
-                }
-            }
-            return list;
-        }
-
-        Enumerable<T> *intersection(const Enumerable<T> &enumerable) const
-        {
-            auto enumerator = unique_ptr(this->getEnumerator());
-            auto *list = new List<T>{};
-
-            while (enumerator->hasNext())
-            {
-                auto &item = enumerator->nextItem();
-                if (!list->contains(item)) list->add(item);
-            }
-
-            delete enumerator;
-            enumerator = enumerable.getEnumerator();
-
-            while (enumerator->hasNext())
-            {
-                auto &item = enumerator->nextItem();
-                if (!list->contains(item)) list->add(item);
-            }
-            return list;
-        }
 	};
 }

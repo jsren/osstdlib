@@ -1,8 +1,9 @@
-/* func.hpp - (c) James S Renwick 2014-2016
-   ----------------------------------------
-   Version 1.1.0
+/* func.hpp - (c) James S Renwick 2014
+   -----------------------------------
+   Version 1.0.0
 */
 #pragma once
+#include "meta.hpp"
 
 namespace std
 {
@@ -44,8 +45,25 @@ namespace std
 	   
 	   delegate - The function pointer or lambda from which to create the object.
 	 */
-	inline static Function<T, RT, PTs...> Func(T delegate) noexcept
+	static Function<T, RT, PTs...> Delegate(T delegate) noexcept
 	{
 		return Function<T, RT, PTs...>(delegate);
 	}
+
+	template<typename Func>
+	class function
+	{
+	private:
+		
+		Func func;
+
+	public:
+		function(Func func) noexcept : func(func) { }
+
+		template<typename ...Ts>
+		inline auto operator ()(Ts&&... args)
+		{
+			return func(std::move(args)...);
+		}
+	};
 }

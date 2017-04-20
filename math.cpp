@@ -8,36 +8,36 @@
 
 namespace std
 {
-	UInt pow2(UInt power) noexcept
+	uint32_t pow2(uint32_t power) noexcept
 	{
-		if (power > (sizeof(UInt) * 8 - 1)) {
+		if (power > (sizeof(uint32_t) * 8 - 1)) {
 			return 0;
 		}
 		else if (power < 8) { return 1 << power; }
 
-		UInt output = 1;
-		for (UInt i = 0; i < power; i++) {
+		uint32_t output = 1;
+		for (uint32_t i = 0; i < power; i++) {
 			output <<= 1;
 		}
 		return output;
 	}
 
-	UInt32 log2(UInt32 i) noexcept
+	uint32_t log2(uint32_t i) noexcept
 	{
 		if (i == 0) return 0;
 
 		// GCC has a nice built-in function for this
 #ifdef GCC
-		return 31 - (UInt)__builtin_clz(i);
+		return 31 - (size_t)__builtin_clz(i);
 #else
-		for (UInt32 n = 0x80000000, t = 0; n != 0; n >> 1, t++) {
+		for (uint32_t n = 0x80000000, t = 0; n != 0; n >> 1, t++) {
 			if ((i & n) != 0) return t;
 		}
 		return 0;
 #endif
 	}
 
-	float sqrt(float f, UInt16 precision) noexcept
+	float sqrt(float f, uint16_t precision) noexcept
 	{
 		if (f < 0)  return -1;
 		if (f == 0) return 0;
@@ -52,14 +52,14 @@ namespace std
 		else               x = 50.0f;
 
 		// Now iteratively improve our estimate
-		for (UInt16 i = 0; i < precision; i++)
+		for (uint16_t i = 0; i < precision; i++)
 		{
 			x += (f - (x * x)) / (2 * x);
 		}
 		return x;
 	}
 
-	double sqrt(double d, UInt16 precision) noexcept
+	double sqrt(double d, uint16_t precision) noexcept
 	{
 		if (d < 0)  return -1;
 		if (d == 0) return 0;
@@ -76,17 +76,18 @@ namespace std
 		else                 x = 1000;
 
 		// Now iteratively improve our estimate
-		for (UInt16 i = 0; i < precision; i++)
+		for (uint16_t i = 0; i < precision; i++)
 		{
 			x += (d - (x * x)) / (2 * x);
 		}
 		return x;
 	}
 
-	UInt16 sqrt(UInt16 num) noexcept
+	// Taken from http://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+	uint16_t sqrt(uint16_t num) noexcept
 	{
-		UInt16 output = 0;
-		UInt16 bit = 1 << 14; // The second-to-top bit is set: 1L<<30 for long
+		uint16_t output = 0;
+		uint16_t bit = 1 << 14; // The second-to-top bit is set: 1L<<30 for long
  
 		// "bit" starts at the highest power of four <= the argument.
 		while (bit > num) bit >>= 2;
@@ -105,9 +106,10 @@ namespace std
 		return output;
 	}
 
-	UInt32 fastSqrt(UInt32 value) noexcept
+	// Taken from http://ccpssolutions.com/nogdusforums/index.php?topic=696.0
+	uint32_t fastSqrt(uint32_t value) noexcept
 	{
-		UInt32 result = 0;
+		uint32_t result = 0;
 		for (unsigned int i = 128; i != 0; i >>= 1)
 		{
 			result += i;
