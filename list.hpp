@@ -18,6 +18,10 @@ namespace std
 		UInt length;
 		UInt realLength;
 
+	private:
+		explicit List(T* backingArray, UInt length) : IList<T>(),
+			data(backingArray), length(0), realLength(length) { }
+
 	public:
 		List() : IList<T>(), length(0), realLength(10) {
 			this->data = new T[this->realLength];

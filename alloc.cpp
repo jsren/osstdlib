@@ -1,5 +1,7 @@
 #include "memory.hpp"
 #include "async.hpp"
+#include "math.hpp"
+#include "collections"
 
 #define HEAP_MAGIC 0xA110CA7E
 
@@ -15,6 +17,7 @@ namespace std
 
 	struct HeapHeader
 	{
+		Int32  binCount;
 		Int32  magic;
 		Int32  lockVariable;
 		void*  data;
@@ -27,7 +30,7 @@ namespace std
 			FreeEntry*  next;
 		} *freeBins[128];
 
-		HeapRecord records[];
+		List<HeapRecord> 
 	};
 
 	class HeapAllocatorImpl : public HeapAllocator
@@ -83,6 +86,29 @@ namespace std
 
 	void* HeapAllocatorImpl::allocate(UInt size) noexcept
 	{
-		
+		// Look (best-fit) in free block bins
+		auto index = std::log2(size);
+
+		if (this->lock->acquire())
+		{
+			for (; index < this->header->binCount; index++)
+			{
+				auto bin = this->header->freeBins[index];
+
+				for (UInt32 i = 0; bin[i].size != 0; i++) 
+				{
+					HeapHeader::FreeEntry* entry = &bin[i];
+					while ((entry = entry->next) != nullptr)
+					{
+						if (entry->size >= size) 
+						{
+							entry->record->
+						}
+					}
+				}
+			}
+		}
+		return nullptr;
 	}
+
 }

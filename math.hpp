@@ -22,17 +22,6 @@ namespace std
 	i - The integer for which to find the log.
 	*/
 	UInt32 log2(UInt32 i) noexcept;
-
-	/* Returns the smallest of the two given integers. */
-	inline UInt min(UInt i1, UInt i2) noexcept{
-		return (i1 > i2) ? i2 : i1;
-	}
-
-	/* Returns the largest of the two given integers. */
-	inline UInt max(UInt i1, UInt i2) noexcept{
-		return (i1 > i2) ? i1 : i2;
-	}
-
 	
 	/* 
 	Approximates the floating-point square root of a number with the given precision. 

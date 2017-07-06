@@ -1,6 +1,6 @@
-/* std.hpp - (c) James S Renwick 2013 - 2015 
+/* std.hpp - (c) James S Renwick 2013 - 2016
    -----------------------------------------
-   Version 2.1.0
+   Version 2.2.0
 */
 #pragma once
 
@@ -30,13 +30,13 @@ namespace std
 
 	public:
 		template<typename T>
-		operator T*() const { return (T*)-1; }
+		operator T*() const { return (T*)0; }
 
 		template<typename T, typename Y>
-		operator T Y::*() const { return -1; }
+		operator T Y::*() const { return 0; }
 
 		void operator&() const = delete;
-		operator void*() const { return (void*)-1; }
+		operator void*() const { return (void*)0; }
 
 		inline bool operator==(const nullptr_t&) const { return true; }
 		inline bool operator!=(const nullptr_t&) const { return false; }

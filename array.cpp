@@ -2,7 +2,7 @@
 
 namespace std
 {
-    	template <class T>
+    template <class T>
 	Array<T>::Array(const Array<T>& copy) : 
         arrayData(new T[copy.length]), length(copy.length)
 	{

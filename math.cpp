@@ -1,6 +1,6 @@
-/* math.cpp - (c) James S Renwick 2013 
-   -----------------------------------
-   Version 1.0.0
+/* math.cpp - (c) James S Renwick 2013 - 2016
+   ------------------------------------------
+   Version 1.0.1
    
    See comments for logic attributions.
 */
@@ -27,10 +27,25 @@ namespace std
 		if (i == 0) return 0;
 
 		// GCC has a nice built-in function for this
-#ifdef GCC
-		return 31 - (UInt)__builtin_clz(i);
+#ifdef _GNUC_
+		return 31 - (UInt32)__builtin_clz(i);
 #else
 		for (UInt32 n = 0x80000000, t = 0; n != 0; n >> 1, t++) {
+			if ((i & n) != 0) return t;
+		}
+		return 0;
+#endif
+	}
+
+	UInt64 log2(UInt64 i) noexcept
+	{
+		if (i == 0) return 0;
+
+		// GCC has a nice built-in function for this
+#ifdef _GNUC_
+		return 63 - (UInt64)__builtin_clzl(i);
+#else
+		for (UInt64 n = 0x80000000 << 32, t = 0; n != 0; n >> 1, t++) {
 			if ((i & n) != 0) return t;
 		}
 		return 0;
