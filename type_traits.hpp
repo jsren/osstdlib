@@ -72,6 +72,17 @@ namespace std
     constexpr bool is_array_v = is_array<T>::value;
 #endif
 
+    template<typename T>
+    struct is_reference : false_type { };
+    template<typename T>
+    struct is_reference<T&> : true_type { };
+    template<typename T>
+    struct is_reference<T&&> : true_type { };
+#if defined(__cpp_variable_templates)
+    template<typename T>
+    constexpr bool is_reference_v = is_reference<T>::value;
+#endif
+
 
     template<long long int N> struct is_even : bool_constant<N % 2 == 0> { };
 #if defined(__cpp_variable_templates)
@@ -90,6 +101,12 @@ namespace std
     template<typename T> struct add_reference<T&&> { typedef T& type; };
     template<typename T> using add_reference_t = typename add_reference<T>::type;
 
+
+    template<typename T> struct add_rvalue_reference { typedef T&& type; };
+    template<typename T> struct add_rvalue_reference<T&> { typedef T&& type; };
+    template<typename T> struct add_rvalue_reference<T&&> { typedef T&& type; };
+    template<typename T> using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+
     template<typename T> struct remove_reference { typedef T type; };
     template<typename T> struct remove_reference<T&> { typedef T type; };
     template<typename T> struct remove_reference<T&&> { typedef T type; };
@@ -107,8 +124,26 @@ namespace std
     template<typename T> struct remove_volatile<volatile T> { typedef T type; };
     template<typename T> using remove_volatile_t = typename remove_volatile<T>::type;
 
+    template<typename T> using remove_cv = remove_volatile<remove_const_t<T>>;
+    template<typename T> using remove_cv_t = typename remove_cv<T>::type;
+
     template<typename T> struct bare_type { typedef remove_const_t<remove_volatile_t<remove_reference_t<T>>> type; };
     template<typename T> using bare_type_t = remove_const_t<remove_volatile_t<remove_reference_t<T>>>;
+
+
+    template<typename...Ts>
+    struct common_type;
+
+    template<>
+    struct common_type<> { };
+
+
+
+
+
+    template<class T>
+    std::remove_reference_t<T>&& declval();
+
 
     template<typename T> struct is_volatile : false_type {  };
     template<typename T> struct is_volatile<volatile T> : true_type { };
@@ -137,7 +172,7 @@ namespace std
 
 #if defined(__cpp_variable_templates)
     template<typename T> constexpr bool is_union_v = is_union<T>::value;
-    template<typename T> constexpr bool is_empty_v = is_empty_type<T>::value;
+    //template<typename T> constexpr bool is_empty_v = is_empty_type<T>::value;
     template<typename T> constexpr bool is_class_v = is_class<T>::value;
     template<typename T> constexpr bool is_abstract_v = is_abstract<T>::value;
     template<typename T> constexpr bool is_enum_v = is_enum<T>::value;
@@ -161,12 +196,75 @@ namespace std
     template<typename T> constexpr bool has_trivial_copy_v = has_trivial_copy<T>::value;
 #endif
 
+#pragma warn "TODO: result_of/invoke_result are hacks"
+
+    template<typename>
+    struct result_of;
+
+    template<typename F, typename ...Args>
+    struct result_of<F(Args...)> {
+        using type = decltype(std::declval<F>()(std::declval<Args>()...));
+    };
+
+    template<typename ...Args, typename R, typename T>
+    struct result_of<R(T::*)(Args...)> { using type = R; };
+
+    template<typename ...Args, typename R, typename T, typename Y>
+    struct result_of<R (T::*(Y*, Args...))(Args...)> { using type = R; };
+
+
+    template<typename T> using result_of_t = typename result_of<T>::type;
+
+    template<typename T, typename ...Args>
+    using invoke_result = result_of<T(Args...)>;
+
+    template<typename T, typename ...Args>
+    using invoke_result_t = typename invoke_result<T, Args...>::type;
+    
+
 
     template<typename Base, typename Derived>
     using is_base_of = bool_constant<__is_base_of(Base, Derived)>;
 #if defined(__cpp_variable_templates)
     template<typename Base, typename Derived>
     constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+#endif
+
+
+    namespace __detail 
+    {
+        //using std::swap;
+
+        struct is_swappable_impl
+        {
+            template<typename T, typename = 
+                decltype(swap(declval<T&>(), declval<T&>()))>
+            static const constexpr true_type v(int);
+            
+            template<typename>
+            static const constexpr false_type v(...);
+        };
+
+        struct is_nothrow_swappable_impl
+        {
+            template<typename T, typename V = 
+                bool_constant<noexcept(swap(declval<T&>(), declval<T&>()))>>
+            static const constexpr V v(int);
+            
+            template<typename>
+            static const constexpr false_type v(...);
+        };
+    }
+
+    template<typename T> struct is_swappable : 
+        decltype(__detail::is_swappable_impl::v<T>(0)) { };
+
+    template<typename T> struct is_nothrow_swappable : 
+        decltype(__detail::is_nothrow_swappable_impl::v<T>(0)) { };
+
+#if defined(__cpp_variable_templates)
+    template<typename T> constexpr bool is_swappable_v = is_swappable<T>::value;
+    template<typename T> constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
 #endif
 
     // See http://www.boost.org/doc/libs/1_53_0/boost/type_traits/intrinsics.hpp
@@ -209,9 +307,6 @@ namespace std
     template<typename T> constexpr bool is_unsigned_v = is_unsigned<T>::value;
     template<typename T> constexpr bool is_signed_v = is_signed<T>::value;
 #endif
-
-    template<class T>
-    std::remove_reference_t<T>&& declval();
 
 
     // TODO: Support in VS
@@ -307,6 +402,12 @@ namespace std
         return static_cast<typename remove_reference<T>::type&&>(ref);
     }
 
+
+    template<typename T>
+    constexpr inline T&& forward(typename remove_reference<T>::type& ref) noexcept
+    {
+        return static_cast<T&&>(ref);
+    }
     template<typename T>
     constexpr inline T&& forward(typename remove_reference<T>::type&& ref) noexcept
     {
@@ -449,4 +550,113 @@ namespace __std
     };
     template<typename Template, typename T>
     using rebind_t = typename rebind<Template, T>::type;
+}
+
+namespace std
+{
+    namespace __detail
+    {
+        template<typename T>
+        struct is_ref_qualified : false_type { };
+
+        template<typename T, typename R, typename ...Args>
+        struct is_ref_qualified<R(T::*)(Args...)&> : true_type { };
+        template<typename T, typename R, typename ...Args>        
+        struct is_ref_qualified<R(T::*)(Args...)&&> : true_type { };
+
+        template<typename R, typename T, typename Y, typename ...Args>
+        struct is_ref_qualified<R (T::*(Y*, Args...))(Args...)&> : true_type { };
+        template<typename R, typename T, typename Y, typename ...Args>
+        struct is_ref_qualified<R (T::*(Y*, Args...))(Args...)&&> : true_type { };
+    }   
+
+    template<typename T>
+    struct add_pointer {
+        using type = conditional_t<!is_function<T>::value || !__detail::is_ref_qualified<T>::value, T*, T>;
+    };
+    template<typename T> struct add_pointer<T&> { using type = T*; };
+    template<typename T> struct add_pointer<T&&> { using type = T*; };
+
+    template<typename T>
+    using add_pointer_t = typename add_pointer<T>::type;
+
+
+    template<typename T> struct remove_extent { typedef T type; };     
+    template<typename T> struct remove_extent<T[]> { typedef T type; };
+     
+    template<typename T, size_t N>
+    struct remove_extent<T[N]> { typedef T type; };
+
+    template<typename T>
+    using remove_extent_t = typename remove_extent<T>::type;
+
+
+
+    template<typename T>
+    struct decay
+    {
+    private:
+        using Y = remove_reference_t<T>;
+    public:
+        using type = conditional_t<is_array<Y>::value, remove_extent_t<Y>*,
+                        conditional_t<is_function<Y>::value, add_pointer_t<Y>, 
+                            remove_cv_t<Y>>>;
+    };
+
+    template<typename T>
+    using decay_t = typename decay<T>::type;
+
+
+
+
+    // primary template (used for zero types)
+    template <class ...T> struct common_type { }; 
+
+    template<class ...Ts>
+    using common_type_t = typename common_type<Ts...>::type;
+
+
+    //////// one type
+    template <class T>
+    struct common_type<T> {
+        using type = std::decay_t<T>;
+    };
+     
+    //////// two types
+     
+    // default implementation for two types
+    template<class T1, class T2>
+    using cond_t = decltype(false ? std::declval<T1>() : std::declval<T2>());
+     
+    template<class T1, class T2, class=void>
+    struct common_type_2_default { };
+     
+    template<class T1, class T2>
+    struct common_type_2_default<T1, T2, std::void_t<cond_t<T1, T2>>> {
+        using type = std::decay_t<cond_t<T1, T2>>;
+    };
+     
+    // dispatcher to decay the type before applying specializations
+    template<class T1, class T2, class D1 = std::decay_t<T1>, class D2=std::decay_t<T2>>
+    struct common_type_2_impl : common_type<D1, D2> {};
+     
+    template<class D1, class D2>
+    struct common_type_2_impl<D1, D2, D1, D2> : common_type_2_default<D1, D2> {};
+     
+    template <class T1, class T2>
+    struct common_type<T1, T2> : common_type_2_impl<T1, T2> { };
+     
+    //////// 3+ types
+     
+    template<class AlwaysVoid, class T1, class T2, class...R>
+    struct common_type_multi_impl { };
+     
+    template< class T1, class T2, class...R>
+    struct common_type_multi_impl<std::void_t<common_type_t<T1, T2>>, T1, T2, R...>
+        : common_type<common_type_t<T1, T2>, R...>  { };
+      
+    template <class T1, class T2, class... R>
+    struct common_type<T1, T2, R...>
+        : common_type_multi_impl<void, T1, T2, R...> { };
+
 }

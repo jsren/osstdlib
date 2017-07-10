@@ -1,205 +1,208 @@
-/* array.hpp - (c) James S Renwick 2013
-   ------------------------------------
-   Authors: James S Renwick
-*/
 #pragma once
 
-#include "_std.hpp"
-#include "enumeration.hpp"
-#include "memory.hpp"
-
+#include "iterator.hpp"
+#include "functional.hpp"
+#include "stdexcept.hpp"
+#include "type_traits.hpp"
 
 namespace std
 {
-    template<typename Y>
-    class ArrayEnumerator;
+    template<typename T, size_t N>
+    struct array
+    {
+        using value_type = T;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using iterator = __detail::pointer_iterator<T>;
+        using const_iterator = __detail::pointer_iterator<const T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-	// Core data type for a fixed-size generic collection.
-	template<class T>
-	class Array final : public Enumerable<T>
-	{
-        friend ArrayEnumerator<T>;
-        friend ArrayEnumerator<const T>;
+        T _data[N];
 
-	public:
-		// The type of the array elements
-		using ElementType = T;
+        constexpr reference at(size_type index) {
+            if (index >= N) __abi_throw(out_of_range("index")); else return _data[index];
+        }
+        constexpr const_reference at(size_type index) const {
+            if (index >= N) __abi_throw(out_of_range("index")); else return _data[index];
+        }
 
-	private:
-		// The internal data of the array
-        unique_ptr<T[]> arrayData{};
+        constexpr reference operator[](size_type index) {
+            return _data[index];
+        }
+        constexpr reference operator[](size_type index) const {
+            return _data[index];
+        }
 
-		/* The number of items in the array. */
-		size_t _length = 0;
+        constexpr reference front() {
+            return this->operator[](0);
+        }
+        constexpr reference front() const {
+            return this->operator[](0);
+        }
 
-	public:
+        constexpr reference back() {
+            return this->operator[](N-1);
+        }
+        constexpr reference back() const {
+            return this->operator[](N-1);
+        }
 
-		// Creates a new array with the specified fixed capacity.
-		explicit Array(size_t capacity);
-		// Creates a new copy of the given array.
-		Array(const Array<T>& copy);
+        constexpr T* data() noexcept {
+            return _data;
+        }
+        constexpr const T* data() const noexcept {
+            return _data;
+        }
 
+        constexpr iterator begin() noexcept {
+            return iterator(_data);
+        }
+        constexpr const_iterator begin() const noexcept {
+            return const_iterator(_data);            
+        }
+        constexpr const_iterator cbegin() const noexcept {
+            return const_iterator(_data);
+        }
 
-		/* Gets the item at the specified index. Returns true when index is valid. */
-		bool getItem(size_t index, T& out) const noexcept;
-		/* Sets the item at the specified index. Returns true when index is valid. */
-		bool setItem(size_t index, const T& item) noexcept;
+        constexpr reverse_iterator rbegin() noexcept {
+            return reverse_iterator(_data);
+        }
+        constexpr const_reverse_iterator rbegin() const noexcept {
+            return reverse_iterator(_data);            
+        }
+        constexpr const_reverse_iterator crbegin() const noexcept {
+            return reverse_iterator(_data);            
+        }
 
+        constexpr iterator end() noexcept {
+            return iterator(_data + N);
+        }
+        constexpr const_iterator end() const noexcept {
+            return const_iterator(_data + N);            
+        }
+        constexpr const_iterator cend() const noexcept {
+            return const_iterator(_data + N);            
+        }
 
-        /* Gets an enumerator enabling iteration over the array. */
-        Enumerator<T> getEnumerator() override final;
-		/* Gets an enumerator enabling iteration over the array. */
-		Enumerator<const T> getEnumerator() const override final;
+        constexpr reverse_iterator rend() noexcept {
+            return reverse_iterator(_data + N);
+        }
+        constexpr const_reverse_iterator rend() const noexcept {
+            return const_reverse_iterator(_data + N);            
+        }
+        constexpr const_reverse_iterator crend() const noexcept {
+            return const_reverse_iterator(_data + N);            
+        }
 
-		/* Shallow-copies the members of the current array to a destination array. */
-		void copyTo(Array<T>& destination) const;
+        constexpr bool empty() const noexcept {
+            return N == 0;
+        }
+        constexpr size_type size() const noexcept {
+            return static_cast<size_type>(N);
+        }
+        constexpr size_type max_size() const noexcept {
+            return static_cast<size_type>(N);
+        }
+        
+        void fill(const T& value) {
+            for (size_t i = 0; i < N; i++) _data[i] = value;
+        }
 
-		/* Returns the unsafe C backing-array. */
-		inline const T* getCArray() const { return this->arrayData; }
+        void swap(array& other) noexcept(
+            conditional_t<N == 0, true_type, is_nothrow_swappable<T>>::value)
+        {
+            for (size_t i = 0; i < N; i++) std::swap(_data[i], other[i]);
+        }
 
-        /* Gets the number of elements in the array. */
-        inline size_t length() const { return this->_length;  }
+    };
 
-		// Copy assignment
-		Array<T>& operator =(const Array<T>& array);
-
-		// Move assignment
-		Array<T>& operator =(Array<T>&& array) noexcept;
-
-	public:
-		/* Gets the item at the specified index. No bounds check is performed. */
-        inline T& operator[] (size_t index) noexcept { return arrayData[index]; }
-
-        /* Gets the item at the specified index. No bounds check is performed. */
-		inline const T& operator[] (size_t index) const noexcept { return arrayData[index]; }
-
-		/* Resizes the given array, trimming items if smaller. */
-		static void resize(Array<T>* arr, size_t newSize);
-
-	};
-
-	template <class T>
-	Array<T>::Array(size_t capacity) : _length(capacity)
-	{
-		if (capacity != 0) this->arrayData = new T[capacity];
-	}
-
-	template <class T>
-	Array<T>::Array(const Array<T>& copy) : _length(copy._length)
-	{
-		if (copy.arrayData != nullptr)
-		{
-			this->arrayData = new T[copy._length];
-
-			for (size_t i = 0; i < copy._length; i++) {
-				this->arrayData[i] = copy.arrayData[i];
-			}
-		}
-		else this->_length = 0;
-	}
-
-	template <class T>
-	inline bool Array<T>::getItem(size_t index, T& out) const noexcept
-	{
-		if (index < this->_length)
-		{
-			out = this->arrayData[index];
-			return true;
-		}
-		else return false;
-	}
-
-	template <class T>
-	inline bool Array<T>::setItem(size_t index, const T& item) noexcept
-	{
-		if (index < this->_length)
-		{
-			this->arrayData[index] = item;
-			return true;
-		}
-		else return false;
-	}
-
-	template <class T>
-	void Array<T>::copyTo(Array<T>& destination) const
-	{
-        size_t l = this->_length < destination._length ? this->_length : destination._length;
-		for (size_t i = 0; i < l; i++)
-		{
-			destination.arrayData[i] = this->arrayData[i];
-		}
-	}
-
-	template <class T>
-	void Array<T>::resize(Array<T>* arr, size_t newSize)
-	{
-		Array<T> newArr(newSize);
-		arr->copyTo(newArr);
-
-		*arr = newArr;
-	}
-
-	template <class T>
-	Array<T>& Array<T>::operator =(const Array<T>& array)
-	{
-		if (this->arrayData != array.arrayData)
-		{
-			T* newData = new T[array._length];
-
-			this->_length = array._length;
-
-			delete this->arrayData;
-			this->arrayData = newData;
-
-			array.copyTo(*this);
-		}
-		return *this;
-	}
-
-	template <class T>
-	Array<T>& Array<T>::operator =(Array<T>&& array) noexcept
-	{
-		this->arrayData = array.arrayData;
-		this->_length    = array._length;
-		array.arrayData = nullptr;
-		array._length    = 0;
-		return *this;
-	}
-
-
-	/* An explicit enumerator for array objects. */
-	template<class T>
-	class ArrayEnumerator final : public EnumeratorBase<T>
-	{
-	private:
-        T* data = nullptr;
-		size_t index = 0;
-        size_t length = 0;
-
-	public:
-		explicit ArrayEnumerator(const Array<std::remove_const<T>>& arr) noexcept
-            : data(const_cast<T*>(arr.arrayData.get())), length(arr._length) { }
-
-		// Performs a single step of iteration. Returns false if no next item exists. 
-		bool next() noexcept override final {
-			return (++this->index) <= (this->length);
-		}
-		// Gets the current item.
-		T& current() override final
-		{
-			if (index == 0)          return data[0];
-            else if (index > length) return data[length -1];
-			else                     return data[index - 1];
-		}
-	};
-
-    template <class T>
-    Enumerator<T> Array<T>::getEnumerator() {
-        return new ArrayEnumerator<T>(*this);
+#define __STD_ARRAY_OPERATOR(op) \
+    template<typename T, size_t N> \
+    inline bool operator op (const array<T,N>& lhs, const array<T,N>& rhs) { \
+        for (size_t i = 0; i < N; i++) { \
+            if (!(lhs[i] op rhs[i])) return false; \
+        } \
+        return true; \
     }
 
-	template <class T>
-	Enumerator<const T> Array<T>::getEnumerator() const {
-		return new ArrayEnumerator<const T>(*this);
-	}
+    __STD_ARRAY_OPERATOR(==)
+    __STD_ARRAY_OPERATOR(!=)
+    __STD_ARRAY_OPERATOR(<)
+    __STD_ARRAY_OPERATOR(>)
+    __STD_ARRAY_OPERATOR(<=)
+    __STD_ARRAY_OPERATOR(>=)
+
+
+    template<size_t Index, typename T, size_t N>
+    inline constexpr T& get(array<T,N>& a) noexcept {
+        static_assert(Index < N, ""); return a[Index];
+    }
+    template<size_t Index, typename T, size_t N>
+    inline constexpr const T& get(const array<T,N>& a) noexcept {
+        static_assert(Index < N, ""); return a[Index];
+    }
+    template<size_t Index, typename T, size_t N>
+    inline constexpr T&& get(array<T,N>&& a) noexcept {
+        static_assert(Index < N, ""); return std::move(a[Index]);
+    }
+    template<size_t Index, typename T, size_t N>
+    inline constexpr const T&& get(const array<T,N>&& a) noexcept {
+        static_assert(Index < N, ""); return std::move(a[Index]);
+    }
+
+    template<typename T, size_t N, enable_if_t<N == 0 || is_swappable<T>::value>>
+    void swap(array<T,N>& lhs, array<T,N>& rhs) noexcept(noexcept(lhs.swap(rhs))) {
+        lhs.swap(rhs);
+    }
+
+    //template<typename T, size_t N>
+    //class tuple_size<array<T, N>> : public integral_constant<size_t, N> { };
+
+    //template<size_t Index, typename T, size_t N>
+    //struct tuple_element<T, array<T, N>> { using type = T; }
+
+
+#ifdef __cpp_deduction_guides
+    template<typename T, typename U>
+    array(T, U...) -> array<T, 1 + sizeof...(U)>;
+#endif
+
+    namespace __detail
+    {
+        template<typename T> struct is_reference_wrapper : false_type { };
+        template<typename T> struct is_reference_wrapper<reference_wrapper<T>> : true_type { };
+
+        template<typename T, typename... Ts>
+        inline constexpr bool reference_wrapper_in() noexcept {
+            return is_reference_wrapper<T>::value;
+        }
+    }
+
+    template<typename Y = void, typename... Ts,
+        typename T = conditional_t<is_same<Y, void>::value, common_type_t<Ts...>, Y>>
+    inline constexpr array<T, sizeof...(Ts)> make_array(Ts&&... elements) 
+    {
+        using namespace __detail;
+        static_assert(is_same<Y, void>::value || reference_wrapper_in<Ts...>(), "");
+
+        return { {std::forward<Ts>(elements)...} };
+    }
+
+    namespace __detail
+    {
+        template<typename T, size_t N, size_t... I>
+        constexpr array<remove_cv_t<T>, N> to_array(T (&a)[N], index_sequence<I...>) {
+            return { {a[I]...} };
+        }
+    }
+
+    template<typename T, size_t N>
+    constexpr array<remove_cv_t<T>, N> to_array(T (&a)[N]) {
+        return __detail::to_array(a, make_index_sequence<N>());
+    }
 }

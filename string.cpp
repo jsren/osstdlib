@@ -7,3 +7,4 @@ namespace __std
     const char16_t* __empty_ustring = u"\0";
     const char32_t* __empty_Ustring = U"\0";
 }
+

@@ -1,5 +1,0 @@
-#pragma once
-#include "array.hpp"
-#include "collections.hpp"
-#include "stack.hpp"
-#include "list.hpp"

@@ -1,6 +1,9 @@
 #pragma once
+#include "cstring.hpp"
 #include "allocator.hpp"
 #include "memory.hpp"
+#include "stdexcept.hpp"
+#include "string-bits.hpp"
 
 namespace __std
 {
@@ -24,14 +27,6 @@ namespace __std
 
 namespace std
 {
-    template<typename Char>
-    struct char_traits
-    {
-        using value_type = Char;
-    };
-
-
-
     template<typename Char, typename Traits = char_traits<Char>,
         typename Allocator = allocator<Char>>
     class __basic_string_base
@@ -117,6 +112,17 @@ namespace std
         typename Allocator = allocator<Char>>
     class basic_string : public __basic_string_base<Char, Traits, Allocator>
     {
+    public:
+        using typename __basic_string_base<Char, Traits, Allocator>::traits_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::value_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::allocator_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::size_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::difference_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::reference;
+        using typename __basic_string_base<Char, Traits, Allocator>::const_reference;
+        using typename __basic_string_base<Char, Traits, Allocator>::pointer;
+        using typename __basic_string_base<Char, Traits, Allocator>::const_pointer;
+
     private:
         allocator_type _alloc;
 
@@ -137,7 +143,7 @@ namespace std
         {
             if (length > 0) {
                 _data = alloc_traits::allocate(_alloc, length+1);
-                std::memcpy(data, cstr, length * sizeof(Char));
+                std::memcpy(_data, cstr, length * sizeof(Char));
             }
         }
 
@@ -153,11 +159,24 @@ namespace std
 
 
     template<typename Char>
-    class basic_string<Char, char_traits<Char>, allocator<Char>> 
+    class basic_string<Char, char_traits<Char>, allocator<Char>>
         : public __basic_string_base<Char, char_traits<Char>, allocator<Char>>
     {
-    public:
+        using Traits = char_traits<Char>;
+        using Allocator = allocator<Char>;
 
+        using typename __basic_string_base<Char, Traits, Allocator>::traits_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::value_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::allocator_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::size_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::difference_type;
+        using typename __basic_string_base<Char, Traits, Allocator>::reference;
+        using typename __basic_string_base<Char, Traits, Allocator>::const_reference;
+        using typename __basic_string_base<Char, Traits, Allocator>::pointer;
+        using typename __basic_string_base<Char, Traits, Allocator>::const_pointer;
+
+    private:
+        allocator_type _alloc{};
 
     public:
         inline basic_string() noexcept(noexcept(allocator_type())) { }
@@ -165,7 +184,7 @@ namespace std
         inline explicit basic_string(const allocator_type& alloc) noexcept : _alloc(alloc) { }
 
         basic_string(size_type length, Char character, const allocator_type& alloc = allocator_type())
-            : __basic_string_base(length, nullptr)
+            : __basic_string_base(length, nullptr), _alloc(alloc)
         {
             if (length > 0) {
                 _data = new char[length + 1];
@@ -173,7 +192,7 @@ namespace std
         }
 
         basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
-            :__basic_string_base(length, nullptr)
+            : __basic_string_base(length, nullptr), _alloc(alloc)
         {
             if (length > 0) {
                 auto* data = new char[length + 1];

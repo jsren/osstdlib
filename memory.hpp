@@ -1,9 +1,4 @@
-/* smartptr.hpp - (c) James S Renwick 2014 
-   ---------------------------------------
-   Version 1.0.0
-*/
 #pragma once
-#include "std"
 #include "type_traits.hpp"
 #include "cstddef.hpp"
 
@@ -64,11 +59,10 @@ namespace std
         constexpr default_delete() = default;
 
 		template<typename Y, class=enable_if<is_convertible<Y, T>::value>>
-        inline default_delete(const default_delete<Y[]>&) noexcept { };
+        inline default_delete(const default_delete<Y[]>&) noexcept { }
 
-		template<typename Y/*, class=enable_if<is_convertible<Y, T>::value>*/>
+		template<typename Y, class=enable_if_t<is_convertible<Y, T>::value>>
 		inline void operator()(Y* ptr) const {
-#pragma warn "TODO: Fix enable_if here"
 			delete[] ptr;
 		}
 	};
