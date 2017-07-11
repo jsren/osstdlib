@@ -5,7 +5,8 @@ namespace std
 #pragma warn "TODO: Make std::size_t platform-specific"
     typedef unsigned long long size_t;
 
-    void* memcpy(void* dest, const void* src, std::size_t count);
+    void* memcpy(void* dest, const void* src, size_t count);
+    void* memset(void* ptr, int value, size_t num);
 
     inline std::size_t strlen(const char* str) {
         for (std::size_t i = 0; true; i++) {

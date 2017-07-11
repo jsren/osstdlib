@@ -34,7 +34,7 @@ namespace std
         constexpr reference operator[](size_type index) {
             return _data[index];
         }
-        constexpr reference operator[](size_type index) const {
+        constexpr const_reference operator[](size_type index) const {
             return _data[index];
         }
 
