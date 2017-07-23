@@ -1,62 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClInclude Include="..\.string-decl.hpp" />
     <ClInclude Include="..\_feats.hpp" />
+    <ClInclude Include="..\_intrinsics.hpp" />
     <ClInclude Include="..\_std.hpp" />
     <ClInclude Include="..\algorithm.hpp" />
     <ClInclude Include="..\allocator.hpp" />
     <ClInclude Include="..\array.hpp" />
-    <ClInclude Include="..\collections.hpp" />
-    <ClInclude Include="..\enumeration.hpp" />
+    <ClInclude Include="..\atomic.hpp" />
+    <ClInclude Include="..\chrono.hpp" />
+    <ClInclude Include="..\cstddef.hpp" />
+    <ClInclude Include="..\cstring.hpp" />
     <ClInclude Include="..\exception.hpp" />
-    <ClInclude Include="..\func.hpp" />
-    <ClInclude Include="..\list.hpp" />
-    <ClInclude Include="..\math.hpp" />
-    <ClInclude Include="..\point.hpp" />
+    <ClInclude Include="..\functional.hpp" />
+    <ClInclude Include="..\ios.hpp" />
+    <ClInclude Include="..\iterator.hpp" />
+    <ClInclude Include="..\memory.hpp" />
+    <ClInclude Include="..\new.hpp" />
+    <ClInclude Include="..\ostream.hpp" />
     <ClInclude Include="..\set.hpp" />
-    <ClInclude Include="..\stack.hpp" />
     <ClInclude Include="..\std.hpp" />
     <ClInclude Include="..\stdexcept.hpp" />
-    <ClInclude Include="..\string_old.hpp" />
-    <ClInclude Include="..\time.hpp" />
-    <ClInclude Include="..\tuple.hpp" />
-    <ClInclude Include="..\uuid.hpp" />
-    <ClInclude Include="..\version.hpp" />
     <ClInclude Include="..\string.hpp" />
-    <ClInclude Include="..\memory-old.hpp" />
-    <ClInclude Include="..\memory.hpp" />
-    <ClInclude Include="..\cstring.hpp" />
-    <ClInclude Include="..\new.hpp" />
-    <ClInclude Include="..\_intrinsics.hpp" />
-    <ClInclude Include="..\cstddef.hpp" />
-    <ClInclude Include="..\type_traits.hpp" />
-    <ClInclude Include="..\ostream.hpp" />
-    <ClInclude Include="..\ios.hpp" />
     <ClInclude Include="..\system_error.hpp" />
-    <ClInclude Include="..\impl\system_error.hpp">
-      <Filter>impl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\atomic.hpp" />
+    <ClInclude Include="..\tuple.hpp" />
+    <ClInclude Include="..\type_traits.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\math.cpp" />
-    <ClCompile Include="..\osstdlib.cpp" />
-    <ClCompile Include="..\string_old.cpp" />
-    <ClCompile Include="main.cpp">
-      <Filter>test</Filter>
-    </ClCompile>
-    <ClCompile Include="..\string.cpp" />
+    <Text Include="..\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="..\cstring.cpp" />
-    <ClCompile Include="..\impl\example.cpp">
-      <Filter>impl</Filter>
-    </ClCompile>
+    <ClCompile Include="..\iterator_test.cpp" />
+    <ClCompile Include="..\stdexcept.cpp" />
+    <ClCompile Include="..\string.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="test">
-      <UniqueIdentifier>{a0bfb5e7-9e3d-4c6a-9b78-437a936678f2}</UniqueIdentifier>
-    </Filter>
+    <None Include="..\Makefile" />
+  </ItemGroup>
+  <ItemGroup>
     <Filter Include="impl">
-      <UniqueIdentifier>{28ffddaf-2a77-42c1-81f3-d4f7b40540ad}</UniqueIdentifier>
+      <UniqueIdentifier>{517ac4f1-7903-4984-84b5-17abcbae459e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

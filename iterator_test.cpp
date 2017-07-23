@@ -2,14 +2,17 @@
 #include "iterator.hpp"
 #include "memory.hpp"
 #include "string.hpp"
+#include "tuple.hpp"
+#include "type_traits.hpp"
+
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
 
-void* operator new(unsigned long size) noexcept {
+void* operator new(size_t size) noexcept {
     return malloc(size);
 }
-void* operator new[](unsigned long size) noexcept {
+void* operator new[](size_t size) noexcept {
     return malloc(size);
 }
 void operator delete(void* ptr) noexcept {
@@ -25,14 +28,17 @@ void operator delete[](void* ptr, long unsigned int) noexcept {
     free(ptr);
 }
 
-
-void* std::memcpy(void* dest, const void* src, size_t count) {
-    return ::memcpy(dest, src, count);
-}
-
-
 int nums[] = { 1, 2, 3, 4 };
 
+template<typename T>
+T identity(T value, bool) {
+	return std::forward<T>(value);
+}
+
+std::tuple<bool, int> doTheThing()
+{
+	return std::tuple<bool, int>(false, -3);
+}
 
 int main()
 {
@@ -50,6 +56,7 @@ int main()
         printf("%d, ", i);
     }
     printf("\n");
+	printf("%d\n", std::get<0>(array));
 
     std::string test("hello, world!");
     printf("%s\n", test.c_str());
@@ -59,5 +66,21 @@ int main()
     }
     printf("\n");
 
-    return std::get<0>(array);
+	std::tuple<int, bool> t{ 3, false };
+
+	t = std::tuple<short, bool>{ 4, false };
+	std::tuple<int, bool> haha{ 450, false };
+
+	t = haha;
+	printf("%d\n", std::get<0>(t));
+
+	bool success;
+	int rc;
+
+	std::tie(success, rc) = doTheThing();
+	printf("%d/%d\n", success, rc);
+
+	std::tie(std::ignore, std::ignore) = doTheThing();
+
+	return 0;
 }

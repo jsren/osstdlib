@@ -15,11 +15,14 @@ where otherwise stated.
 - allocators
 - stdexcept
 - system_error
+- tuple
+- iterators
 ### Started ###
 - exception
 - string
-- tuple
 - ios
 ### Targeted ###
-- iostream
+- string_view
 - vector
+- small string optimisation
+- iostream

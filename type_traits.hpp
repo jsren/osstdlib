@@ -1,4 +1,4 @@
-/* meta.h - (c) James S Renwick 2015-17
+/* type_traits.hpp - (c) James S Renwick 2015-17
    except where otherwise stated.
 */
 #pragma once
@@ -27,15 +27,6 @@ namespace std
     using false_type = bool_constant<false>;
 
 
-    template<bool, bool> struct And : false_type { };
-    template<> struct And<true, true> : true_type { };
-
-    template<bool, bool> struct Or : true_type { };
-    template<> struct Or <false, false> : false_type { };
-
-    template<bool> struct Not : true_type { };
-    template<> struct Not<true> : false_type { };
-
 
     template<bool, typename TrueType, typename FalseType>
     struct conditional { using type = TrueType; };
@@ -52,13 +43,14 @@ namespace std
     template<typename T>
     struct is_same<T, T> : true_type {};
 #if defined(__cpp_variable_templates)
-    template<typename T, typename U> constexpr bool is_same_v = is_same<T, U>::value;
+    template<typename T, typename U> 
+	constexpr const bool is_same_v = is_same<T, U>::value;
 #endif
 
     template<typename> struct is_void : false_type { };
     template<> struct is_void<void> : true_type { };
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_void_v = is_void<T>::value;
+    template<typename T> constexpr const bool is_void_v = is_void<T>::value;
 #endif
 
     template<typename T>
@@ -69,7 +61,7 @@ namespace std
     struct is_array<T[]> : true_type { };
 #if defined(__cpp_variable_templates)
     template<typename T>
-    constexpr bool is_array_v = is_array<T>::value;
+    constexpr const bool is_array_v = is_array<T>::value;
 #endif
 
     template<typename T>
@@ -80,13 +72,13 @@ namespace std
     struct is_reference<T&&> : true_type { };
 #if defined(__cpp_variable_templates)
     template<typename T>
-    constexpr bool is_reference_v = is_reference<T>::value;
+    constexpr const bool is_reference_v = is_reference<T>::value;
 #endif
 
 
     template<long long int N> struct is_even : bool_constant<N % 2 == 0> { };
 #if defined(__cpp_variable_templates)
-    template<long long int N> constexpr bool is_even_v = is_even<N>::value;
+    template<long long int N> constexpr const bool is_even_v = is_even<N>::value;
 #endif
 
     template<class T>
@@ -120,9 +112,19 @@ namespace std
     template<typename T> struct remove_const<const T> { typedef T type; };
     template<typename T> using remove_const_t = typename remove_const<T>::type;
 
+
+	template<typename T> struct add_volatile { typedef volatile T type; };
+	template<typename T> struct add_volatile<volatile T> { typedef volatile T type; };
+	template<typename T> using add_volatile_t = typename add_volatile<T>::type;
+
     template<typename T> struct remove_volatile { typedef T type; };
     template<typename T> struct remove_volatile<volatile T> { typedef T type; };
     template<typename T> using remove_volatile_t = typename remove_volatile<T>::type;
+
+
+	template<typename T> struct add_cv { typedef const volatile T type; };
+	template<typename T> struct add_cv<const volatile T> { typedef const volatile T type; };
+	template<typename T> using add_cv_t = typename add_cv<T>::type;
 
     template<typename T> using remove_cv = remove_volatile<remove_const_t<T>>;
     template<typename T> using remove_cv_t = typename remove_cv<T>::type;
@@ -148,13 +150,13 @@ namespace std
     template<typename T> struct is_volatile : false_type {  };
     template<typename T> struct is_volatile<volatile T> : true_type { };
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_volatile_v = is_volatile<T>::value;
+    template<typename T> constexpr const bool is_volatile_v = is_volatile<T>::value;
 #endif
 
     template<typename T> struct is_const : false_type {  };
     template<typename T> struct is_const<const T> : true_type { };
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_const_v = is_const<T>::value;
+    template<typename T> constexpr const bool is_const_v = is_const<T>::value;
 #endif
 
     template<bool, class T = void> struct enable_if { };
@@ -171,29 +173,30 @@ namespace std
 
 
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_union_v = is_union<T>::value;
-    //template<typename T> constexpr bool is_empty_v = is_empty_type<T>::value;
-    template<typename T> constexpr bool is_class_v = is_class<T>::value;
-    template<typename T> constexpr bool is_abstract_v = is_abstract<T>::value;
-    template<typename T> constexpr bool is_enum_v = is_enum<T>::value;
+    template<typename T> constexpr const bool is_union_v = is_union<T>::value;
+    //template<typename T> constexpr const bool is_empty_v = is_empty_type<T>::value;
+    template<typename T> constexpr const bool is_class_v = is_class<T>::value;
+    template<typename T> constexpr const bool is_abstract_v = is_abstract<T>::value;
+    template<typename T> constexpr const bool is_enum_v = is_enum<T>::value;
 #endif
 
     template<typename T> using has_trivial_constructor = bool_constant<__has_trivial_constructor(T)>;
     template<typename T> using has_virtual_destructor = bool_constant<__has_virtual_destructor(T)>;
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool has_trivial_constructor_v = has_trivial_constructor<T>::value;
-    template<typename T> constexpr bool has_virtual_destructor_v = has_virtual_destructor<T>::value;
+    template<typename T> constexpr const bool has_trivial_constructor_v = has_trivial_constructor<T>::value;
+    template<typename T> constexpr const bool has_virtual_destructor_v = has_virtual_destructor<T>::value;
 #endif
 
-    template<typename T> using is_pod = std::And<__is_pod(T),
-        has_trivial_constructor<T>::value>;
+	template<typename T>
+	using is_pod = bool_constant<__is_pod(T) && has_trivial_constructor<T>::value>;
 
-    template<typename T> using has_trivial_copy = std::Or<__has_trivial_copy(T),
-        std::And<is_pod<T>::value, std::Not<is_volatile<T>::value>::value>::value>;
+	template<typename T>
+	using has_trivial_copy = bool_constant<__has_trivial_copy(T) ||
+        (is_pod<T>::value && !is_volatile<T>::value)>;
 
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_pod_v = is_pod<T>::value;
-    template<typename T> constexpr bool has_trivial_copy_v = has_trivial_copy<T>::value;
+    template<typename T> constexpr const bool is_pod_v = is_pod<T>::value;
+    template<typename T> constexpr const bool has_trivial_copy_v = has_trivial_copy<T>::value;
 #endif
 
 #pragma warn "TODO: result_of/invoke_result are hacks"
@@ -227,7 +230,7 @@ namespace std
     using is_base_of = bool_constant<__is_base_of(Base, Derived)>;
 #if defined(__cpp_variable_templates)
     template<typename Base, typename Derived>
-    constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
+    constexpr const bool is_base_of_v = is_base_of<Base, Derived>::value;
 #endif
 
 
@@ -263,8 +266,8 @@ namespace std
         decltype(__detail::is_nothrow_swappable_impl::v<T>(0)) { };
 
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_swappable_v = is_swappable<T>::value;
-    template<typename T> constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
+    template<typename T> constexpr const bool is_swappable_v = is_swappable<T>::value;
+    template<typename T> constexpr const bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
 #endif
 
     // See http://www.boost.org/doc/libs/1_53_0/boost/type_traits/intrinsics.hpp
@@ -275,7 +278,7 @@ namespace std
     template<> struct is_fractional<float> : true_type { };
     template<> struct is_fractional<double> : true_type { };
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_fractional_v = is_fractional<T>::value;
+    template<typename T> constexpr const bool is_fractional_v = is_fractional<T>::value;
 #endif
 
     template<typename T> struct is_integer : false_type { };
@@ -290,7 +293,7 @@ namespace std
     template<> struct is_integer<unsigned long int> : true_type { };
     template<> struct is_integer<unsigned long long int> : true_type { };
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_integer_v = is_integer<T>::value;
+    template<typename T> constexpr const bool is_integer_v = is_integer<T>::value;
 #endif
 
     template<typename T, class = enable_if_t<is_integer<T>::value>> struct is_unsigned : false_type { };
@@ -301,11 +304,11 @@ namespace std
     template<> struct is_unsigned<unsigned long long int> : true_type { };
 
     template<typename T, class = enable_if_t<is_integer<T>::value>>
-    struct is_signed : Not<is_unsigned<T>::value> { };
+    struct is_signed : bool_constant<!is_unsigned<T>::value> { };
 
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr bool is_unsigned_v = is_unsigned<T>::value;
-    template<typename T> constexpr bool is_signed_v = is_signed<T>::value;
+    template<typename T> constexpr const bool is_unsigned_v = is_unsigned<T>::value;
+    template<typename T> constexpr const bool is_signed_v = is_signed<T>::value;
 #endif
 
 
@@ -363,12 +366,16 @@ namespace std
     struct is_function<_Res(_ArgTypes......) const volatile &> : public true_type { };
     template<typename _Res, typename... _ArgTypes>
     struct is_function<_Res(_ArgTypes......) const volatile &&> : public true_type { };
+#else
+	template<typename>
+	struct is_function : public false_type { };
+#endif
 
 #if defined(__cpp_variable_templates)
     template<typename Return>
-    constexpr bool is_function_v = is_function<Return>::value;
+    constexpr const bool is_function_v = is_function<Return>::value;
 #endif
-#endif
+
 
     template<typename From, typename To,
         bool = is_void<From>::value || is_function<To>::value || is_array<To>::value>
@@ -393,7 +400,7 @@ namespace std
 
 #if defined(__cpp_variable_templates)
     template<typename From, typename To>
-    constexpr bool is_convertible_v = is_convertible<From, To>::type::value;
+    constexpr const bool is_convertible_v = is_convertible<From, To>::type::value;
 #endif
 
     template<typename T>
@@ -456,6 +463,7 @@ namespace std
     template <size_t End, size_t Start = 0>
     using make_index_sequence = typename _internal::_make_integer_sequence<size_t, End, Start>::type;
 }
+
 
 namespace __std
 {

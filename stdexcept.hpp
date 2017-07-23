@@ -1,7 +1,7 @@
 #pragma once
-#include <exception.hpp>
-#include <memory.hpp>
-#include <cstring.hpp>
+#include "exception.hpp"
+#include "memory.hpp"
+#include "cstring.hpp"
 #include ".string-decl.hpp"
 
 namespace std

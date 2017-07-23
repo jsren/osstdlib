@@ -52,11 +52,12 @@ namespace std
 
     protected:
         size_type _length{};
+        size_type _capacity{};
         pointer _data{};
 
         __basic_string_base() = default;
         __basic_string_base(size_type length, pointer data)
-            : _length(length), _data(data) { }
+            : _length(length), _capacity(length), _data(data) { }
 
     public:
         reference at(size_type pos) {
@@ -138,15 +139,36 @@ namespace std
         bool empty() const noexcept {
             return _length == 0;
         }
-
         size_type length() const noexcept {
             return _length;
         }
         size_type size() const noexcept {
             return _length;
         }
+        size_type max_size() const noexcept {
+            return static_cast<size_type>(-1);
+        }
 
-        
+        void reserve(size_type capacity = 0);
+
+        void capacity() const noexcept {
+            return _capacity;
+        }
+
+        void shrink_to_fit() { }
+
+        void clear() noexcept {
+            _length = 0;
+        }
+
+        /*basic_string& insert(size_type index, size_type count, Char value)
+        {
+            if (index > _length) __abi::__throw_exception(std::out_of_range("index"));
+
+            if (index + count > _capacity) resize(index + count);
+
+            return *this;
+        }*/
     };
 
 
@@ -249,10 +271,13 @@ namespace std
         basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
             : __basic_string_base<Char, Traits, Allocator>(length, nullptr), _alloc(alloc)
         {
-            if (length > 0) {
+            if (length > 0) 
+			{
                 auto* data = new char[length + 1];
                 std::memcpy(data, cstr, length * sizeof(Char));
-                _data = data;
+
+				this->_data = data;
+				this->_data[length] = '\0';
             }
         }
 
@@ -264,7 +289,6 @@ namespace std
             if (_length != 0) delete[] _data;
         }
     };
-
 
 
     typedef basic_string<char> string;
