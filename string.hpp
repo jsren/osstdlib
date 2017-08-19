@@ -6,28 +6,28 @@
 #include "stdexcept.hpp"
 #include ".string-decl.hpp"
 
-namespace __std
-{
-    template<typename Char>
-    const Char* __get_empty_str();
-
-    template<> inline const char* __get_empty_str<char>() {
-        extern const char* __empty_cstring; return __empty_cstring;
-    }
-    template<> inline const wchar_t* __get_empty_str<wchar_t>() {
-        extern const wchar_t* __empty_wstring; return __empty_wstring;
-    }
-    template<> inline const char16_t* __get_empty_str<char16_t>() {
-        extern const char16_t* __empty_ustring; return __empty_ustring;
-    }
-    template<> inline const char32_t* __get_empty_str<char32_t>() {
-        extern const char32_t* __empty_Ustring; return __empty_Ustring;
-    }
-}
-
 
 namespace std
 {
+	namespace __detail
+	{
+		template<typename Char>
+		const Char* __get_empty_str();
+
+		template<> inline const char* __get_empty_str<char>() {
+			extern const char* __empty_cstring; return __empty_cstring;
+		}
+		template<> inline const wchar_t* __get_empty_str<wchar_t>() {
+			extern const wchar_t* __empty_wstring; return __empty_wstring;
+		}
+		template<> inline const char16_t* __get_empty_str<char16_t>() {
+			extern const char16_t* __empty_ustring; return __empty_ustring;
+		}
+		template<> inline const char32_t* __get_empty_str<char32_t>() {
+			extern const char32_t* __empty_Ustring; return __empty_Ustring;
+		}
+	}
+
     template<typename Char, typename Traits = char_traits<Char>,
         typename Allocator = allocator<Char>>
     class __basic_string_base

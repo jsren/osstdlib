@@ -465,105 +465,104 @@ namespace std
 }
 
 
-namespace __std
+namespace std
 {
-    template<typename Src, typename T>
-    struct mirror_const_volatile {
-    private:
-        using const_type = std::conditional_t<std::is_const<Src>::value, const T, T>;
-    public:
-        using type = std::conditional_t<std::is_volatile<Src>::value, volatile const_type, const_type>;
-    };
+	namespace __detail
+	{
+		template<typename Src, typename T>
+		struct mirror_const_volatile {
+		private:
+			using const_type = std::conditional_t<std::is_const<Src>::value, const T, T>;
+		public:
+			using type = std::conditional_t<std::is_volatile<Src>::value, volatile const_type, const_type>;
+		};
 
-    template<typename T>
-    struct make_unsigned_raw { };
-    template<> struct make_unsigned_raw<char> { using type = unsigned char; };
-    template<> struct make_unsigned_raw<signed char> { using type = unsigned char; };
-    template<> struct make_unsigned_raw<unsigned char> { using type = unsigned char; };
-    template<> struct make_unsigned_raw<short> { using type = unsigned short; };
-    template<> struct make_unsigned_raw<unsigned short> { using type = unsigned short; };
-    template<> struct make_unsigned_raw<int> { using type = unsigned int; };
-    template<> struct make_unsigned_raw<unsigned int> { using type = unsigned int; };
-    template<> struct make_unsigned_raw<long> { using type = unsigned long; };
-    template<> struct make_unsigned_raw<unsigned long> { using type = unsigned long; };
-    template<> struct make_unsigned_raw<long long> { using type = unsigned long long; };
-    template<> struct make_unsigned_raw<unsigned long long> { using type = unsigned long long; };
+		template<typename T>
+		struct make_unsigned_raw { };
+		template<> struct make_unsigned_raw<char> { using type = unsigned char; };
+		template<> struct make_unsigned_raw<signed char> { using type = unsigned char; };
+		template<> struct make_unsigned_raw<unsigned char> { using type = unsigned char; };
+		template<> struct make_unsigned_raw<short> { using type = unsigned short; };
+		template<> struct make_unsigned_raw<unsigned short> { using type = unsigned short; };
+		template<> struct make_unsigned_raw<int> { using type = unsigned int; };
+		template<> struct make_unsigned_raw<unsigned int> { using type = unsigned int; };
+		template<> struct make_unsigned_raw<long> { using type = unsigned long; };
+		template<> struct make_unsigned_raw<unsigned long> { using type = unsigned long; };
+		template<> struct make_unsigned_raw<long long> { using type = unsigned long long; };
+		template<> struct make_unsigned_raw<unsigned long long> { using type = unsigned long long; };
 
-    template<typename T>
-    struct make_signed_raw { };
-    template<> struct make_signed_raw<char> { using type = signed char; };
-    template<> struct make_signed_raw<signed char> { using type = signed char; };
-    template<> struct make_signed_raw<unsigned char> { using type = signed char; };
-    template<> struct make_signed_raw<short> { using type = signed short; };
-    template<> struct make_signed_raw<unsigned short> { using type = signed short; };
-    template<> struct make_signed_raw<int> { using type = signed int; };
-    template<> struct make_signed_raw<unsigned int> { using type = signed int; };
-    template<> struct make_signed_raw<long> { using type = signed long; };
-    template<> struct make_signed_raw<unsigned long> { using type = signed long; };
-    template<> struct make_signed_raw<long long> { using type = signed long long; };
-    template<> struct make_signed_raw<unsigned long long> { using type = signed long long; };
+		template<typename T>
+		struct make_signed_raw { };
+		template<> struct make_signed_raw<char> { using type = signed char; };
+		template<> struct make_signed_raw<signed char> { using type = signed char; };
+		template<> struct make_signed_raw<unsigned char> { using type = signed char; };
+		template<> struct make_signed_raw<short> { using type = signed short; };
+		template<> struct make_signed_raw<unsigned short> { using type = signed short; };
+		template<> struct make_signed_raw<int> { using type = signed int; };
+		template<> struct make_signed_raw<unsigned int> { using type = signed int; };
+		template<> struct make_signed_raw<long> { using type = signed long; };
+		template<> struct make_signed_raw<unsigned long> { using type = signed long; };
+		template<> struct make_signed_raw<long long> { using type = signed long long; };
+		template<> struct make_signed_raw<unsigned long long> { using type = signed long long; };
+	}
 }
 
 namespace std
 {
     template<typename T>
     struct make_unsigned {
-        using type = typename __std::mirror_const_volatile<T, typename __std::make_unsigned_raw<T>::type>::type;
+        using type = typename __detail::mirror_const_volatile<T, typename __detail::make_unsigned_raw<T>::type>::type;
     };
     template<typename T>
     using make_unsigned_t = typename make_unsigned<T>::type;
 
     template<typename T>
     struct make_signed {
-        using type = typename __std::mirror_const_volatile<T, typename __std::make_signed_raw<T>::type>::type;
+        using type = typename __detail::mirror_const_volatile<T, typename __detail::make_signed_raw<T>::type>::type;
     };
     template<typename T>
     using make_signed_t = typename make_signed<T>::type;
 }
 
-
-namespace __std
-{
-    template<typename T>
-    struct first_tparam {
-        using type = void;
-    };
-    template<template<typename, typename...> class Template, typename T, typename... _>
-    struct first_tparam<Template<T, _...>> {
-        using type = T;
-    };
-    template<typename T>
-    using first_tparam_t = typename first_tparam<T>::type;
-
-
-    template<typename T, template<class> class Accessor, typename Default, class = void>
-    struct scope_type_or_default {
-        using type = Default;
-    };
-    template<typename T, template<class> class Accessor, typename _>
-    struct scope_type_or_default<T, Accessor, _, std::void_t<Accessor<T>>> {
-        using type = Accessor<T>;
-    };
-    template<typename T, template<class> class Accessor, typename Default>
-    using scope_type_or_default_t = typename scope_type_or_default<T, Accessor, Default>::type;
-
-
-    template<typename T, typename Y>
-    struct rebind {
-        using type = void;
-    };
-    template<template<class, class...> class Template, typename T, typename _, typename... Args>
-    struct rebind<Template<_, Args...>, T> {
-        using type = Template<T, Args...>;
-    };
-    template<typename Template, typename T>
-    using rebind_t = typename rebind<Template, T>::type;
-}
-
 namespace std
 {
-    namespace __detail
-    {
+	namespace __detail
+	{
+		template<typename T>
+		struct first_tparam {
+			using type = void;
+		};
+		template<template<typename, typename...> class Template, typename T, typename... _>
+		struct first_tparam<Template<T, _...>> {
+			using type = T;
+		};
+		template<typename T>
+		using first_tparam_t = typename first_tparam<T>::type;
+
+
+		template<typename T, template<class> class Accessor, typename Default, class = void>
+		struct scope_type_or_default {
+			using type = Default;
+		};
+		template<typename T, template<class> class Accessor, typename _>
+		struct scope_type_or_default<T, Accessor, _, std::void_t<Accessor<T>>> {
+			using type = Accessor<T>;
+		};
+		template<typename T, template<class> class Accessor, typename Default>
+		using scope_type_or_default_t = typename scope_type_or_default<T, Accessor, Default>::type;
+
+
+		template<typename T, typename Y>
+		struct rebind {
+			using type = void;
+		};
+		template<template<class, class...> class Template, typename T, typename _, typename... Args>
+		struct rebind<Template<_, Args...>, T> {
+			using type = Template<T, Args...>;
+		};
+		template<typename Template, typename T>
+		using rebind_t = typename rebind<Template, T>::type;
+
         template<typename T>
         struct is_ref_qualified : false_type { };
 
@@ -666,5 +665,4 @@ namespace std
     template <class T1, class T2, class... R>
     struct common_type<T1, T2, R...>
         : common_type_multi_impl<void, T1, T2, R...> { };
-
 }

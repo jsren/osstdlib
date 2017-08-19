@@ -1,59 +1,61 @@
+/* ios.hpp - (c) 2017 James Renwick */
 #pragma once
 #include "system_error.hpp"
 #include "atomic.hpp"
 #include "memory.hpp"
 
-namespace __std
-{
-    namespace __fmtflags {
-        enum enum_ {
-            boolalpha  = 0x01,
-            dec        = 0x02,
-            fixed      = 0x04,
-            hex        = 0x08,
-            internal   = 0x10,
-            left       = 0x20,
-            oct        = 0x40,
-            right      = 0x80,
-            scientific = 0x100,
-            showbase   = 0x200,
-            showpoint  = 0x400,
-            showpos    = 0x800,
-            skipws     = 0x1000,
-            unitbuf    = 0x2000,
-            uppercase  = 0x4000
-        };
-    }
-    namespace __iostate {
-        enum enum_ {
-            goodbit = 0,
-            badbit  = 0x1,
-            eofbit  = 0x2,
-            failbit = 0x4
-        };
-    }
-    namespace __openmode {
-        enum enum_ {
-            app    = 0x1,
-            ate    = 0x2,
-            binary = 0x4,
-            in     = 0x8,
-            out    = 0x10,
-            trunc  = 0x20
-        };
-    }
-    namespace __seekdir {
-        enum enum_ {
-            beg = 0x1,
-            cur = 0x2,
-            end = 0x4
-        };
-    }
-}
-
 namespace std
 {
-    typedef make_signed_t<size_t> streamsize;
+	namespace __detail
+	{
+		namespace fmtflags {
+			enum enum_ {
+				boolalpha  = 0x01,
+				dec        = 0x02,
+				fixed      = 0x04,
+				hex        = 0x08,
+				internal   = 0x10,
+				left       = 0x20,
+				oct        = 0x40,
+				right      = 0x80,
+				scientific = 0x100,
+				showbase   = 0x200,
+				showpoint  = 0x400,
+				showpos    = 0x800,
+				skipws     = 0x1000,
+				unitbuf    = 0x2000,
+				uppercase  = 0x4000
+			};
+		}
+		namespace iostate {
+			enum enum_ {
+				goodbit = 0,
+				badbit  = 0x1,
+				eofbit  = 0x2,
+				failbit = 0x4
+			};
+		}
+		namespace openmode {
+			enum enum_ {
+				app    = 0x1,
+				ate    = 0x2,
+				binary = 0x4,
+				in     = 0x8,
+				out    = 0x10,
+				trunc  = 0x20
+			};
+		}
+		namespace seekdir {
+			enum enum_ {
+				beg = 0x1,
+				cur = 0x2,
+				end = 0x4
+			};
+		}
+	}
+	
+	
+	typedef make_signed_t<size_t> streamsize;
     typedef make_signed_t<size_t> streamoff;
 
     class ios_base
@@ -67,59 +69,59 @@ namespace std
         class failure;
 
         // fmtflags
-        typedef __std::__fmtflags::enum_ fmtflags;
-        static constexpr fmtflags boolalpha = __std::__fmtflags::boolalpha;
-        static constexpr fmtflags dec = __std::__fmtflags::dec;
-        static constexpr fmtflags fixed = __std::__fmtflags::fixed;
-        static constexpr fmtflags hex = __std::__fmtflags::hex;
-        static constexpr fmtflags internal = __std::__fmtflags::internal;
-        static constexpr fmtflags left = __std::__fmtflags::left;
-        static constexpr fmtflags oct = __std::__fmtflags::oct;
-        static constexpr fmtflags right = __std::__fmtflags::right;
-        static constexpr fmtflags scientific = __std::__fmtflags::scientific;
-        static constexpr fmtflags showbase = __std::__fmtflags::showbase;
-        static constexpr fmtflags showpoint = __std::__fmtflags::showpoint;
-        static constexpr fmtflags showpos = __std::__fmtflags::showpos;
-        static constexpr fmtflags skipws = __std::__fmtflags::skipws;
-        static constexpr fmtflags unitbuf = __std::__fmtflags::unitbuf;
-        static constexpr fmtflags uppercase = __std::__fmtflags::uppercase;
+        typedef __detail::fmtflags::enum_ fmtflags;
+        static constexpr fmtflags boolalpha = fmtflags::boolalpha;
+        static constexpr fmtflags dec = fmtflags::dec;
+        static constexpr fmtflags fixed = fmtflags::fixed;
+        static constexpr fmtflags hex = fmtflags::hex;
+        static constexpr fmtflags internal = fmtflags::internal;
+        static constexpr fmtflags left = fmtflags::left;
+        static constexpr fmtflags oct = fmtflags::oct;
+        static constexpr fmtflags right = fmtflags::right;
+        static constexpr fmtflags scientific = fmtflags::scientific;
+        static constexpr fmtflags showbase = fmtflags::showbase;
+        static constexpr fmtflags showpoint = fmtflags::showpoint;
+        static constexpr fmtflags showpos = fmtflags::showpos;
+        static constexpr fmtflags skipws = fmtflags::skipws;
+        static constexpr fmtflags unitbuf = fmtflags::unitbuf;
+        static constexpr fmtflags uppercase = fmtflags::uppercase;
         static constexpr fmtflags adjustfield = static_cast<fmtflags>(left | right | internal);
         static constexpr fmtflags basefield = static_cast<fmtflags>(dec | oct | hex);
         static constexpr fmtflags floatfield = static_cast<fmtflags>(scientific | fixed);
 
-        typedef __std::__iostate::enum_ iostate;
+        typedef __detail::iostate::enum_ iostate;
         /* Flag indicating no error. */
-        static constexpr iostate goodbit = __std::__iostate::goodbit;
+        static constexpr iostate goodbit = iostate::goodbit;
         /* Flag indicating an irrecoverable stream error. */
-        static constexpr iostate badbit = __std::__iostate::badbit;
+        static constexpr iostate badbit = iostate::badbit;
         /* Flag indicating a formatting or extraction error. */
-        static constexpr iostate eofbit = __std::__iostate::eofbit;
+        static constexpr iostate eofbit = iostate::eofbit;
         /* Flag indicating that the end of file has been reached. */
-        static constexpr iostate failbit = __std::__iostate::failbit;
+        static constexpr iostate failbit = iostate::failbit;
 
         // openmode
-        typedef __std::__openmode::enum_ openmode;
+        typedef __detail::openmode::enum_ openmode;
         /* Flag indicating a seek to end of stream before each write. */
-        static constexpr openmode app = __std::__openmode::app;
+        static constexpr openmode app = openmode::app;
         /* Flag indicating a seek to end of stream after opening. */
-        static constexpr openmode ate = __std::__openmode::ate;
+        static constexpr openmode ate = openmode::ate;
         /* Flag indicating opening in binary mode. */
-        static constexpr openmode binary = __std::__openmode::binary;
+        static constexpr openmode binary = openmode::binary;
         /* Flag indicating opening for reading. */
-        static constexpr openmode in = __std::__openmode::in;
+        static constexpr openmode in = openmode::in;
         /* Flag indicating opening for writing. */
-        static constexpr openmode out = __std::__openmode::out;
+        static constexpr openmode out = openmode::out;
         /* Flag indicating that the contents of the stream should be discarded upon open. */
-        static constexpr openmode trunc = __std::__openmode::trunc;
+        static constexpr openmode trunc = openmode::trunc;
 
         // seekdir
-        typedef __std::__seekdir::enum_ seekdir;
+        typedef __detail::seekdir::enum_ seekdir;
         /* Flag indicating seeking relative to the begining of the stream. */
-        static constexpr seekdir beg = __std::__seekdir::beg;
+        static constexpr seekdir beg = seekdir::beg;
         /* Flag indicating seeking relative to the current position. */
-        static constexpr seekdir cur = __std::__seekdir::cur;
+        static constexpr seekdir cur = seekdir::cur;
         /* Flag indicating seeking relative to the end of the stream. */
-        static constexpr seekdir end = __std::__seekdir::end;
+        static constexpr seekdir end = seekdir::end;
 
         class Init;
 
@@ -145,8 +147,8 @@ namespace std
         // callbacks;
         enum event {
             erase_event,
-                imbue_event,
-                copyfmt_event
+            imbue_event,
+            copyfmt_event
         };
         typedef void(*event_callback)(event, ios_base&, int index);
         void register_callback(event_callback fn, int index);

@@ -6,3 +6,6 @@
 *.so
 *.a
 .vs/
+.vscode/
+testing/*.exe
+testing/ostest/

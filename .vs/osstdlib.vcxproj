@@ -41,6 +41,7 @@
     <ClInclude Include="..\system_error.hpp" />
     <ClInclude Include="..\tuple.hpp" />
     <ClInclude Include="..\type_traits.hpp" />
+    <ClInclude Include="..\vector.hpp" />
     <ClInclude Include="..\_feats.hpp" />
     <ClInclude Include="..\_intrinsics.hpp" />
     <ClInclude Include="..\_std.hpp" />
@@ -50,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cstring.cpp" />
-    <ClCompile Include="..\iterator_test.cpp" />
     <ClCompile Include="..\stdexcept.cpp" />
     <ClCompile Include="..\string.cpp" />
   </ItemGroup>

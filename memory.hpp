@@ -1,47 +1,74 @@
+/* memory.hpp - (c) 2017 James Renwick */
 #pragma once
 #include "type_traits.hpp"
 #include "cstddef.hpp"
 
-namespace __std
-{
-    template<typename U>
-    struct get_rebind_s {
-        template<typename T> using type = typename T::template rebind<U>;
-    };
-
-    template<class T>
-    struct addressof_make_ref
-    {
-        T& v;
-        inline constexpr addressof_make_ref(T& v) : v(v) {}
-        inline constexpr operator T& () const { return v; }
-    private:
-        addressof_make_ref& operator=(const addressof_make_ref&);
-    };
-
-    template<class T>
-    struct addressof_s
-    {
-        static inline constexpr T* f(T* v, int) { return v; }
-        static inline constexpr T* f(T& v, long) {
-            return reinterpret_cast<T*>(&const_cast<char&>(
-                reinterpret_cast<const volatile char &>(v)));
-        }
-    };
-}
-
-
 
 namespace std
 {
-    template<class T>
+	namespace __detail
+	{
+		template<typename U>
+		struct get_rebind_s {
+			template<typename T> using type = typename T::template rebind<U>;
+		};
+
+		template<typename T>
+		struct addressof_make_ref
+		{
+			T& v;
+			inline constexpr addressof_make_ref(T& v) : v(v) {}
+			inline constexpr operator T& () const { return v; }
+		private:
+			addressof_make_ref& operator=(const addressof_make_ref&);
+		};
+
+		template<typename T>
+		struct addressof_s
+		{
+			static inline constexpr T* f(T* v, int) { return v; }
+			static inline constexpr T* f(T& v, long) {
+				return reinterpret_cast<T*>(&const_cast<char&>(
+					reinterpret_cast<const volatile char &>(v)));
+			}
+		};
+
+		template<typename T>
+		struct has_select_on_container_copy_construction
+		{
+		private:
+			template<typename Y, class = decltype(declval<Y>().select_on_container_copy_construction())>
+			static true_type test(Y);
+			static false_type test(...);
+		public:
+			static constexpr const bool value = decltype(test(declval<T>()))::value;
+		};
+
+		template<typename T, bool b = has_select_on_container_copy_construction<T>::value>
+		struct call_select_on_container_copy_construction
+		{
+			auto operator()(T&& allocator) {
+				return allocator.select_on_container_copy_construction();
+			}
+		};
+		template<typename T>
+		struct call_select_on_container_copy_construction<T, false>
+		{
+			auto operator()(T&& allocator) {
+				return forward<T>(allocator);
+			}
+		};
+	}
+
+
+    template<typename T>
     inline constexpr T* addressof(T& v) noexcept {
-        return __std::addressof_s<T>::f(__std::addressof_make_ref<T>(v), 0);
+        return __detail::addressof_s<T>::f(__detail::addressof_make_ref<T>(v), 0);
     }
-    template <class T>
+    template <typename T>
     const T* addressof(const T&&) = delete;
 
-	template<class T>
+	template<typename T>
 	struct default_delete
 	{
 		constexpr default_delete() = default;
@@ -79,15 +106,15 @@ namespace std
     public:
         using pointer = Ptr;
 
-        using element_type = __std::scope_type_or_default_t<
-            Ptr, _get_element_type, __std::first_tparam_t<Ptr>>;
+        using element_type = __detail::scope_type_or_default_t<
+            Ptr, _get_element_type, __detail::first_tparam_t<Ptr>>;
 
-        using difference_type = __std::scope_type_or_default_t<
+        using difference_type = __detail::scope_type_or_default_t<
             Ptr, _get_difference_type, ptrdiff_t>;
 
         template<typename T>
-        using rebind = __std::scope_type_or_default_t<
-            Ptr, __std::get_rebind_s<T>::template type, __std::rebind_t<Ptr, T>>;
+        using rebind = __detail::scope_type_or_default_t<
+            Ptr, __detail::get_rebind_s<T>::template type, __detail::rebind_t<Ptr, T>>;
 
         inline static pointer pointer_to(element_type& reference) 
             noexcept(noexcept(Ptr::pointer_to(reference)))
@@ -127,6 +154,8 @@ namespace std
         using _get_difference_type = typename T::difference_type;
         template<typename T>
         using _get_size_type = typename T::size_type;
+		template<typename T>
+		using _get_other = typename T::other;
         template<typename T>
         using _get_propagate_on_container_copy_assignment = 
             typename T::propagate_on_container_copy_assignment;
@@ -139,33 +168,50 @@ namespace std
         template<typename T>
         using _get_is_always_equal = typename T::is_always_equal;
 
+		template<typename T, typename ...Args>
+		struct rebind { };
+
+		template<typename T, template<class, class...> class _Alloc, typename Y, typename ...Args>
+		struct rebind<T, _Alloc<Y, Args...>> {
+			using type = _Alloc<T, Args...>;
+		};
+
     public:
         using allocator_type = Alloc;
         using value_type = typename Alloc::value_type;
 
-        using pointer = __std::scope_type_or_default_t<
+        using pointer = __detail::scope_type_or_default_t<
             Alloc, _get_pointer, value_type*>;
-        using const_pointer = __std::scope_type_or_default_t<
+        using const_pointer = __detail::scope_type_or_default_t<
             Alloc, _get_const_pointer, typename pointer_traits<pointer>::template rebind<const value_type>>;
-        using void_pointer = __std::scope_type_or_default_t<
+        using void_pointer = __detail::scope_type_or_default_t<
             Alloc, _get_void_pointer, typename pointer_traits<pointer>::template rebind<void>>;
-        using const_void_pointer = __std::scope_type_or_default_t<
+        using const_void_pointer = __detail::scope_type_or_default_t<
             Alloc, _get_const_void_pointer, typename pointer_traits<pointer>::template rebind<const void>>;
 
-        using difference_type = __std::scope_type_or_default_t<
+        using difference_type = __detail::scope_type_or_default_t<
             Alloc, _get_difference_type, typename pointer_traits<pointer>::difference_type>;
-        using size_type = __std::scope_type_or_default_t<
+        using size_type = __detail::scope_type_or_default_t<
             Alloc, _get_size_type, typename make_unsigned<difference_type>::type>;
 
-        using propagate_on_container_copy_assignment = __std::scope_type_or_default_t<
+        using propagate_on_container_copy_assignment = __detail::scope_type_or_default_t<
             Alloc, _get_propagate_on_container_copy_assignment, false_type>;
-        using propagate_on_container_move_assignment = __std::scope_type_or_default_t<
+        using propagate_on_container_move_assignment = __detail::scope_type_or_default_t<
             Alloc, _get_propagate_on_container_move_assignment, false_type>;
-        using propagate_on_container_swap = __std::scope_type_or_default_t<
+        using propagate_on_container_swap = __detail::scope_type_or_default_t<
             Alloc, _get_propagate_on_container_swap, false_type>;
 
-        using is_always_equal = __std::scope_type_or_default_t<
+        using is_always_equal = __detail::scope_type_or_default_t<
             Alloc, _get_is_always_equal, is_empty<Alloc>>;
+
+		template<typename T>
+		using rebind_alloc = __detail::scope_type_or_default_t<
+			__detail::scope_type_or_default_t<Alloc, 
+				__detail::get_rebind_s<T>::template type, void_t<>>,
+			_get_other, typename rebind<T, Alloc>::type>;
+
+		template<typename T>
+		using rebind_traits = allocator_traits<rebind_alloc<T>>;
 
         inline static pointer allocate(Alloc& alloc, size_type count) {
             return alloc.allocate(count);
@@ -173,6 +219,11 @@ namespace std
         static void deallocate(Alloc& alloc, pointer p, size_type count) {
             alloc.deallocate(p, count);
         }
+
+		static Alloc select_on_container_copy_construction(const Alloc& allocator)
+		{
+			return __detail::call_select_on_container_copy_construction<Alloc>()(allocator);
+		}
     };
 
 
@@ -301,7 +352,7 @@ namespace std
 	each pointing to the same object. This creation happens via the copy constructor. 
 	Atomatic object destruction occurs when the final referenced to the object is destroyed. 
 	*/
-	template<class T>
+	template<typename T>
 	struct shared_ptr
 	{
 	private:

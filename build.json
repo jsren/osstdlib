@@ -1,0 +1,27 @@
+{
+    "BuildSteps":
+    [
+        {
+            "Name": "Clone ostest",
+            "Command": "bash -c \"git clone https://github.com/jsren/ostest\" testing/ostest"
+        },
+        {
+            "Name": "Build ostest",
+            "Command": "bash -c \"cd testing/ostest; make FLAGS=-fno-rtti \""
+        },
+        {
+            "Name": "Build tests",
+            "Command": "bash -c \"make test\""
+        },
+        {
+            "Name": "Remove ostest",
+            "Command": "bash -c \"rm -rf testing/ostest\""
+        }
+    ],
+    "TestSteps": [
+        {
+            "Command": "bash -c testing/test.exe",
+            "ResultParser": "ostest"
+        }
+    ]
+}
