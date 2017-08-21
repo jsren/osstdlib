@@ -1,0 +1,3 @@
+[submodule "testing/ostest"]
+	path = testing/ostest
+	url = https://github.com/jsren/ostest
