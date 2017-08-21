@@ -2,3 +2,5 @@
 #include "ostest/ostest.h"
 #include <stddef.h>
 #include <string>
+
+extern "C" int printf(const char*, ...);

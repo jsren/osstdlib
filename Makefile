@@ -5,5 +5,6 @@ default:
 .PHONY: test
 
 test:
-	gcc-7 -std=c++14 -I. -Itesting/ostest *.cpp testing/*.cpp -O3 -fno-exceptions -fno-rtti testing/ostest/ostest.o -o testing/test.exe
+	git submodule update --init
+	g++-7 -std=c++14 -I. -Itesting/ostest *.cpp testing/*.cpp -O3 -fno-exceptions -fno-rtti testing/ostest/ostest.o -o testing/test.exe
 	clang -std=c++14 -I. -Itesting/ostest *.cpp testing/*.cpp -O3 -fno-exceptions -fno-rtti testing/ostest/ostest.o -o testing/test.exe

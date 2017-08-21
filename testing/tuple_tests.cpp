@@ -135,3 +135,63 @@ TEST(TupleSuite, TupleAssign)
 	EXPECT(std::get<4>(tuple1) == std::get<4>(tuple2));
 	EXPECT(std::get<5>(tuple1) == std::get<5>(tuple2));
 }
+
+
+std::tuple<T1, T2, T3, T4, T5, T6> example_function(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6)
+{
+	return std::make_tuple(v1, v2, v3, v4, v5, v6);
+}
+
+TEST(TupleSuite, TupleTie)
+{
+	// Ensure that those values not ignored differ from their default
+	ASSERT(V2 != T2{} || !(V4 == T4{}) || V6 != T6{});
+
+	// Ignore all
+	std::tie(std::ignore, std::ignore, std::ignore, std::ignore, std::ignore, std::ignore)
+		= example_function(V1, V2, V3, V4, V5, V6);
+
+	// Tie all
+	{
+		T1 v1{};
+		T2 v2{};
+		T3 v3{};
+		T4 v4{};
+		T5 v5{};
+		T6 v6{};
+
+		std::tie(v1, v2, v3, v4, v5, v6) = example_function(V1, V2, V3, V4, V5, V6);
+		EXPECT_EQ(v1, V1);
+		EXPECT_EQ(v2, V2);
+		EXPECT_EQ(v3, V3);
+		EXPECT_EQ(v4, V4);
+		EXPECT_EQ(v5, V5);
+		EXPECT_EQ(v6, V6);
+	}
+
+	// Tie some
+	{
+		T2 v2{};
+		T4 v4{};
+		T6 v6{};
+
+		std::tie(std::ignore, v2, std::ignore, v4, std::ignore, v6) = example_function(V1, V2, V3, V4, V5, V6);
+		EXPECT_EQ(v2, V2);
+		EXPECT_EQ(v4, V4);
+		EXPECT_EQ(v6, V6);
+	}
+}
+
+TEST(TupleSuite, TupleApply)
+{
+	std::tuple<T1, T2, T3, T4, T5, T6> tuple1(V1, V2, V3, V4, V5, V6);
+
+	auto tuple2 = std::apply(example_function, tuple1);
+
+	EXPECT_EQ(std::get<0>(tuple1), std::get<0>(tuple2));
+	EXPECT_EQ(std::get<1>(tuple1), std::get<1>(tuple2));
+	EXPECT_EQ(std::get<2>(tuple1), std::get<2>(tuple2));
+	EXPECT_EQ(std::get<3>(tuple1), std::get<3>(tuple2));
+	EXPECT_EQ(std::get<4>(tuple1), std::get<4>(tuple2));
+	EXPECT_EQ(std::get<5>(tuple1), std::get<5>(tuple2));
+}
