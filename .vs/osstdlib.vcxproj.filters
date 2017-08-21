@@ -35,6 +35,7 @@
     <ClCompile Include="..\cstring.cpp" />
     <ClCompile Include="..\stdexcept.cpp" />
     <ClCompile Include="..\string.cpp" />
+    <ClCompile Include="..\tuple.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Makefile" />

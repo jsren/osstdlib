@@ -190,14 +190,28 @@ namespace std
 			move_from_f(values...);
 		}
 
+		struct _ {};
+		struct default_ctor { };
+		struct direct_ctor { };
+
+		template<typename, typename = _>
+		struct requirements;
+
+		template<typename _>
+		struct requirements<default_ctor, _>
+		{
+			static constexpr const bool values_copy_ctor = sizeof...(Ts) > 0 &&
+				__detail::for_all<is_copy_constructible, Ts...>::value;
+		};
 
 	public:
 		constexpr tuple() = default;
 
+		template<class _=direct_ctor, class=enable_if_t<requirements<_>::value>>
 		explicit constexpr tuple(const Ts&... values) :
 			__detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(values...) { }
 
-		template<typename... Ys>
+		template<typename... Ys, class=enable_if_t<sizeof...(Ys) != 0 && sizeof...(Ys) == sizeof...(Ts)>>
 		explicit constexpr tuple(Ys&&... values)
 			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(forward<Ys>(values)...) { };
 
@@ -285,7 +299,7 @@ namespace std
 		return tuple<Ts&&...>(forward<Ts>(args)...);
 	}
 
-	__detail::ignore ignore;
+	extern __detail::ignore ignore;
 
 	template<typename ...Ts>
 	tuple<Ts&...> tie(Ts&... args) noexcept

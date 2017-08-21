@@ -88,10 +88,10 @@ namespace std
     template<class T>
     using underlying_type_t = typename underlying_type<T>::type;
 
-    template<typename T> struct add_reference { typedef T& type; };
-    template<typename T> struct add_reference<T&> { typedef T& type; };
-    template<typename T> struct add_reference<T&&> { typedef T& type; };
-    template<typename T> using add_reference_t = typename add_reference<T>::type;
+    template<typename T> struct add_lvalue_reference { typedef T& type; };
+    template<typename T> struct add_lvalue_reference<T&> { typedef T& type; };
+    template<typename T> struct add_lvalue_reference<T&&> { typedef T& type; };
+    template<typename T> using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
 
     template<typename T> struct add_rvalue_reference { typedef T&& type; };
@@ -132,6 +132,17 @@ namespace std
     template<typename T> struct bare_type { typedef remove_const_t<remove_volatile_t<remove_reference_t<T>>> type; };
     template<typename T> using bare_type_t = remove_const_t<remove_volatile_t<remove_reference_t<T>>>;
 
+	template<typename T>
+	struct remove_all_extents { using type = T; };
+
+	template<typename T>
+	using remove_all_extents_t = typename remove_all_extents<T>::type;
+
+	template<typename T>
+	struct remove_all_extents<T[]> { using type = remove_all_extents_t<T>; };
+
+	template<typename T, size_t N>
+	struct remove_all_extents<T[N]> { using type = remove_all_extents_t<T>; };
 
     template<typename...Ts>
     struct common_type;
@@ -182,7 +193,34 @@ namespace std
 
     template<typename T> using has_trivial_constructor = bool_constant<__has_trivial_constructor(T)>;
     template<typename T> using has_virtual_destructor = bool_constant<__has_virtual_destructor(T)>;
+
+	// GCC doesn't support the __is_constructible intrinsic until 8+
+#if !defined(__GNUC__) || __GNUC__ > 7
+	template<typename T, typename ...Args>
+	using is_constructible = bool_constant<__is_constructible(T, Args...)>;
+#else
+	namespace __detail
+	{
+		// N.B - THIS IS NOT EXHAUSTIVE.
+		template<typename T, typename ...Args>
+		struct is_constructable
+		{
+			template<typename Y, class=decltype(::new T{declval<Args>()...})>
+			static true_type test(int);
+			template<typename>
+			static false_type test(...);
+		public:
+			static constexpr const bool value = decltype(test(0))::value;
+		};
+	}
+
+#pragma warn "is_constructable is not exhaustive"
+	template<typename T, typename ...Args>
+	struct is_constructible : bool_constant<__detail::is_constructable<T, Args...>::value> { };
+#endif
+
 #if defined(__cpp_variable_templates)
+	template<typename T, typename ...Args> constexpr const bool is_constructible_v = is_constructible<T, Args...>::value;
     template<typename T> constexpr const bool has_trivial_constructor_v = has_trivial_constructor<T>::value;
     template<typename T> constexpr const bool has_virtual_destructor_v = has_virtual_destructor<T>::value;
 #endif
@@ -198,6 +236,78 @@ namespace std
     template<typename T> constexpr const bool is_pod_v = is_pod<T>::value;
     template<typename T> constexpr const bool has_trivial_copy_v = has_trivial_copy<T>::value;
 #endif
+
+	namespace __detail
+	{
+		template<typename T>
+		struct is_sized_array : false_type { };
+
+		template<typename T, size_t N>
+		struct is_sized_array<T[N]> : true_type { };
+
+		template<typename T, bool = is_array<T>::value>
+		struct is_nothrow_default_constructible
+		{
+			static constexpr const bool value = is_sized_array<T>::value &&
+				is_nothrow_default_constructible<remove_all_extents_t<T>>::value;
+		};
+
+		template<typename T>
+		struct is_nothrow_default_constructible<T, false> : 
+			bool_constant<noexcept(T{})> { };
+
+		template<typename T, typename ...Args>
+		struct is_nothrow_constructible {
+			static constexpr const bool value = noexcept(T(declval<Args>()...));
+		};
+		template<typename T, typename Arg>
+		struct is_nothrow_constructible<T, Arg> {
+			static constexpr const bool value = noexcept(static_cast<T>(declval<Arg>()));
+		};
+		template<typename T>
+		struct is_nothrow_constructible<T> : is_nothrow_default_constructible<T> { };
+
+		template<typename T, bool = is_array<T>::value>
+		struct is_default_constructible
+		{
+		private:
+			template<typename Y, class=decltype(Y())>
+			static true_type test(Y);
+			template<typename>
+			static false_type test(...);
+		public:
+			static constexpr const bool value = !is_void<T>::value && decltype(test(declval<T>()))::value;
+		};
+
+		template<typename T>
+		struct is_default_constructible<T, true>
+		{
+			static constexpr const bool value = is_sized_array<T>::value &&
+				is_default_constructible<remove_all_extents_t<T>>::value;
+		};
+	}
+
+	template<typename T, typename ...Args>
+	struct is_nothrow_constructible : 
+		bool_constant<is_constructible<T, Args...>::value && 
+			__detail::is_nothrow_constructible<T, Args...>::value> { };
+
+	template<typename T>
+	struct is_default_constructible : 
+		bool_constant<__detail::is_default_constructible<T>::value> { };
+
+	template<typename T>
+	struct is_nothrow_default_constructible : 
+		bool_constant<is_default_constructible<T>::value && 
+			__detail::is_nothrow_default_constructible<T>::value> { };
+
+	template<typename T, typename ...Args>
+	struct is_trivially_constructible : 
+		bool_constant<__is_trivially_constructible(T, Args...)> { };
+
+	template<typename T, typename ...Args>
+	struct is_trivially_default_constructible : is_trivially_constructible<T, Args...> { };
+
 
 #pragma warn "TODO: result_of/invoke_result are hacks"
 
@@ -313,7 +423,7 @@ namespace std
 
 
     // TODO: Support in VS
-#if !defined(_MSC_VER)
+#if false
 
     // is_function - Taken from libstdc++
     template<typename>
@@ -476,6 +586,16 @@ namespace std
 		public:
 			using type = std::conditional_t<std::is_volatile<Src>::value, volatile const_type, const_type>;
 		};
+
+		template<template<typename> class Predicate, typename ...Ts>
+		struct for_all {
+			static constexpr const bool value = true;
+		};
+		template<template<typename> class Predicate, typename T, typename ...Ts>
+		struct for_all<Predicate, T, Ts...> {
+			static constexpr const bool value = Predicate<T>::value && for_all<Predicate, Ts...>::value;
+		};
+
 
 		template<typename T>
 		struct make_unsigned_raw { };
@@ -665,4 +785,17 @@ namespace std
     template <class T1, class T2, class... R>
     struct common_type<T1, T2, R...>
         : common_type_multi_impl<void, T1, T2, R...> { };
+
+
+	template<typename T>
+	struct is_copy_constructible : 
+		is_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
+
+	template<typename T>
+	struct is_trivially_copy_constructible :
+		is_trivially_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
+
+	template<typename T>
+	struct is_nothrow_copy_constructible :
+		is_nothrow_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
 }

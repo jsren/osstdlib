@@ -1,15 +1,12 @@
+/* iterator_tests.cpp - (c) 2017 James Renwick */
 #include <array.hpp>
-#include "iterator.hpp"
-#include "memory.hpp"
-#include "string.hpp"
-#include "tuple.hpp"
-#include "type_traits.hpp"
+#include <iterator.hpp>
+#include <memory.hpp>
+#include <string.hpp>
+#include <tuple.hpp>
+#include <type_traits.hpp>
 
-#include <stdio.h>
-#include <malloc.h>
-#include <string.h>
-
-#include <ostest.h>
+#include "ostest/ostest.h"
 
 
 static int nums[] = { 1, 2, 3, 4 };
