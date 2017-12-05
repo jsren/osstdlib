@@ -25,10 +25,12 @@ namespace std
         T _data[N];
 
         constexpr reference at(size_type index) {
-            if (index >= N) __abi_throw(out_of_range("index")); else return _data[index];
+            if (index >= N) __abi::__throw_exception(out_of_range("index"));
+            else return _data[index];
         }
         constexpr const_reference at(size_type index) const {
-            if (index >= N) __abi_throw(out_of_range("index")); else return _data[index];
+            if (index >= N) __abi::__throw_exception(out_of_range("index"));
+            else return _data[index];
         }
 
         constexpr reference operator[](size_type index) {
@@ -63,7 +65,7 @@ namespace std
             return iterator(_data);
         }
         constexpr const_iterator begin() const noexcept {
-            return const_iterator(_data);            
+            return const_iterator(_data);
         }
         constexpr const_iterator cbegin() const noexcept {
             return const_iterator(_data);
@@ -73,30 +75,30 @@ namespace std
             return reverse_iterator(_data);
         }
         constexpr const_reverse_iterator rbegin() const noexcept {
-            return reverse_iterator(_data);            
+            return reverse_iterator(_data);
         }
         constexpr const_reverse_iterator crbegin() const noexcept {
-            return reverse_iterator(_data);            
+            return reverse_iterator(_data);
         }
 
         constexpr iterator end() noexcept {
             return iterator(_data + N);
         }
         constexpr const_iterator end() const noexcept {
-            return const_iterator(_data + N);            
+            return const_iterator(_data + N);
         }
         constexpr const_iterator cend() const noexcept {
-            return const_iterator(_data + N);            
+            return const_iterator(_data + N);
         }
 
         constexpr reverse_iterator rend() noexcept {
             return reverse_iterator(_data + N);
         }
         constexpr const_reverse_iterator rend() const noexcept {
-            return const_reverse_iterator(_data + N);            
+            return const_reverse_iterator(_data + N);
         }
         constexpr const_reverse_iterator crend() const noexcept {
-            return const_reverse_iterator(_data + N);            
+            return const_reverse_iterator(_data + N);
         }
 
         constexpr bool empty() const noexcept {
@@ -108,7 +110,7 @@ namespace std
         constexpr size_type max_size() const noexcept {
             return static_cast<size_type>(N);
         }
-        
+
         void fill(const T& value) {
             for (size_t i = 0; i < N; i++) _data[i] = value;
         }
@@ -185,7 +187,7 @@ namespace std
 
     template<typename Y = void, typename... Ts,
         typename T = conditional_t<is_same<Y, void>::value, common_type_t<Ts...>, Y>>
-    inline constexpr array<T, sizeof...(Ts)> make_array(Ts&&... elements) 
+    inline constexpr array<T, sizeof...(Ts)> make_array(Ts&&... elements)
     {
         using namespace __detail;
         static_assert(is_same<Y, void>::value || reference_wrapper_in<Ts...>(), "");

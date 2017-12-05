@@ -40,7 +40,7 @@ namespace std
 
 		vector(const vector& other) : vector(other, allocator_traits<Allocator>::
 			select_on_container_copy_construction(other.get_allocator())) { }
-		
+
 		vector(vector&& other) noexcept;
 
 		vector(vector&& other, const Allocator& alloc);

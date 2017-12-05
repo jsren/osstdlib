@@ -5,6 +5,7 @@
 #include "memory.hpp"
 #include "stdexcept.hpp"
 #include ".string-decl.hpp"
+#include "string_view.hpp"
 
 
 namespace std
@@ -102,6 +103,10 @@ namespace std
         }
         const_pointer c_str() const {
             return _data;
+        }
+
+        operator basic_string_view<Char, Traits>() const noexcept {
+            return basic_string_view<Char, Traits>(data(), size());
         }
 
         iterator begin() noexcept {
@@ -271,7 +276,7 @@ namespace std
         basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
             : __basic_string_base<Char, Traits, Allocator>(length, nullptr), _alloc(alloc)
         {
-            if (length > 0) 
+            if (length > 0)
 			{
                 auto* data = new char[length + 1];
                 std::memcpy(data, cstr, length * sizeof(Char));

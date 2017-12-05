@@ -13,14 +13,14 @@ namespace std
     public:
         using type = T;
 
-        reference_wrapper(T& reference) noexcept 
+        reference_wrapper(T& reference) noexcept
             : pointer(&reference) { }
-    
-        reference_wrapper(const reference_wrapper<T>& other) noexcept 
+
+        reference_wrapper(const reference_wrapper<T>& other) noexcept
             : pointer(other.get()) { }
 
         reference_wrapper(T&& reference) = delete;
-        
+
         reference_wrapper& operator=(const reference_wrapper<T>& other) noexcept {
             pointer = &other.get();
         }
@@ -38,7 +38,7 @@ namespace std
 #pragma warn "TODO: Enable if callable"
             return (*pointer)(std::forward<Args>(args)...);
         }
-    }; 
+    };
 
 #ifdef __cpp_deduction_guides
     template<typename T>
@@ -61,7 +61,7 @@ namespace std
     inline reference_wrapper<const T> cref(reference_wrapper<T> reference) noexcept {
         return reference_wrapper<T>(reference.get());
     }
-    
+
     template<typename T>
     void ref(const T&&) = delete;
 

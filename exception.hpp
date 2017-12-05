@@ -22,6 +22,5 @@ namespace std
 }
 
 namespace __abi {
-    extern void __throw_exception(const std::exception&) noexcept;
+    [[noreturn]] void __throw_exception(const std::exception&) noexcept;
 }
-#define __abi_throw(e) __abi::__throw_exception(e)
