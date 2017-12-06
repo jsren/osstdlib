@@ -69,5 +69,13 @@ namespace std
     void cref(const T&&) = delete;
 
 
-
+    template<typename Key>
+    struct hash
+    {
+        hash() = delete;
+        hash(const hash&) = delete;
+        hash(hash&&) = delete;
+        hash& opearator=(const hash&) = delete;
+        hash& opearator=(hash&&) = delete;
+    };
 }
