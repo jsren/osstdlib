@@ -78,4 +78,100 @@ namespace std
         hash& opearator=(const hash&) = delete;
         hash& opearator=(hash&&) = delete;
     };
+
+
+    namespace __detail
+    {
+        template<typename T>
+        T hash_buffer_fnv(const uint8_t*, size_t)
+        {
+            static_assert(!std::is_same<T, uint8_t>::value,
+                "8-bit hash not supported.");
+            static_assert(!std::is_same<T, uint16_t>::value,
+                "16-bit hash not supported.");
+        }
+        template<typename T>
+        T hash_string_fnv(const uint8_t*, size_t)
+        {
+            static_assert(!std::is_same<T, uint8_t>::value,
+                "8-bit hash not supported.");
+            static_assert(!std::is_same<T, uint16_t>::value,
+                "16-bit hash not supported.");
+        }
+
+        template<>
+        extern uint32_t hash_buffer_fnv<uint32_t>(const uint8_t*, size_t);
+        template<>
+        extern uint64_t hash_buffer_fnv<uint64_t>(const uint8_t*, size_t);
+        template<>
+        extern uint32_t hash_string_fnv<uint32_t>(const uint8_t*, size_t);
+        template<>
+        extern uint64_t hash_string_fnv<uint64_t>(const uint8_t*, size_t);
+
+        template<>
+        inline int32_t hash_buffer_fnv<int32_t>(const uint8_t* buffer, size_t size) {
+            return static_cast<int32_t>(hash_buffer_fnv<uint32_t>(buffer, size));
+        }
+        template<>
+        inline int64_t hash_buffer_fnv<int64_t>(const uint8_t* buffer, size_t size) {
+            return static_cast<int64_t>(hash_buffer_fnv<uint64_t>(buffer, size));
+        }
+        template<>
+        inline int32_t hash_string_fnv<int32_t>(const uint8_t* buffer, size_t size) {
+            return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
+        }
+        template<>
+        inline int64_t hash_string_fnv<int64_t>(const uint8_t* buffer, size_t size) {
+            return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
+        }
+
+        template<typename T>
+        struct identity_hash
+        {
+            using argument_type = T;
+            using result_type = size_t;
+            static_assert(sizeof(T) <= sizeof(result_type), "");
+
+            result_type operator()(argument_type value) {
+                return static_cast<result_type>(value);
+            }
+        };
+
+        template<typename T>
+        struct buffer_hash
+        {
+            using argument_type = T;
+            using result_type = size_t;
+
+            static_assert(is_standard_layout<T>::value, "");
+
+            result_type operator()(argument_type value) {
+                return hash_buffer_fnv<result_type>(&value, sizeof(value));
+            }
+        };
+
+        template<typename T>
+        struct string_hash
+        {
+            using argument_type = T*;
+            using result_type = size_t;
+
+            result_type operator()(const argument_type value) {
+                return hash_string_fnv<result_type>(&value, sizeof(value));
+            }
+        };
+
+        template<typename T>
+        struct default_hash
+        {
+            using _RT = std::remove_cv_t<T>;
+            using type = conditional_t<
+                is_scalar<_RT>::value && sizeof(T) <= sizeof(typename identity_hash<_RT>::result_type),
+                identity_hash<_RT>, buffer_hash<_RT>>;
+        };
+    }
+
+    template<> struct hash<bool> : typename __detail::default_hash<bool>::type { };
+
+
 }

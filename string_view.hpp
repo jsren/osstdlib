@@ -256,7 +256,8 @@ namespace std
     typedef basic_string_view<char16_t> u16string_view;
     typedef basic_string_view<char32_t> u32string_view;
 
-    template<> struct hash<string_view>
+    template<>
+    struct hash<string_view>
     {
         using argument_type = string_view;
         using result_type = size_t;

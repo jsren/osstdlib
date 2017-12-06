@@ -43,7 +43,7 @@ namespace std
     template<typename T>
     struct is_same<T, T> : true_type {};
 #if defined(__cpp_variable_templates)
-    template<typename T, typename U> 
+    template<typename T, typename U>
 	constexpr const bool is_same_v = is_same<T, U>::value;
 #endif
 
@@ -132,6 +132,7 @@ namespace std
     template<typename T> struct bare_type { typedef remove_const_t<remove_volatile_t<remove_reference_t<T>>> type; };
     template<typename T> using bare_type_t = remove_const_t<remove_volatile_t<remove_reference_t<T>>>;
 
+
 	template<typename T>
 	struct remove_all_extents { using type = T; };
 
@@ -181,6 +182,7 @@ namespace std
     template<typename T> using is_class = bool_constant<__is_class(T)>;
     template<typename T> using is_abstract = bool_constant<__is_abstract(T)>;
     template<typename T> using is_enum = bool_constant<__is_enum(T)>;
+    template<typename T> using is_standard_layout = bool_constant<__is_standard_layout(T)>;
 
 
 #if defined(__cpp_variable_templates)
@@ -189,6 +191,7 @@ namespace std
     template<typename T> constexpr const bool is_class_v = is_class<T>::value;
     template<typename T> constexpr const bool is_abstract_v = is_abstract<T>::value;
     template<typename T> constexpr const bool is_enum_v = is_enum<T>::value;
+    template<typename T> constexpr const bool is_standard_layout_v = is_standard_layout<T>::value;
 #endif
 
     template<typename T> using has_trivial_constructor = bool_constant<__has_trivial_constructor(T)>;
@@ -253,7 +256,7 @@ namespace std
 		};
 
 		template<typename T>
-		struct is_nothrow_default_constructible<T, false> : 
+		struct is_nothrow_default_constructible<T, false> :
 			bool_constant<noexcept(T{})> { };
 
 		template<typename T, typename ...Args>
@@ -288,25 +291,40 @@ namespace std
 	}
 
 	template<typename T, typename ...Args>
-	struct is_nothrow_constructible : 
-		bool_constant<is_constructible<T, Args...>::value && 
+	struct is_nothrow_constructible :
+		bool_constant<is_constructible<T, Args...>::value &&
 			__detail::is_nothrow_constructible<T, Args...>::value> { };
 
 	template<typename T>
-	struct is_default_constructible : 
+	struct is_default_constructible :
 		bool_constant<__detail::is_default_constructible<T>::value> { };
 
 	template<typename T>
-	struct is_nothrow_default_constructible : 
-		bool_constant<is_default_constructible<T>::value && 
+	struct is_nothrow_default_constructible :
+		bool_constant<is_default_constructible<T>::value &&
 			__detail::is_nothrow_default_constructible<T>::value> { };
 
 	template<typename T, typename ...Args>
-	struct is_trivially_constructible : 
+	struct is_trivially_constructible :
 		bool_constant<__is_trivially_constructible(T, Args...)> { };
 
 	template<typename T, typename ...Args>
 	struct is_trivially_default_constructible : is_trivially_constructible<T, Args...> { };
+
+    template<typename T> struct is_member_pointer : false_type { };
+    template<typename T, typename U> struct is_member_pointer<T U::*> : true_type { };
+
+    template<typename T> struct is_pointer : false_type { };
+    template<typename T> struct is_pointer<T*> : true_type { };
+
+
+    template<typename T> struct is_null_pointer : is_same<nullptr_t, remove_cv_t<T>> {};
+
+#if defined(__cpp_variable_templates)
+    template<typename T> constexpr const bool is_pointer_v = is_pointer<T>::value;
+    template<typename T> constexpr const bool is_member_pointer_v = is_member_pointer<T>::value;
+    template<typename T> constexpr const bool is_null_pointer_v = is_null_pointer<T>::value;
+#endif
 
 
 #pragma warn "TODO: result_of/invoke_result are hacks"
@@ -333,7 +351,7 @@ namespace std
 
     template<typename T, typename ...Args>
     using invoke_result_t = typename invoke_result<T, Args...>::type;
-    
+
 
 
     template<typename Base, typename Derived>
@@ -344,35 +362,35 @@ namespace std
 #endif
 
 
-    namespace __detail 
+    namespace __detail
     {
         //using std::swap;
 
         struct is_swappable_impl
         {
-            template<typename T, typename = 
+            template<typename T, typename =
                 decltype(swap(declval<T&>(), declval<T&>()))>
             static const constexpr true_type v(int);
-            
+
             template<typename>
             static const constexpr false_type v(...);
         };
 
         struct is_nothrow_swappable_impl
         {
-            template<typename T, typename V = 
+            template<typename T, typename V =
                 bool_constant<noexcept(swap(declval<T&>(), declval<T&>()))>>
             static const constexpr V v(int);
-            
+
             template<typename>
             static const constexpr false_type v(...);
         };
     }
 
-    template<typename T> struct is_swappable : 
+    template<typename T> struct is_swappable :
         decltype(__detail::is_swappable_impl::v<T>(0)) { };
 
-    template<typename T> struct is_nothrow_swappable : 
+    template<typename T> struct is_nothrow_swappable :
         decltype(__detail::is_nothrow_swappable_impl::v<T>(0)) { };
 
 #if defined(__cpp_variable_templates)
@@ -384,41 +402,74 @@ namespace std
     // https://github.com/gcc-mirror/gcc/blob/master/libstdc%2B%2B-v3/include/std/type_traits
     // for examples for more
 
-    template<typename T> struct is_fractional : false_type { };
-    template<> struct is_fractional<float> : true_type { };
-    template<> struct is_fractional<double> : true_type { };
+    namespace __detail
+    {
+        template<typename T> struct is_integral : false_type { };
+        template<> struct is_integral<signed char> : true_type { };
+        template<> struct is_integral<signed short> : true_type { };
+        template<> struct is_integral<signed int> : true_type { };
+        template<> struct is_integral<signed long int> : true_type { };
+        template<> struct is_integral<signed long long int> : true_type { };
+        template<> struct is_integral<unsigned char> : true_type { };
+        template<> struct is_integral<unsigned short> : true_type { };
+        template<> struct is_integral<unsigned int> : true_type { };
+        template<> struct is_integral<unsigned long int> : true_type { };
+        template<> struct is_integral<unsigned long long int> : true_type { };
+
+        template<typename T> struct is_floating_point : false_type { };
+        template<> struct is_floating_point<float> : true_type { };
+        template<> struct is_floating_point<double> : true_type { };
+        template<> struct is_floating_point<long double> : true_type { };
+    }
+
+    template<typename T>
+    struct is_floating_point : __detail::is_floating_point<std::remove_cv_t<T>> { };
+
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr const bool is_fractional_v = is_fractional<T>::value;
+    template<typename T> constexpr const bool is_floating_point_v = is_floating_point<T>::value;
 #endif
 
-    template<typename T> struct is_integer : false_type { };
-    template<> struct is_integer<signed char> : true_type { };
-    template<> struct is_integer<signed short> : true_type { };
-    template<> struct is_integer<signed int> : true_type { };
-    template<> struct is_integer<signed long int> : true_type { };
-    template<> struct is_integer<signed long long int> : true_type { };
-    template<> struct is_integer<unsigned char> : true_type { };
-    template<> struct is_integer<unsigned short> : true_type { };
-    template<> struct is_integer<unsigned int> : true_type { };
-    template<> struct is_integer<unsigned long int> : true_type { };
-    template<> struct is_integer<unsigned long long int> : true_type { };
+    template<typename T>
+    struct is_integral : __detail::is_integral<std::remove_cv_t<T>> { };
+
 #if defined(__cpp_variable_templates)
-    template<typename T> constexpr const bool is_integer_v = is_integer<T>::value;
+    template<typename T> constexpr const bool is_integral_v = is_integral<T>::value;
 #endif
 
-    template<typename T, class = enable_if_t<is_integer<T>::value>> struct is_unsigned : false_type { };
+    template<typename T, class = enable_if_t<is_integral<T>::value>> struct is_unsigned : false_type { };
     template<> struct is_unsigned<unsigned char> : true_type { };
     template<> struct is_unsigned<unsigned short> : true_type { };
     template<> struct is_unsigned<unsigned int> : true_type { };
     template<> struct is_unsigned<unsigned long int> : true_type { };
     template<> struct is_unsigned<unsigned long long int> : true_type { };
 
-    template<typename T, class = enable_if_t<is_integer<T>::value>>
+    template<typename T, class = enable_if_t<is_integral<T>::value>>
     struct is_signed : bool_constant<!is_unsigned<T>::value> { };
 
 #if defined(__cpp_variable_templates)
     template<typename T> constexpr const bool is_unsigned_v = is_unsigned<T>::value;
     template<typename T> constexpr const bool is_signed_v = is_signed<T>::value;
+#endif
+
+
+    template<typename T>
+    struct is_arithmetic :
+        bool_constant<is_integral<T>::value || is_floating_point<T>::value> { };
+
+    template<typename T>
+    struct is_scalar : bool_constant<
+        is_arithmetic<T>::value ||
+        is_enum<T>::value ||
+        is_pointer<T>::value ||
+        is_member_pointer<T>::value ||
+        is_null_pointer<T>::value> { };
+
+    template<typename T>
+    struct is_fundamental
+
+#if defined(__cpp_variable_templates)
+    template<typename T> constexpr const bool is_arithmetic_v = is_arithmetic<T>::value;
+    template<typename T> constexpr const bool is_scalar_v = is_scalar<T>::value;
 #endif
 
 
@@ -688,14 +739,14 @@ namespace std
 
         template<typename T, typename R, typename ...Args>
         struct is_ref_qualified<R(T::*)(Args...)&> : true_type { };
-        template<typename T, typename R, typename ...Args>        
+        template<typename T, typename R, typename ...Args>
         struct is_ref_qualified<R(T::*)(Args...)&&> : true_type { };
 
         template<typename R, typename T, typename Y, typename ...Args>
         struct is_ref_qualified<R (T::*(Y*, Args...))(Args...)&> : true_type { };
         template<typename R, typename T, typename Y, typename ...Args>
         struct is_ref_qualified<R (T::*(Y*, Args...))(Args...)&&> : true_type { };
-    }   
+    }
 
     template<typename T>
     struct add_pointer {
@@ -708,9 +759,9 @@ namespace std
     using add_pointer_t = typename add_pointer<T>::type;
 
 
-    template<typename T> struct remove_extent { typedef T type; };     
+    template<typename T> struct remove_extent { typedef T type; };
     template<typename T> struct remove_extent<T[]> { typedef T type; };
-     
+
     template<typename T, size_t N>
     struct remove_extent<T[N]> { typedef T type; };
 
@@ -726,7 +777,7 @@ namespace std
         using Y = remove_reference_t<T>;
     public:
         using type = conditional_t<is_array<Y>::value, remove_extent_t<Y>*,
-                        conditional_t<is_function<Y>::value, add_pointer_t<Y>, 
+                        conditional_t<is_function<Y>::value, add_pointer_t<Y>,
                             remove_cv_t<Y>>>;
     };
 
@@ -737,7 +788,7 @@ namespace std
 
 
     // primary template (used for zero types)
-    template <class ...T> struct common_type { }; 
+    template <class ...T> struct common_type { };
 
     template<class ...Ts>
     using common_type_t = typename common_type<Ts...>::type;
@@ -748,47 +799,47 @@ namespace std
     struct common_type<T> {
         using type = std::decay_t<T>;
     };
-     
+
     //////// two types
-     
+
     // default implementation for two types
     template<class T1, class T2>
     using cond_t = decltype(false ? std::declval<T1>() : std::declval<T2>());
-     
+
     template<class T1, class T2, class=void>
     struct common_type_2_default { };
-     
+
     template<class T1, class T2>
     struct common_type_2_default<T1, T2, std::void_t<cond_t<T1, T2>>> {
         using type = std::decay_t<cond_t<T1, T2>>;
     };
-     
+
     // dispatcher to decay the type before applying specializations
     template<class T1, class T2, class D1 = std::decay_t<T1>, class D2=std::decay_t<T2>>
     struct common_type_2_impl : common_type<D1, D2> {};
-     
+
     template<class D1, class D2>
     struct common_type_2_impl<D1, D2, D1, D2> : common_type_2_default<D1, D2> {};
-     
+
     template <class T1, class T2>
     struct common_type<T1, T2> : common_type_2_impl<T1, T2> { };
-     
+
     //////// 3+ types
-     
+
     template<class AlwaysVoid, class T1, class T2, class...R>
     struct common_type_multi_impl { };
-     
+
     template< class T1, class T2, class...R>
     struct common_type_multi_impl<std::void_t<common_type_t<T1, T2>>, T1, T2, R...>
         : common_type<common_type_t<T1, T2>, R...>  { };
-      
+
     template <class T1, class T2, class... R>
     struct common_type<T1, T2, R...>
         : common_type_multi_impl<void, T1, T2, R...> { };
 
 
 	template<typename T>
-	struct is_copy_constructible : 
+	struct is_copy_constructible :
 		is_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
 
 	template<typename T>
