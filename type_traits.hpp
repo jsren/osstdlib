@@ -464,8 +464,6 @@ namespace std
         is_member_pointer<T>::value ||
         is_null_pointer<T>::value> { };
 
-    template<typename T>
-    struct is_fundamental
 
 #if defined(__cpp_variable_templates)
     template<typename T> constexpr const bool is_arithmetic_v = is_arithmetic<T>::value;

@@ -2,6 +2,7 @@
 #include "iterator.hpp"
 #include "cstring.hpp"
 #include "functional.hpp"
+#include "limits.hpp"
 
 namespace std
 {
@@ -17,7 +18,7 @@ namespace std
         using const_reference = const Char&;
         using const_iterator = __detail::pointer_iterator<const Char>;
         using iterator = const_iterator;
-        using const_reverse_iterator = reverse_iterator<const_iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using reverse_iterator = const_reverse_iterator;
         using size_type = size_t;
         using difference_type = ptrdiff_t;
@@ -114,7 +115,7 @@ namespace std
         size_type copy(Char* destination, size_type count,
             size_type startIndex = 0) const
         {
-            if (index < 0 || index >= _size) {
+            if (startIndex < 0 || startIndex >= _size) {
                 __abi::__throw_exception(std::out_of_range("startIndex"));
             }
             std::memcpy(destination, _data + startIndex, count - startIndex);
@@ -127,7 +128,7 @@ namespace std
                 __abi::__throw_exception(std::out_of_range("startIndex"));
             }
             auto size = _size - startIndex;
-            return basic_string_view(_data, count > size ? size : count)
+            return basic_string_view(_data, count > size ? size : count);
         }
 
         constexpr int compare(basic_string_view other) const noexcept
@@ -171,7 +172,7 @@ namespace std
         }
 
         constexpr bool ends_with(basic_string_view suffix) const noexcept {
-            return _size >= suffix._size && compare(_size - suffix._size, npos, other) == 0;
+            return _size >= suffix._size && compare(_size - suffix._size, npos, suffix) == 0;
         }
         constexpr bool ends_with(Char suffix) const noexcept {
             return _size >= 1 && _data[_size - 1] == suffix;
@@ -214,38 +215,38 @@ namespace std
     };
 
     template<typename Char, typename Traits>
-    constexpr bool operator ==(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator ==(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return lhs.compare(rhs) == 0;
     }
     template<typename Char, typename Traits>
-    constexpr bool operator !=(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator !=(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return !(lhs == rhs);
     }
     template<typename Char, typename Traits>
-    constexpr bool operator <(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator <(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return lhs.compare(rhs) < 0;
     }
     template<typename Char, typename Traits>
-    constexpr bool operator <=(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator <=(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return lhs.compare(rhs) <= 0;
     }
     template<typename Char, typename Traits>
-    constexpr bool operator >(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator >(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return !(lhs <= rhs);
     }
     template<typename Char, typename Traits>
-    constexpr bool operator >=(basic_string_vew<Char, Traits> lhs,
-        basic_string_vew<Char, Traits> rhs) noexcept
+    constexpr bool operator >=(basic_string_view<Char, Traits> lhs,
+        basic_string_view<Char, Traits> rhs) noexcept
     {
         return !(lhs < rhs);
     }
@@ -256,40 +257,35 @@ namespace std
     typedef basic_string_view<char16_t> u16string_view;
     typedef basic_string_view<char32_t> u32string_view;
 
-    template<>
-    struct hash<string_view>
+    template<typename Char>
+    struct hash<basic_string_view<Char>>
     {
-        using argument_type = string_view;
+        using argument_type = basic_string_view<Char>;
         using result_type = size_t;
 
-        // See https://github.com/aappleby/smhasher/blob/master/src/MurmurHash2.cpp
-        result_type operator()(argument_type value) const
-        {
-            result_type output = 0;
-            for (size_t i = 0; i < value.size(); i++)
-            {
-
-            }
+        result_type operator()(argument_type value) const {
+            return __detail::string_hash<Char>{}(value.data(), value.size());
         }
     };
 }
 
 namespace std
 {
-    namespace literals
+    inline namespace literals
     {
-        namespace string_view_literals
+        inline namespace string_view_literals
         {
-            constexpr string_view operator "" sv(const char* string, size_t length) noexcept {
+            #pragma GCC diagnostic ignored "-Wliteral-suffix"
+            inline constexpr string_view operator""sv(const char* string, size_t length) noexcept {
                 return std::string_view(string, length);
             }
-            constexpr wstring_view operator "" sv(const wchar_t* string, size_t length) noexcept {
+            inline constexpr wstring_view operator""sv(const wchar_t* string, size_t length) noexcept {
                 return std::wstring_view(string, length);
             }
-            constexpr u16string_view operator "" sv(const char16_t* string, size_t length) noexcept {
+            inline constexpr u16string_view operator""sv(const char16_t* string, size_t length) noexcept {
                 return std::u16string_view(string, length);
             }
-            constexpr u32string_view operator "" sv(const char32_t* string, size_t length) noexcept {
+            inline constexpr u32string_view operator""sv(const char32_t* string, size_t length) noexcept {
                 return std::u32string_view(string, length);
             }
         }

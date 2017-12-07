@@ -69,29 +69,18 @@ namespace std
     void cref(const T&&) = delete;
 
 
-    template<typename Key>
-    struct hash
-    {
-        hash() = delete;
-        hash(const hash&) = delete;
-        hash(hash&&) = delete;
-        hash& opearator=(const hash&) = delete;
-        hash& opearator=(hash&&) = delete;
-    };
-
-
     namespace __detail
     {
         template<typename T>
-        T hash_buffer_fnv(const uint8_t*, size_t)
+        T hash_buffer_fnv(const uint8_t*, size_t) noexcept
         {
             static_assert(!std::is_same<T, uint8_t>::value,
                 "8-bit hash not supported.");
             static_assert(!std::is_same<T, uint16_t>::value,
                 "16-bit hash not supported.");
         }
-        template<typename T>
-        T hash_string_fnv(const uint8_t*, size_t)
+        template<typename T, typename Char>
+        T hash_string_fnv(const Char*, size_t) noexcept
         {
             static_assert(!std::is_same<T, uint8_t>::value,
                 "8-bit hash not supported.");
@@ -99,31 +88,50 @@ namespace std
                 "16-bit hash not supported.");
         }
 
-        template<>
-        extern uint32_t hash_buffer_fnv<uint32_t>(const uint8_t*, size_t);
-        template<>
-        extern uint64_t hash_buffer_fnv<uint64_t>(const uint8_t*, size_t);
-        template<>
-        extern uint32_t hash_string_fnv<uint32_t>(const uint8_t*, size_t);
-        template<>
-        extern uint64_t hash_string_fnv<uint64_t>(const uint8_t*, size_t);
+        template<> uint32_t hash_buffer_fnv<uint32_t>(const uint8_t*, size_t) noexcept;
+        template<> uint64_t hash_buffer_fnv<uint64_t>(const uint8_t*, size_t) noexcept;
+        template<> uint32_t hash_string_fnv<uint32_t>(const char*, size_t) noexcept;
+        template<> uint32_t hash_string_fnv<uint32_t>(const wchar_t*, size_t) noexcept;
+        template<> uint32_t hash_string_fnv<uint32_t>(const char16_t*, size_t) noexcept;
+        template<> uint32_t hash_string_fnv<uint32_t>(const char32_t*, size_t) noexcept;
+        template<> uint64_t hash_string_fnv<uint64_t>(const char*, size_t) noexcept;
+        template<> uint64_t hash_string_fnv<uint64_t>(const wchar_t*, size_t) noexcept;
+        template<> uint64_t hash_string_fnv<uint64_t>(const char16_t*, size_t) noexcept;
+        template<> uint64_t hash_string_fnv<uint64_t>(const char32_t*, size_t) noexcept;
 
         template<>
-        inline int32_t hash_buffer_fnv<int32_t>(const uint8_t* buffer, size_t size) {
+        inline int32_t hash_buffer_fnv<int32_t>(const uint8_t* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_buffer_fnv<uint32_t>(buffer, size));
         }
         template<>
-        inline int64_t hash_buffer_fnv<int64_t>(const uint8_t* buffer, size_t size) {
+        inline int64_t hash_buffer_fnv<int64_t>(const uint8_t* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_buffer_fnv<uint64_t>(buffer, size));
         }
-        template<>
-        inline int32_t hash_string_fnv<int32_t>(const uint8_t* buffer, size_t size) {
+        template<> int32_t hash_string_fnv<int32_t>(const char* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
         }
-        template<>
-        inline int64_t hash_string_fnv<int64_t>(const uint8_t* buffer, size_t size) {
+        template<> int32_t hash_string_fnv<int32_t>(const wchar_t* buffer, size_t size) noexcept {
+            return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
+        }
+        template<> int32_t hash_string_fnv<int32_t>(const char16_t* buffer, size_t size) noexcept {
+            return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
+        }
+        template<> int32_t hash_string_fnv<int32_t>(const char32_t* buffer, size_t size) noexcept {
+            return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
+        }
+        template<> int64_t hash_string_fnv<int64_t>(const char* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
         }
+        template<> int64_t hash_string_fnv<int64_t>(const wchar_t* buffer, size_t size) noexcept {
+            return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
+        }
+        template<> int64_t hash_string_fnv<int64_t>(const char16_t* buffer, size_t size) noexcept {
+            return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
+        }
+        template<> int64_t hash_string_fnv<int64_t>(const char32_t* buffer, size_t size) noexcept {
+            return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
+        }
+
 
         template<typename T>
         struct identity_hash
@@ -132,7 +140,7 @@ namespace std
             using result_type = size_t;
             static_assert(sizeof(T) <= sizeof(result_type), "");
 
-            result_type operator()(argument_type value) {
+            result_type operator()(argument_type value) noexcept {
                 return static_cast<result_type>(value);
             }
         };
@@ -145,7 +153,7 @@ namespace std
 
             static_assert(is_standard_layout<T>::value, "");
 
-            result_type operator()(argument_type value) {
+            result_type operator()(argument_type value) noexcept {
                 return hash_buffer_fnv<result_type>(&value, sizeof(value));
             }
         };
@@ -156,22 +164,53 @@ namespace std
             using argument_type = T*;
             using result_type = size_t;
 
-            result_type operator()(const argument_type value) {
-                return hash_string_fnv<result_type>(&value, sizeof(value));
+            result_type operator()(const T* value, size_t size) noexcept {
+                return hash_string_fnv<result_type>(value, size);
             }
+        };
+
+        template<typename T>
+        struct disabled_hash
+        {
+            disabled_hash() = delete;
+            disabled_hash(const disabled_hash&) = delete;
+            disabled_hash(disabled_hash&&) = delete;
+            disabled_hash& operator=(const disabled_hash&) = delete;
+            disabled_hash& operator=(disabled_hash&&) = delete;
         };
 
         template<typename T>
         struct default_hash
         {
-            using _RT = std::remove_cv_t<T>;
+            using _RT = remove_cv_t<T>;
             using type = conditional_t<
-                is_scalar<_RT>::value && sizeof(T) <= sizeof(typename identity_hash<_RT>::result_type),
+                is_scalar<_RT>::value && sizeof(_RT) <= sizeof(size_t),
                 identity_hash<_RT>, buffer_hash<_RT>>;
         };
     }
 
-    template<> struct hash<bool> : typename __detail::default_hash<bool>::type { };
+    template<typename Key>
+    struct hash : conditional_t<is_enum<Key>::value,
+        typename __detail::default_hash<Key>, __detail::disabled_hash<Key>> { };
 
+    template<> struct hash<bool> : __detail::default_hash<bool>::type { };
+    template<> struct hash<char> : __detail::default_hash<char>::type { };
+    template<> struct hash<signed char> : __detail::default_hash<signed char>::type { };
+    template<> struct hash<unsigned char> : __detail::default_hash<unsigned char>::type { };
+    template<> struct hash<char16_t> : __detail::default_hash<char16_t>::type { };
+    template<> struct hash<char32_t> : __detail::default_hash<char32_t>::type { };
+    template<> struct hash<wchar_t> : __detail::default_hash<wchar_t>::type { };
+    template<> struct hash<short> : __detail::default_hash<short>::type { };
+    template<> struct hash<unsigned short> : __detail::default_hash<unsigned short>::type { };
+    template<> struct hash<int> : __detail::default_hash<int>::type { };
+    template<> struct hash<unsigned int> : __detail::default_hash<unsigned int>::type { };
+    template<> struct hash<long> : __detail::default_hash<long>::type { };
+    template<> struct hash<unsigned long> : __detail::default_hash<unsigned long>::type { };
+    template<> struct hash<long long> : __detail::default_hash<long long>::type { };
+    template<> struct hash<unsigned long long> : __detail::default_hash<unsigned long long>::type { };
+    template<> struct hash<float> : __detail::default_hash<float>::type { };
+    template<> struct hash<double> : __detail::default_hash<double>::type { };
+    template<> struct hash<long double> : __detail::default_hash<long double>::type { };
+    template<class T> struct hash<T*> : __detail::default_hash<T*>::type { };
 
 }

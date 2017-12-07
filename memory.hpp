@@ -116,7 +116,7 @@ namespace std
         using rebind = __detail::scope_type_or_default_t<
             Ptr, __detail::get_rebind_s<T>::template type, __detail::rebind_t<Ptr, T>>;
 
-        inline static pointer pointer_to(element_type& reference) 
+        inline static pointer pointer_to(element_type& reference)
             noexcept(noexcept(Ptr::pointer_to(reference)))
         {
             return Ptr::pointer_to(reference);
@@ -157,7 +157,7 @@ namespace std
 		template<typename T>
 		using _get_other = typename T::other;
         template<typename T>
-        using _get_propagate_on_container_copy_assignment = 
+        using _get_propagate_on_container_copy_assignment =
             typename T::propagate_on_container_copy_assignment;
         template<typename T>
         using _get_propagate_on_container_move_assignment =
@@ -206,7 +206,7 @@ namespace std
 
 		template<typename T>
 		using rebind_alloc = __detail::scope_type_or_default_t<
-			__detail::scope_type_or_default_t<Alloc, 
+			__detail::scope_type_or_default_t<Alloc,
 				__detail::get_rebind_s<T>::template type, void_t<>>,
 			_get_other, typename rebind<T, Alloc>::type>;
 
@@ -228,8 +228,8 @@ namespace std
 
 
 
-	/* A pointer type enforcing automatic object destruction when the 
-	referenced object leaves the current scope. */ 
+	/* A pointer type enforcing automatic object destruction when the
+	referenced object leaves the current scope. */
 	template<typename T, typename Deleter = default_delete<T>>
 	struct unique_ptr
 	{
@@ -257,7 +257,7 @@ namespace std
 			std::swap(this->ptr, ptr.ptr);
 			std::swap(this->deleter, ptr.deleter);
 		}
-		template<typename Y, typename D1, 
+		template<typename Y, typename D1,
 			class=std::enable_if<!is_array<Y>::value && is_convertible<D1, Deleter>::value>>
 		inline unique_ptr(unique_ptr<Y, D1>&& other)
 		{
@@ -347,10 +347,10 @@ namespace std
 	};
 
 
-	/* 
-	A pointer type allowing for the creation of other pointers, 
-	each pointing to the same object. This creation happens via the copy constructor. 
-	Atomatic object destruction occurs when the final referenced to the object is destroyed. 
+	/*
+	A pointer type allowing for the creation of other pointers,
+	each pointing to the same object. This creation happens via the copy constructor.
+	Atomatic object destruction occurs when the final referenced to the object is destroyed.
 	*/
 	template<typename T>
 	struct shared_ptr
@@ -377,7 +377,7 @@ namespace std
 		inline ~shared_ptr()
 		{
 			if (--(*this->refCount) == 0)
-			{ 
+			{
 				if (this->ptr != nullptr) delete this->ptr;
 				if (this->refCount != nullptr) delete this->refCount;
 			}
