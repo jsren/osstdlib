@@ -1,4 +1,5 @@
-#include <type_traits>
+#pragma once
+#include "type_traits.hpp"
 
 namespace std
 {
@@ -207,12 +208,21 @@ namespace std
         constexpr const float float_min = -1;
         constexpr const float float_max = 1;
         constexpr const float float_epsilon = 1;
+        constexpr const float float_infty = 1;
+        constexpr const float float_qnan = 1;
+        constexpr const float float_snan = 1;
         constexpr const double double_min = -1;
         constexpr const double double_max = 1;
         constexpr const double double_epsilon = 1;
+        constexpr const double double_infty = 1;
+        constexpr const double double_qnan = 1;
+        constexpr const double double_snan = 1;
         constexpr const long double ldouble_min = -1;
         constexpr const long double ldouble_max = 1;
         constexpr const long double ldouble_epsilon = 1;
+        constexpr const long double ldouble_infty = 1;
+        constexpr const long double ldouble_qnan = 1;
+        constexpr const long double ldouble_snan = 1;
 
 
         static constexpr const int char_digits = bitsPerByte*sizeof(char) - char_padding;
@@ -253,14 +263,14 @@ namespace std
             true, false, true, true, false, false, false, denorm_absent, false,
             round_toward_zero, false, true, false, 1, 0, 0, 2, 0, 0, 0, 0, false, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr bool min() noexcept { return false; }
+            static constexpr bool lowest() noexcept { return false; }
+            static constexpr bool max() noexcept { return true; }
+            static constexpr bool epsilon() noexcept { return false; }
+            static constexpr bool round_error() noexcept { return false; }
+            static constexpr bool infinity() noexcept { return false; }
+            static constexpr bool quiet_NaN() noexcept { return false; }
+            static constexpr bool signaling_NaN() noexcept { return false; }
         };
 
         template<> struct numeric_limits<char> : numeric_limits_base<char,
@@ -268,14 +278,14 @@ namespace std
             round_toward_zero, false, true, char_is_modulo, char_digits, char_b10_digits,
             0, 2, 0, 0, 0, 0, char_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr char min() noexcept { return char_min; }
+            static constexpr char lowest() noexcept { return char_min; }
+            static constexpr char max() noexcept { return char_max; }
+            static constexpr char epsilon() noexcept { return 0; }
+            static constexpr char round_error() noexcept { return 0; }
+            static constexpr char infinity() noexcept { return 0; }
+            static constexpr char quiet_NaN() noexcept { return 0; }
+            static constexpr char signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<signed char> : numeric_limits_base<signed char,
@@ -283,14 +293,14 @@ namespace std
             round_toward_zero, false, true, schar_is_modulo, schar_digits, schar_b10_digits,
             0, 2, 0, 0, 0, 0, schar_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr signed char min() noexcept { return schar_min; }
+            static constexpr signed char lowest() noexcept { return schar_min; }
+            static constexpr signed char max() noexcept { return schar_max; }
+            static constexpr signed char epsilon() noexcept { return 0; }
+            static constexpr signed char round_error() noexcept { return 0; }
+            static constexpr signed char infinity() noexcept { return 0; }
+            static constexpr signed char quiet_NaN() noexcept { return 0; }
+            static constexpr signed char signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<unsigned char> : numeric_limits_base<unsigned char,
@@ -298,14 +308,14 @@ namespace std
             round_toward_zero, false, true, true, uchar_digits, uchar_b10_digits, 0, 2, 0, 0,
             0, 0, uchar_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr unsigned char min() noexcept { return 0; }
+            static constexpr unsigned char lowest() noexcept { return 0; }
+            static constexpr unsigned char max() noexcept { return uchar_max; }
+            static constexpr unsigned char epsilon() noexcept { return 0; }
+            static constexpr unsigned char round_error() noexcept { return 0; }
+            static constexpr unsigned char infinity() noexcept { return 0; }
+            static constexpr unsigned char quiet_NaN() noexcept { return 0; }
+            static constexpr unsigned char signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<wchar_t> : numeric_limits_base<wchar_t,
@@ -313,14 +323,14 @@ namespace std
             round_toward_zero, false, true, wchar_is_modulo, wchar_digits, wchar_b10_digits,
             0, 2, 0, 0, 0, 0, wchar_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr wchar_t min() noexcept { return wchar_min; }
+            static constexpr wchar_t lowest() noexcept { return wchar_min; }
+            static constexpr wchar_t max() noexcept { return wchar_max; }
+            static constexpr wchar_t epsilon() noexcept { return 0; }
+            static constexpr wchar_t round_error() noexcept { return 0; }
+            static constexpr wchar_t infinity() noexcept { return 0; }
+            static constexpr wchar_t quiet_NaN() noexcept { return 0; }
+            static constexpr wchar_t signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<char16_t> : numeric_limits_base<char16_t,
@@ -328,14 +338,14 @@ namespace std
             round_toward_zero, false, true, char16_is_modulo, char16_digits, char16_b10_digits,
             0, 2, 0, 0, 0, 0, char16_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr char16_t min() noexcept { return 0; }
+            static constexpr char16_t lowest() noexcept { return 0; }
+            static constexpr char16_t max() noexcept { return char16_max; }
+            static constexpr char16_t epsilon() noexcept { return 0; }
+            static constexpr char16_t round_error() noexcept { return 0; }
+            static constexpr char16_t infinity() noexcept { return 0; }
+            static constexpr char16_t quiet_NaN() noexcept { return 0; }
+            static constexpr char16_t signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<char32_t> : numeric_limits_base<char32_t,
@@ -343,14 +353,14 @@ namespace std
             round_toward_zero, false, true, char32_is_modulo, char32_digits, char32_b10_digits,
             0, 2, 0, 0, 0, 0, char32_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr char32_t min() noexcept { return 0; }
+            static constexpr char32_t lowest() noexcept { return 0; }
+            static constexpr char32_t max() noexcept { return char32_max; }
+            static constexpr char32_t epsilon() noexcept { return 0; }
+            static constexpr char32_t round_error() noexcept { return 0; }
+            static constexpr char32_t infinity() noexcept { return 0; }
+            static constexpr char32_t quiet_NaN() noexcept { return 0; }
+            static constexpr char32_t signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<short> : numeric_limits_base<short,
@@ -358,14 +368,14 @@ namespace std
             round_toward_zero, false, true, short_is_modulo, short_digits, short_b10_digits, 0,
             2, 0, 0, 0, 0, short_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr short min() noexcept { return short_min; }
+            static constexpr short lowest() noexcept { return short_min; }
+            static constexpr short max() noexcept { return short_max; }
+            static constexpr short epsilon() noexcept { return 0; }
+            static constexpr short round_error() noexcept { return 0; }
+            static constexpr short infinity() noexcept { return 0; }
+            static constexpr short quiet_NaN() noexcept { return 0; }
+            static constexpr short signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<unsigned short> : numeric_limits_base<unsigned short,
@@ -373,14 +383,14 @@ namespace std
             round_toward_zero, false, true, true, ushort_digits, ushort_b10_digits, 0, 2, 0, 0,
             0, 0, ushort_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr unsigned short min() noexcept { return 0; }
+            static constexpr unsigned short lowest() noexcept { return 0; }
+            static constexpr unsigned short max() noexcept { return ushort_max; }
+            static constexpr unsigned short epsilon() noexcept { return 0; }
+            static constexpr unsigned short round_error() noexcept { return 0; }
+            static constexpr unsigned short infinity() noexcept { return 0; }
+            static constexpr unsigned short quiet_NaN() noexcept { return 0; }
+            static constexpr unsigned short signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<int> : numeric_limits_base<int,
@@ -388,14 +398,14 @@ namespace std
             round_toward_zero, false, true, int_is_modulo, int_digits, int_b10_digits, 0, 2, 0,
             0, 0, 0, int_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr int min() noexcept { return int_min; }
+            static constexpr int lowest() noexcept { return int_min; }
+            static constexpr int max() noexcept { return int_max; }
+            static constexpr int epsilon() noexcept { return 0; }
+            static constexpr int round_error() noexcept { return 0; }
+            static constexpr int infinity() noexcept { return 0; }
+            static constexpr int quiet_NaN() noexcept { return 0; }
+            static constexpr int signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<unsigned int> : numeric_limits_base<unsigned int,
@@ -403,14 +413,14 @@ namespace std
             round_toward_zero, false, true, true, uint_digits, uint_b10_digits, 0, 2, 0, 0, 0,
             0, uint_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr unsigned int min() noexcept { return 0; }
+            static constexpr unsigned int lowest() noexcept { return 0; }
+            static constexpr unsigned int max() noexcept { return uint_max; }
+            static constexpr unsigned int epsilon() noexcept { return 0; }
+            static constexpr unsigned int round_error() noexcept { return 0; }
+            static constexpr unsigned int infinity() noexcept { return 0; }
+            static constexpr unsigned int quiet_NaN() noexcept { return 0; }
+            static constexpr unsigned int signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<long> : numeric_limits_base<long,
@@ -418,14 +428,14 @@ namespace std
             round_toward_zero, false, true, long_is_modulo, long_digits, long_b10_digits, 0, 2,
             0, 0, 0, 0, long_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr long min() noexcept { return long_min; }
+            static constexpr long lowest() noexcept { return long_min; }
+            static constexpr long max() noexcept { return long_max; }
+            static constexpr long epsilon() noexcept { return 0; }
+            static constexpr long round_error() noexcept { return 0; }
+            static constexpr long infinity() noexcept { return 0; }
+            static constexpr long quiet_NaN() noexcept { return 0; }
+            static constexpr long signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<unsigned long> : numeric_limits_base<unsigned long,
@@ -433,14 +443,14 @@ namespace std
             round_toward_zero, false, true, true, ulong_digits, ullong_b10_digits, 0, 2, 0, 0,
             0, 0, ulong_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr unsigned long min() noexcept { return 0; }
+            static constexpr unsigned long lowest() noexcept { return 0; }
+            static constexpr unsigned long max() noexcept { return ulong_max; }
+            static constexpr unsigned long epsilon() noexcept { return 0; }
+            static constexpr unsigned long round_error() noexcept { return 0; }
+            static constexpr unsigned long infinity() noexcept { return 0; }
+            static constexpr unsigned long quiet_NaN() noexcept { return 0; }
+            static constexpr unsigned long signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<long long> : numeric_limits_base<long long,
@@ -448,14 +458,14 @@ namespace std
             round_toward_zero, false, true, llong_is_modulo, llong_digits, llong_b10_digits, 0,
             2, 0, 0, 0, 0, llong_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr long long min() noexcept { return llong_min; }
+            static constexpr long long lowest() noexcept { return llong_min; }
+            static constexpr long long max() noexcept { return llong_max; }
+            static constexpr long long epsilon() noexcept { return 0; }
+            static constexpr long long round_error() noexcept { return 0; }
+            static constexpr long long infinity() noexcept { return 0; }
+            static constexpr long long quiet_NaN() noexcept { return 0; }
+            static constexpr long long signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<unsigned long long> : numeric_limits_base<unsigned long long,
@@ -463,14 +473,14 @@ namespace std
             round_toward_zero, false, true, true, ullong_digits, ullong_b10_digits, 0, 2, 0, 0,
             0, 0, ullong_traps, false>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr unsigned long long min() noexcept { return 0; }
+            static constexpr unsigned long long lowest() noexcept { return 0; }
+            static constexpr unsigned long long max() noexcept { return ullong_max; }
+            static constexpr unsigned long long epsilon() noexcept { return 0; }
+            static constexpr unsigned long long round_error() noexcept { return 0; }
+            static constexpr unsigned long long infinity() noexcept { return 0; }
+            static constexpr unsigned long long quiet_NaN() noexcept { return 0; }
+            static constexpr unsigned long long signaling_NaN() noexcept { return 0; }
         };
 
         template<> struct numeric_limits<float> : numeric_limits_base<float,
@@ -480,14 +490,14 @@ namespace std
             float_min_exp, float_min_b10_exp, float_max_exp, float_max_b10_exp, float_traps,
             float_tinyness_before>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr float min() noexcept { return float_min; }
+            static constexpr float lowest() noexcept { return -float_max; }
+            static constexpr float max() noexcept { return float_max; }
+            static constexpr float epsilon() noexcept { return float_epsilon; }
+            static constexpr float round_error() noexcept { return 0.5F; }
+            static constexpr float infinity() noexcept { return float_infty; }
+            static constexpr float quiet_NaN() noexcept { return float_qnan; }
+            static constexpr float signaling_NaN() noexcept { return float_snan; }
         };
 
         template<> struct numeric_limits<double> : numeric_limits_base<double,
@@ -497,14 +507,14 @@ namespace std
             double_max_b10_digits, double_radix, double_min_exp, double_min_b10_exp,
             double_max_exp, double_max_b10_exp, double_traps, double_tinyness_before>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr double min() noexcept { return double_min; }
+            static constexpr double lowest() noexcept { return -double_max; }
+            static constexpr double max() noexcept { return double_max; }
+            static constexpr double epsilon() noexcept { return double_epsilon; }
+            static constexpr double round_error() noexcept { return 0.5; }
+            static constexpr double infinity() noexcept { return double_infty; }
+            static constexpr double quiet_NaN() noexcept { return double_qnan; }
+            static constexpr double signaling_NaN() noexcept { return double_snan; }
         };
 
         template<> struct numeric_limits<long double> : numeric_limits_base<long double,
@@ -515,16 +525,15 @@ namespace std
             ldouble_min_b10_exp, ldouble_max_exp, ldouble_max_b10_exp, ldouble_traps,
             ldouble_tinyness_before>
         {
-            static constexpr auto min() noexcept { return false; }
-            static constexpr auto lowest() noexcept { return false; }
-            static constexpr auto max() noexcept { return true; }
-            static constexpr auto epsilon() noexcept { return false; }
-            static constexpr auto round_error() noexcept { return false; }
-            static constexpr auto infinity() noexcept { return false; }
-            static constexpr auto quiet_NaN() noexcept { return false; }
-            static constexpr auto signaling_NaN() noexcept { return false; }
+            static constexpr long double min() noexcept { return ldouble_min; }
+            static constexpr long double lowest() noexcept { return -ldouble_max; }
+            static constexpr long double max() noexcept { return ldouble_max; }
+            static constexpr long double epsilon() noexcept { return ldouble_epsilon; }
+            static constexpr long double round_error() noexcept { return 0.5L; }
+            static constexpr long double infinity() noexcept { return ldouble_infty; }
+            static constexpr long double quiet_NaN() noexcept { return ldouble_qnan; }
+            static constexpr long double signaling_NaN() noexcept { return ldouble_snan; }
         };
-
     }
 
     template<typename T>

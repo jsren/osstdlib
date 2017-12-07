@@ -276,16 +276,16 @@ namespace std
         inline namespace string_view_literals
         {
             #pragma GCC diagnostic ignored "-Wliteral-suffix"
-            inline constexpr string_view operator""sv(const char* string, size_t length) noexcept {
+            inline constexpr string_view operator"" sv(const char* string, size_t length) noexcept {
                 return std::string_view(string, length);
             }
-            inline constexpr wstring_view operator""sv(const wchar_t* string, size_t length) noexcept {
+            inline constexpr wstring_view operator"" sv(const wchar_t* string, size_t length) noexcept {
                 return std::wstring_view(string, length);
             }
-            inline constexpr u16string_view operator""sv(const char16_t* string, size_t length) noexcept {
+            inline constexpr u16string_view operator"" sv(const char16_t* string, size_t length) noexcept {
                 return std::u16string_view(string, length);
             }
-            inline constexpr u32string_view operator""sv(const char32_t* string, size_t length) noexcept {
+            inline constexpr u32string_view operator"" sv(const char32_t* string, size_t length) noexcept {
                 return std::u32string_view(string, length);
             }
         }

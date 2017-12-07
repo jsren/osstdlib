@@ -170,7 +170,7 @@ namespace std
 
 
 #ifdef __cpp_deduction_guides
-    template<typename T, typename U>
+    template<typename T, typename ...U>
     array(T, U...) -> array<T, 1 + sizeof...(U)>;
 #endif
 

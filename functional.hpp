@@ -99,36 +99,34 @@ namespace std
         template<> uint64_t hash_string_fnv<uint64_t>(const char16_t*, size_t) noexcept;
         template<> uint64_t hash_string_fnv<uint64_t>(const char32_t*, size_t) noexcept;
 
-        template<>
-        inline int32_t hash_buffer_fnv<int32_t>(const uint8_t* buffer, size_t size) noexcept {
+        template<> inline int32_t hash_buffer_fnv<int32_t>(const uint8_t* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_buffer_fnv<uint32_t>(buffer, size));
         }
-        template<>
-        inline int64_t hash_buffer_fnv<int64_t>(const uint8_t* buffer, size_t size) noexcept {
+        template<> inline int64_t hash_buffer_fnv<int64_t>(const uint8_t* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_buffer_fnv<uint64_t>(buffer, size));
         }
-        template<> int32_t hash_string_fnv<int32_t>(const char* buffer, size_t size) noexcept {
+        template<> inline int32_t hash_string_fnv<int32_t>(const char* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
         }
-        template<> int32_t hash_string_fnv<int32_t>(const wchar_t* buffer, size_t size) noexcept {
+        template<> inline int32_t hash_string_fnv<int32_t>(const wchar_t* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
         }
-        template<> int32_t hash_string_fnv<int32_t>(const char16_t* buffer, size_t size) noexcept {
+        template<> inline int32_t hash_string_fnv<int32_t>(const char16_t* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
         }
-        template<> int32_t hash_string_fnv<int32_t>(const char32_t* buffer, size_t size) noexcept {
+        template<> inline int32_t hash_string_fnv<int32_t>(const char32_t* buffer, size_t size) noexcept {
             return static_cast<int32_t>(hash_string_fnv<uint32_t>(buffer, size));
         }
-        template<> int64_t hash_string_fnv<int64_t>(const char* buffer, size_t size) noexcept {
+        template<> inline int64_t hash_string_fnv<int64_t>(const char* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
         }
-        template<> int64_t hash_string_fnv<int64_t>(const wchar_t* buffer, size_t size) noexcept {
+        template<> inline int64_t hash_string_fnv<int64_t>(const wchar_t* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
         }
-        template<> int64_t hash_string_fnv<int64_t>(const char16_t* buffer, size_t size) noexcept {
+        template<> inline int64_t hash_string_fnv<int64_t>(const char16_t* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
         }
-        template<> int64_t hash_string_fnv<int64_t>(const char32_t* buffer, size_t size) noexcept {
+        template<> inline int64_t hash_string_fnv<int64_t>(const char32_t* buffer, size_t size) noexcept {
             return static_cast<int64_t>(hash_string_fnv<uint64_t>(buffer, size));
         }
 
