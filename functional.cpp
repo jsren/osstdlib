@@ -6,10 +6,10 @@ namespace std
     namespace __detail
     {
         template<typename T>
-        static constexpr uint64_t getInitialBasis();
+        static constexpr uint64_t getInitialBasis() noexcept;
 
         template<typename T>
-        static constexpr uint64_t getPrime();
+        static constexpr uint64_t getPrime() noexcept;
 
         template<> constexpr uint64_t getInitialBasis<uint32_t>() noexcept {
             return 0x811c9dc5;
