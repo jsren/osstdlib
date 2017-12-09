@@ -9,11 +9,18 @@ int main()
 
     char buffer[124]{};
 
-    auto count = __platform::__read(__platform::__stdin, buffer, sizeof(buffer));
+    //auto count = __platform::__read(__platform::__stdin, buffer, sizeof(buffer));
 
-    __platform::__write(__platform::__stdout, lala.c_str(), lala.size() * sizeof(char));
-    __platform::__write(__platform::__stdout, buffer, count * sizeof(char));
-    //__platform::__write(__platform::__stdout, "\n", 1 * sizeof(char));
+    __platform::__open_options opts{};
+    opts.read = true;
+
+    auto handle = __platform::__open("build.json", opts, __platform::__file_acl());
+
+    __platform::ssize_t res = __platform::__read(handle, buffer, 123);
+    __platform::__write(__platform::__stdout, buffer, 123);
+    __platform::__write(__platform::__stdout, "\n", 1 * sizeof(char));
+
+    __platform::__close(handle);
 }
 #else
 

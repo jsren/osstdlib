@@ -15,13 +15,39 @@ namespace __platform
 {
     struct __file_handle;
 
+    struct __open_options
+    {
+        bool read : 1;
+        bool write : 1;
+        bool truncate : 1;
+        bool append : 1;
+        bool create : 1;
+        bool failExists : 1;
+    };
+
+    struct __file_acl
+    {
+        bool userRead : 1;
+        bool userWrite : 1;
+        bool userExecute : 1;
+        bool groupRead : 1;
+        bool groupWrite : 1;
+        bool groupExecute : 1;
+        bool othersRead : 1;
+        bool othersWrite : 1;
+        bool othersExecute : 1;
+        bool set_uid : 1;
+        bool set_gid : 1;
+    };
+
     extern const __file_handle __stdin;
     extern const __file_handle __stdout;
     extern const __file_handle __stderr;
 
     void __exit(int rc) noexcept;
-    __file_handle __open(const char* filename) noexcept;
-    int __close(__file_handle handle) noexcept;
-    int __read(__file_handle handle, const void* buffer, unsigned long size) noexcept;
-    int __write(__file_handle handle, const void* data, unsigned long size) noexcept;
+    __file_handle __open(const char* filename, __open_options, __file_acl) noexcept;
+    ssize_t __close(__file_handle handle) noexcept;
+    ssize_t __read(__file_handle handle, const void* buffer, size_t size) noexcept;
+    ssize_t __write(__file_handle handle, const void* data, size_t size) noexcept;
+    ssize_t __fseek(__file_handle handle, size_t offset) noexcept;
 }
