@@ -40,6 +40,13 @@ namespace __platform
         bool set_gid : 1;
     };
 
+    enum class __seek_whence
+    {
+        start,
+        current,
+        end
+    };
+
     extern const __file_handle __stdin;
     extern const __file_handle __stdout;
     extern const __file_handle __stderr;
@@ -49,5 +56,5 @@ namespace __platform
     ssize_t __close(__file_handle handle) noexcept;
     ssize_t __read(__file_handle handle, const void* buffer, size_t size) noexcept;
     ssize_t __write(__file_handle handle, const void* data, size_t size) noexcept;
-    ssize_t __fseek(__file_handle handle, size_t offset) noexcept;
+    ssize_t __seek(__file_handle handle, ssize_t offset, __seek_whence whence) noexcept;
 }
