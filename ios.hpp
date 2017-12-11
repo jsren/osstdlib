@@ -3,6 +3,7 @@
 #include "system_error.hpp"
 #include "atomic.hpp"
 #include "memory.hpp"
+#include ".ios-decl.hpp"
 
 namespace std
 {
@@ -53,10 +54,7 @@ namespace std
 			};
 		}
 	}
-	
-	
-	typedef make_signed_t<size_t> streamsize;
-    typedef make_signed_t<size_t> streamoff;
+
 
     class ios_base
     {
