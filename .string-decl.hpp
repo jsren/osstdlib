@@ -6,7 +6,7 @@ namespace std
     template<typename Char>
     struct char_traits
     {
-        using value_type = Char;
+        using char_type = Char;
     };
 
     // Forward declare string
