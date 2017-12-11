@@ -33,12 +33,14 @@ namespace std
         typename Allocator = allocator<Char>>
     class __basic_string_base
     {
+        static_assert(is_same<Char, typename Traits::char_type>::value,"");
+
     protected:
         using alloc_traits = allocator_traits<Allocator>;
 
     public:
         using traits_type            = Traits;
-        using value_type             = typename Traits::value_type;
+        using value_type             = typename Traits::char_type;
         using allocator_type         = Allocator;
         using size_type              = typename alloc_traits::size_type;
         using difference_type        = typename alloc_traits::difference_type;
@@ -165,6 +167,8 @@ namespace std
         void clear() noexcept {
             _length = 0;
         }
+
+
 
         /*basic_string& insert(size_type index, size_type count, Char value)
         {
@@ -293,6 +297,42 @@ namespace std
         ~basic_string() {
             if (_length != 0) delete[] _data;
         }
+
+        basic_string& operator +=(const basic_string& other)
+        {
+            auto finalLength = _length + other._length;
+            if (finalLength != 0)
+            {
+                auto* data = new char[finalLength + 1];
+                std::memcpy(data, this->_data, _length);
+                std::memcpy(data + _length, other._data, other._length);
+                data[finalLength] = '\0';
+
+                if (_length != 0) { delete[] this->_data; }
+                this->_data     = data;
+                this->_length   = finalLength;
+                this->_capacity = finalLength;
+            }
+            return *this;
+        }
+        basic_string& operator +=(const char* other)
+        {
+            auto othersize = std::strlen(other);
+            auto finalLength = _length + othersize;
+            if (finalLength != 0)
+            {
+                auto* data = new char[finalLength + 1];
+                std::memcpy(data, this->_data, _length);
+                std::memcpy(data + _length, other, othersize);
+                data[finalLength] = '\0';
+
+                if (_length != 0) { delete[] this->_data; }
+                this->_data      = data;
+                this->_length   = finalLength;
+                this->_capacity = finalLength;
+            }
+            return *this;
+        }
     };
 
 
@@ -300,4 +340,39 @@ namespace std
     typedef basic_string<wchar_t> wstring;
     typedef basic_string<char16_t> u16string;
     typedef basic_string<char32_t> u32string;
+
+
+    namespace __detail
+    {
+        string _int_to_string(unsigned long long, bool);
+
+        inline string uint_to_string(unsigned long long value) {
+            return _int_to_string(value, false);
+        }
+        inline string int_to_string(long long value)
+        {
+            if (value < 0) {
+                return _int_to_string(-value, true);
+            } else return _int_to_string(value, false);
+        }
+    }
+
+    inline string to_string(int value) {
+        return __detail::int_to_string(value);
+    }
+    inline string to_string(long value) {
+        return __detail::int_to_string(value);
+    }
+    inline string to_string(long long value) {
+        return __detail::int_to_string(value);
+    }
+    inline string to_string(unsigned int value) {
+        return __detail::uint_to_string(value);
+    }
+    inline string to_string(unsigned long value) {
+        return __detail::uint_to_string(value);
+    }
+    inline string to_string(unsigned long long value) {
+        return __detail::uint_to_string(value);
+    }
 }
