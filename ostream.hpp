@@ -64,4 +64,11 @@ namespace std
         basic_ostream& operator=(const basic_ostream&& rhs);
         void swap(basic_ostream& rhs);
     };
+
+    using ostream = basic_ostream<char>;
+    using wostream = basic_ostream<wchar_t>;
+
+
+    extern ostream cout;
+    //extern wostream wcout;
 }

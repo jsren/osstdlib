@@ -62,6 +62,9 @@ namespace std
         static atomic<int> xalloc_next;
         unique_ptr<long[]> iarray;
         unique_ptr<void*[]> parray;
+        __detail::fmtflags::enum_ _flags{};
+        streamsize _precision{};
+        streamsize _width{};
 
     public:
         class failure;
@@ -124,15 +127,36 @@ namespace std
         class Init;
 
         // fmtflags state:
-        fmtflags flags() const;
-        fmtflags flags(fmtflags fmtfl);
+        fmtflags flags() const {
+            return _flags;
+        }
+        fmtflags flags(fmtflags flags)
+        {
+            auto old = _flags;
+            _flags = flags;
+            return old;
+        }
         fmtflags setf(fmtflags fmtfl);
         fmtflags setf(fmtflags fmtfl, fmtflags mask);
         void unsetf(fmtflags mask);
-        streamsize precision() const;
-        streamsize precision(streamsize prec);
-        streamsize width() const;
-        streamsize width(streamsize wide);
+        inline streamsize precision() const {
+            return _precision;
+        }
+        streamsize precision(streamsize precision)
+        {
+            auto old = _precision;
+            _precision = precision;
+            return old;
+        }
+        inline streamsize width() const {
+            return _width;
+        }
+        streamsize width(streamsize width)
+        {
+            auto old = _width;
+            _width = width;
+            return old;
+        }
 
         // storage:
         static int xalloc();
@@ -140,7 +164,7 @@ namespace std
         void*& pword(int index);
 
         // destructor
-        virtual ~ios_base() { }
+        virtual ~ios_base() = default;
 
         // callbacks;
         enum event {
@@ -156,8 +180,19 @@ namespace std
         static bool sync_with_stdio(bool sync = true);
 
     protected:
-        ios_base();
+        iostate _iostate{};
 
+        ios_base() = default;
+
+        inline void move(ios_base& other)
+        {
+            swap(iarray, other.iarray);
+            swap(parray, other.parray);
+            swap(_flags, other._flags);
+            swap(_precision, other._precision);
+            swap(_width, other._width);
+            swap(_iostate, other._iostate);
+        }
     };
 
 
@@ -196,6 +231,123 @@ namespace std
 
     const error_category& iostream_category();
 
+
+    template<typename Char, typename Traits = char_traits<Char>>
+    class basic_ostream;
+
+    template<typename Char, typename Traits = char_traits<Char>>
+    class basic_ios : public ios_base
+    {
+    public:
+        using char_type = Char;
+        using traits_type = Traits;
+        using int_type = Traits::int_type;
+        using pos_type = Traits::pos_type;
+        using off_type = Traits::off_type;
+
+    private:
+        Char _fill{' '};
+        basic_streambuf<Char, Traits>* _streambuf{};
+        basic_ostream<Char, Traits>* _tie{};
+
+    protected:
+        basic_ios() = default;
+
+    public:
+        virtual ~basic_ios() = default;
+
+        explicit basic_ios(basic_streambuf<Char, Traits>* streambuf)
+            : _streambuf(streambuf) { }
+
+        basic_ios(const basic_ios&) = delete;
+
+        Char fill() const {
+            return _fill;
+        }
+        Char fill(Char newValue)
+        {
+            auto old = _fill;
+            _fill = newValue;
+            return old;
+        }
+
+        basic_ostream<Char, Traits>* tie() const {
+            return _tie;
+        }
+        basic_ostream<Char, Traits>* tie(basic_ostream<Char, Traits>* newValue)
+        {
+            auto old = _tie;
+            _tie = newValue;
+            return old;
+        }
+
+        iostate rdstate() const {
+            return ios_base::_iostate;
+        }
+
+        bool good() const {
+            return rdstate() == 0;
+        }
+        bool eof() const {
+            return rdstate() & iostate::eofbit == iostate::eofbit;
+        }
+        bool fail() const {
+            return rdstate() & iostate::failbit == iostate::failbit
+                || rdstate() & iostate::badbit == iostate::badbit;
+        }
+        bool bad() const {
+            return rdstate() & iostate::badbit == iostate::badbit;
+        }
+        bool operator!() const {
+            return fail();
+        }
+        operator bool() const {
+            return !fail();
+        }
+        void setstate(iostate state) {
+            clear(rdstate() | state);
+        }
+        void clear(iostate state = ios_base::goodbit) {
+            _iostate = state | (rdbuf() == nullptr ? badbit : 0);
+        }
+
+        char narrow(char_type value, char default_) const;
+        char_type widen(char value) const;
+
+    protected:
+        void init(basic_streambuf<Char, Traits>* streambuf)
+        {
+            _streambuf = streambuf;
+            _tie = nullptr;
+            clear();
+            flags(skipws | dec);
+            width(0);
+            precision(6);
+            _fill = widen(' ');
+        }
+
+        void move(basic_ios&& other)
+        {
+            ios_base::move(other);
+            swap(_fill, other._fill);
+            _tie = other._tie;
+            other._tie = 0;
+        }
+
+        void swap(basic_ios& other) noexcept
+        {
+            ios_base::move(other);
+            swap(_fill, other._fill);
+            swap(_tie, other._tie);
+        }
+
+        void set_rdbuf(basic_streambuf<Char, Traits>* buffer) {
+            _streambuf = buffer;
+        }
+    };
+
+    using ios = basic_ios<char>;
+    using wios = basic_ios<wchar_t>;
 }
 
 namespace __abi
