@@ -23,6 +23,8 @@ where otherwise stated.
 - ios
 - string_view
 - iostream
+- locale
+- initializer_list
 ### Targeted ###
 - vector
 - small string optimisation

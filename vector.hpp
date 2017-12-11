@@ -44,5 +44,17 @@ namespace std
 		vector(vector&& other) noexcept;
 
 		vector(vector&& other, const Allocator& alloc);
+
+
+		vector& operator =(const vector& other);
+		vector& operator =(vector&& other) noexcept(
+			allocator_traits<Allocator>::propagate_on_container_move_assignment::value ||
+			allocator_traits<Allocator>::is_always_equal::value);
+		vector& operator =(initializer_list<T> items);
+
+		void assign(size_type count, const T& value);
+		template<typename InputIter>
+		void assign(InputIter first, InputIter last);
+		void assign(initializer_list<T> items);
 	};
 }
