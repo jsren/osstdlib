@@ -236,14 +236,18 @@ namespace std
     class basic_ostream;
 
     template<typename Char, typename Traits = char_traits<Char>>
+    class basic_streambuf;
+
+
+    template<typename Char, typename Traits = char_traits<Char>>
     class basic_ios : public ios_base
     {
     public:
         using char_type = Char;
         using traits_type = Traits;
-        using int_type = Traits::int_type;
-        using pos_type = Traits::pos_type;
-        using off_type = Traits::off_type;
+        using int_type = typename Traits::int_type;
+        using pos_type = typename Traits::pos_type;
+        using off_type = typename Traits::off_type;
 
     private:
         Char _fill{' '};
@@ -278,6 +282,16 @@ namespace std
         {
             auto old = _tie;
             _tie = newValue;
+            return old;
+        }
+
+        basic_streambuf<Char, Traits>* rdbuf() const {
+            return _streambuf;
+        }
+        basic_streambuf<Char, Traits>* rdbuf(basic_streambuf<Char, Traits>* newBuffer)
+        {
+            auto old = _streambuf;
+            _streambuf = newBuffer;
             return old;
         }
 
@@ -320,7 +334,7 @@ namespace std
             _streambuf = streambuf;
             _tie = nullptr;
             clear();
-            flags(skipws | dec);
+            flags(static_cast<fmtflags>(skipws | dec));
             width(0);
             precision(6);
             _fill = widen(' ');

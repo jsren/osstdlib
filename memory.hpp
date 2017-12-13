@@ -227,6 +227,14 @@ namespace std
     };
 
 
+	namespace __detail
+	{
+		template<typename T, typename Deleter>
+		struct pointer_type
+		{
+			
+		};
+	}
 
 	/* A pointer type enforcing automatic object destruction when the
 	referenced object leaves the current scope. */
@@ -237,14 +245,20 @@ namespace std
 		T* ptr = nullptr;
         Deleter deleter{};
 
+		template<typename Y>
+		using get_deleter_pointer = typename remove_reference_t<Y>::pointer;
+
 	public:
 		using element_type = T;
+		using pointer = __detail::scope_type_or_default_t<
+			Deleter, get_deleter_pointer, T*>;
+		using deleter_type = Deleter;
 
 		constexpr unique_ptr() noexcept = default;
-        constexpr inline unique_ptr(nullptr_t) noexcept { };
+        constexpr unique_ptr(nullptr_t) noexcept { };
 
 		/* Creates a new unique_ptr from the given object pointer. */
-		inline explicit unique_ptr(T* obj) noexcept : ptr(obj) { }
+		explicit unique_ptr(T* obj) noexcept : ptr(obj) { }
 
 		// No copy constructor
 		unique_ptr(const unique_ptr<T>& ptr) = delete;
@@ -252,40 +266,61 @@ namespace std
 		unique_ptr& operator =(const unique_ptr<T>& ptr) = delete;
 
 		// Move constructor
-		inline unique_ptr(unique_ptr<T>&& ptr) noexcept
+		unique_ptr(unique_ptr<T>&& ptr) noexcept
 		{
 			std::swap(this->ptr, ptr.ptr);
 			std::swap(this->deleter, ptr.deleter);
 		}
 		template<typename Y, typename D1,
-			class=std::enable_if<!is_array<Y>::value && is_convertible<D1, Deleter>::value>>
-		inline unique_ptr(unique_ptr<Y, D1>&& other)
+			class=std::enable_if_t<!is_array<Y>::value && is_convertible<D1, Deleter>::value>>
+		unique_ptr(unique_ptr<Y, D1>&& other)
 		{
 			std::swap(this->ptr, other.ptr);
 			std::swap(this->deleter, other.deleter);
 		}
 
 		// Move assignment
-		inline unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
+		unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
 		{
 			std::swap(this->ptr, ptr.ptr);
 			std::swap(this->deleter, ptr.deleter);
 		}
 
-        inline T* get() noexcept { return ptr; }
-        inline const T* get() const noexcept { return ptr; }
+        T* get() noexcept { return ptr; }
+        const T* get() const noexcept { return ptr; }
+
+		Deleter& get_deleter() noexcept { return deleter; }
+		const Deleter& get_deleter() const noexcept { return deleter; }
+
+		operator bool() const noexcept { return ptr != nullptr; }
 
 		/* Calling this destructor will also invoke the destructor
 		of the object being pointed to. */
-		inline ~unique_ptr() {
+		~unique_ptr() {
 			if (this->ptr != nullptr) deleter(this->ptr);
 		}
 
 	public:
 		/* Structure dereference. */
-		inline T* operator ->() const noexcept { return ptr; }
+		T* operator ->() const noexcept { return ptr; }
 		/* Indirection. */
-		inline T& operator *() const { return *ptr; }
+		T& operator *() const { return *ptr; }
+
+		T* release() noexcept {
+			auto old = ptr; ptr = nullptr; return ptr;
+		}
+
+		void reset(pointer ptr = pointer()) noexcept
+		{
+			if (this->ptr != nullptr) deleter(this->ptr);
+			this->ptr = ptr;
+		}
+
+		void swap(unique_ptr& other) noexcept
+		{
+			std::swap(this->ptr, other.ptr);
+			std::swap(this->deleter, other.deleter);
+		}
 	};
 
 	/* A pointer type enforcing automatic object destruction when the
@@ -297,47 +332,81 @@ namespace std
 		T* ptr = nullptr;
         Deleter deleter{};
 
+		template<typename Y>
+		using get_deleter_pointer = typename remove_reference_t<Y>::pointer;
+
 	public:
 		using element_type = T[];
+		using pointer = __detail::scope_type_or_default_t<
+			Deleter, get_deleter_pointer, T*>;
+		using deleter_type = Deleter;
 
         constexpr unique_ptr() noexcept { };
-        constexpr inline unique_ptr(nullptr_t) noexcept { }
+        constexpr unique_ptr(nullptr_t) noexcept { }
 
 		/* Creates a new unique_ptr from the given object pointer. */
-		inline explicit unique_ptr(T* obj) noexcept : ptr(obj) { }
+		explicit unique_ptr(T* obj) noexcept : ptr(obj) { }
 
 		// No copy constructor/assignment
 		unique_ptr(const unique_ptr<T>& ptr) = delete;
 		unique_ptr& operator =(const unique_ptr<T>& ptr) = delete;
 
 		// Move constructor
-		inline unique_ptr(unique_ptr<T[]>&& ptr) noexcept
+		unique_ptr(unique_ptr<T[]>&& ptr) noexcept
 		{
 			this->ptr = ptr.ptr;
 			ptr.ptr = nullptr;
 		}
 		// Move assignment
-		inline unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
+		unique_ptr& operator =(unique_ptr<T>&& ptr) noexcept
 		{
 			this->ptr = ptr.ptr;
 			ptr.ptr = nullptr;
 			return *this;
 		}
 
-        inline unique_ptr& operator =(T ptr[])
+        unique_ptr& operator =(T ptr[])
         {
             if (this->ptr != nullptr) deleter(this->ptr);
             this->ptr = ptr;
             return *this;
         }
 
-        inline T* get() noexcept { return ptr; }
-        inline const T* get() const noexcept { return ptr; }
+        T* get() noexcept { return ptr; }
+        const T* get() const noexcept { return ptr; }
+
+		Deleter& get_deleter() noexcept { return deleter; }
+		const Deleter& get_deleter() const noexcept { return deleter; }
+
+		operator bool() const noexcept { return ptr != nullptr; }
 
 		/* Structure dereference. */
-		inline T* operator ->() const noexcept { return ptr; }
+		T* operator ->() const noexcept { return ptr; }
 		/* Indirection. */
-		inline T& operator *() const { return *ptr; }
+		T& operator *() const { return *ptr; }
+
+		T* release() noexcept {
+			auto old = ptr; ptr = nullptr; return ptr;
+		}
+
+		template<typename Y, class=enable_if_t<is_same<Y, pointer>::value ||
+			is_same<pointer, element_type*>::value>>
+		void reset(Y ptr) noexcept
+		{
+			if (this->ptr != nullptr) deleter(this->ptr);
+			this->ptr = ptr;
+		}
+		void reset(nullptr_t ptr = nullptr) noexcept
+		{
+			if (this->ptr != nullptr) deleter(this->ptr);
+			this->ptr = ptr;
+		}
+
+		void swap(unique_ptr& other) noexcept
+		{
+			std::swap(this->ptr, other.ptr);
+			std::swap(this->deleter, other.deleter);
+		}
 
 		/* Calling this destructor will also invoke the destructor
 		of the object being pointed to. */
@@ -345,6 +414,12 @@ namespace std
             if (this->ptr != nullptr) deleter(this->ptr);
         }
 	};
+
+	template<typename T, typename Deleter>
+    void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept
+	{
+		lhs.swap(rhs);
+	}
 
 
 	/*

@@ -6,6 +6,7 @@ namespace std
 {
     struct output_iterator_tag;
 
+
     template<typename Char, typename Traits = char_traits<Char>>
     class ostreambuf_iterator
     {
