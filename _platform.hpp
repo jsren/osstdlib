@@ -51,7 +51,7 @@ namespace __platform
     extern const __file_handle __stdout;
     extern const __file_handle __stderr;
 
-    void __exit(int rc) noexcept;
+    [[noreturn]] void __exit(int rc) noexcept;
     __file_handle __open(const char* filename, __open_options, __file_acl) noexcept;
     ssize_t __close(__file_handle handle) noexcept;
     ssize_t __read(__file_handle handle, const void* buffer, size_t size) noexcept;

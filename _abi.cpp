@@ -47,6 +47,11 @@ void operator delete[](void*) noexcept {
 
 }
 
+namespace std {
+    void* memcpy(void* dest, const void* src, __platform::size_t count);
+    void* memset(void* ptr, int value, __platform::size_t num);
+}
+
 extern "C"
 {
     int __cxa_guard_acquire(__platform::uint64_t* guard)
@@ -74,5 +79,14 @@ extern "C"
     void _start()
     {
         _exit(main());
+    }
+
+    void* memcpy(void* dest, const void* src, __platform::size_t count)
+    {
+        return std::memcpy(dest, src, count);
+    }
+    void* memset(void* ptr, int value, __platform::size_t num)
+    {
+        return std::memset(ptr, value, num);
     }
 }
