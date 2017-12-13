@@ -1,4 +1,4 @@
-#include "cstring.hpp"
+#include <cstring>
 
 std::size_t std::strlen(const char* str) {
     for (std::size_t i = 0; true; i++) {

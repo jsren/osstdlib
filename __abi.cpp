@@ -1,5 +1,6 @@
 /* abi.cpp - (c) 2017 James S Renwick */
-#include "_platform.hpp"
+#include <__platform>
+#include <exception>
 
 
 inline static bool getInitFlag(const __platform::uint64_t& guard)
@@ -45,6 +46,20 @@ void operator delete(void*, unsigned long) noexcept {
 }
 void operator delete[](void*) noexcept {
 
+}
+
+
+namespace __platform
+{
+    void __throw_exception(const std::exception& e) noexcept;
+}
+
+namespace __abi
+{
+    void __throw_exception(const std::exception& e) noexcept
+    {
+        __platform::__throw_exception(e);
+    }
 }
 
 namespace std {

@@ -1,7 +1,7 @@
 #pragma once
-#include "type_traits.hpp"
-#include "cstddef.hpp"
-#include ".ostreambuf-iterator.hpp"
+#include <type_traits>
+#include <cstddef>
+#include <__ostreambuf-iterator>
 
 namespace std
 {

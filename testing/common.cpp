@@ -1,4 +1,4 @@
-#include "common.hpp"
+#include <common>
 #include <cstdio>
 
 using namespace ostest;

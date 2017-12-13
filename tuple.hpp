@@ -1,9 +1,8 @@
 /* tuple.hpp - (c) 2017 James S Renwick */
 
 #pragma once
-#include "_feats.hpp"
-#include "type_traits.hpp"
-
+#include <type_traits>
+#include <cstddef>
 
 namespace std
 {

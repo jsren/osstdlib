@@ -1,7 +1,7 @@
 #if 1
-#include "string.hpp"
-#include "tuple.hpp"
-#include "_platform.hpp"
+#include <string>
+#include <tuple>
+#include <__platform>
 
 namespace std
 {

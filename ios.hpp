@@ -1,9 +1,9 @@
 /* ios.hpp - (c) 2017 James Renwick */
 #pragma once
-#include "system_error.hpp"
-#include "atomic.hpp"
-#include "memory.hpp"
-#include ".ios-decl.hpp"
+#include <system_error>
+#include <atomic>
+#include <memory>
+#include <__ios-decl>
 
 namespace std
 {
@@ -350,7 +350,7 @@ namespace std
     using wios = basic_ios<wchar_t>;
 }
 
-namespace __abi
+namespace __platform
 {
     extern int __ecode_from_enum(std::io_errc) noexcept;
 }
@@ -359,7 +359,7 @@ namespace std
 {
 
     inline error_code make_error_code(io_errc e) {
-        return error_code(__abi::__ecode_from_enum(e), iostream_category());
+        return error_code(__platform::__ecode_from_enum(e), iostream_category());
     }
 
     /*inline error_condition make_error_condition(io_errc e) {

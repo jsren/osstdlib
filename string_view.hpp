@@ -1,8 +1,8 @@
 #pragma once
-#include "iterator.hpp"
-#include "cstring.hpp"
-#include "functional.hpp"
-#include "limits.hpp"
+#include <iterator>
+#include <cstring>
+#include <functional>
+#include <limits>
 
 namespace std
 {
