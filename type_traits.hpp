@@ -2,7 +2,7 @@
    except where otherwise stated.
 */
 #pragma once
-#include "_std.hpp"
+#include <cstddef>
 
 namespace std
 {
@@ -554,7 +554,7 @@ namespace std
         static false_type __test(...);
 
     public:
-        typedef decltype(__test<From, To>(0)) type;
+        static constexpr const bool value = decltype(__test<From, To>(0))::value;
     };
 
 #if defined(__cpp_variable_templates)

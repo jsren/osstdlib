@@ -1,8 +1,8 @@
 #pragma once
-#include "iterator.hpp"
-#include "cstring.hpp"
-#include "functional.hpp"
-#include "limits.hpp"
+#include <iterator>
+#include <cstring>
+#include <functional>
+#include <limits>
 
 namespace std
 {
@@ -276,6 +276,7 @@ namespace std
         inline namespace string_view_literals
         {
             #pragma GCC diagnostic ignored "-Wliteral-suffix"
+            #pragma GCC diagnostic ignored "-Wuser-defined-literals"
             inline constexpr string_view operator"" sv(const char* string, size_t length) noexcept {
                 return std::string_view(string, length);
             }

@@ -1,26 +1,8 @@
 #include "common.hpp"
-#include <cstdio>
+#include <stdio.h>
 
 using namespace ostest;
 
-void* operator new(size_t size) noexcept {
-    return malloc(size);
-}
-void* operator new[](size_t size) noexcept {
-    return malloc(size);
-}
-void operator delete(void* ptr) noexcept {
-    free(ptr);
-}
-void operator delete[](void* ptr) noexcept {
-    free(ptr);
-}
-void operator delete(void* ptr, long unsigned int) noexcept {
-    free(ptr);
-}
-void operator delete[](void* ptr, long unsigned int) noexcept {
-    free(ptr);
-}
 
 void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 {

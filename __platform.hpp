@@ -1,15 +1,8 @@
-#pragma once
+#if !defined(__OSSTDLIB_PLATFORM_HEADER)
+#define __OSSTDLIB_PLATFORM_HEADER
 
-/*#if defined(__GNUC__)
-#if __LP64__*/
-#include "impl/_platform-linux-i64.hpp"/*
-#else
-#include "impl/_platform-linux-i32.hpp"
-#endif
-#else
-#pragma error "Unknown or not-implemented platform"
-#endif
-*/
+#include <__platform-impl>
+
 
 namespace __platform
 {
@@ -51,10 +44,12 @@ namespace __platform
     extern const __file_handle __stdout;
     extern const __file_handle __stderr;
 
-    void __exit(int rc) noexcept;
+    [[noreturn]] void __exit(int rc) noexcept;
     __file_handle __open(const char* filename, __open_options, __file_acl) noexcept;
     ssize_t __close(__file_handle handle) noexcept;
     ssize_t __read(__file_handle handle, const void* buffer, size_t size) noexcept;
     ssize_t __write(__file_handle handle, const void* data, size_t size) noexcept;
     ssize_t __seek(__file_handle handle, ssize_t offset, __seek_whence whence) noexcept;
 }
+
+#endif

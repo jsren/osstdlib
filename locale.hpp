@@ -1,4 +1,4 @@
-#include ".ostreambuf-iterator.hpp"
+#include <__ostreambuf-iterator>
 
 namespace std
 {

@@ -1,6 +1,6 @@
 #pragma once
-#include "ostream.hpp"
-#include "streambuf.hpp"
+#include <ostream>
+#include <streambuf>
 
 namespace std
 {

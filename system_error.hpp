@@ -1,7 +1,7 @@
 #pragma once
-#include "type_traits.hpp"
-#include "string.hpp"
-#include "stdexcept.hpp"
+#include <type_traits>
+#include <string>
+#include <stdexcept>
 
 namespace std
 {
@@ -140,7 +140,7 @@ namespace std
 
 }
 
-namespace __abi {
+namespace __platform {
     extern int __ecode_from_enum(std::errc) noexcept;
 }
 

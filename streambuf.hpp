@@ -1,5 +1,5 @@
-#include ".string-decl.hpp"
-#include "ios.hpp"
+#include <__string-decl>
+#include <ios>
 
 namespace std
 {

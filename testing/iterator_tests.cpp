@@ -1,10 +1,10 @@
 /* iterator_tests.cpp - (c) 2017 James Renwick */
-#include <array.hpp>
-#include <iterator.hpp>
-#include <memory.hpp>
-#include <string.hpp>
-#include <tuple.hpp>
-#include <type_traits.hpp>
+#include <array>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <type_traits>
 
 #include "ostest/ostest.h"
 

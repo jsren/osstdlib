@@ -3,8 +3,8 @@
    Authors: James S Renwick
 */
 #pragma once
-#include "std"
-#include "meta.hpp"
+#include <type_traits>
+#include <cstddef>
 
 namespace std
 {

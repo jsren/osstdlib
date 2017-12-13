@@ -1,5 +1,8 @@
-#include "../_platform.hpp"
-#include "_platform-linux-i64.hpp"
+#include <__platform>
+#include <system_error>
+#include <type_traits>
+#include <exception>
+#include <ios>
 
 namespace __platform
 {
@@ -29,6 +32,21 @@ namespace __platform
     constexpr const int SEEK_SET = 0;
     constexpr const int SEEK_CUR = 1;
     constexpr const int SEEK_END = 2;
+
+
+    int __ecode_from_enum(std::errc e) noexcept
+    {
+        return static_cast<int>(static_cast<std::underlying_type_t<decltype(e)>>(e));
+    }
+    int __ecode_from_enum(std::io_errc e) noexcept
+    {
+        return static_cast<int>(static_cast<std::underlying_type_t<decltype(e)>>(e));
+    }
+
+    void __throw_exception(const std::exception&) noexcept
+    {
+
+    }
 
 
     [[noreturn]] void __exit(int rc) noexcept
