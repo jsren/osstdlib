@@ -1,5 +1,6 @@
-#include "string.hpp"
-#include "limits.hpp"
+#include <string>
+#include <limits>
+#include <charconv>
 
 namespace std
 {
@@ -11,23 +12,26 @@ namespace std
 		const char32_t* __empty_Ustring = U"\0";
 
 
-        string _int_to_string(unsigned long long value, bool negative)
+        string int_to_string(signed long long value)
+        {
+            constexpr auto maxDigits = numeric_limits<signed long long>::digits10;
+            char buffer[maxDigits + 1];
+
+            auto res = to_chars(buffer, buffer + maxDigits, value);
+            *res.ptr = '\0';
+
+            return (static_cast<bool>(res.ec)) ? string() : string(buffer);
+        }
+
+        string int_to_string(unsigned long long value)
         {
             constexpr auto maxDigits = numeric_limits<unsigned long long>::digits10;
-            char buffer[maxDigits + 2];
-            auto cursor = buffer + maxDigits + 1;
-            *cursor-- = '\0';
+            char buffer[maxDigits + 1];
 
-            auto digit = value % 10;
-            *cursor-- = '0' + digit;
+            auto res = to_chars(buffer, buffer + maxDigits, value);
+            *res.ptr = '\0';
 
-            while (value >= 10) {
-                value /= 10;
-                auto digit = value % 10;
-                *cursor-- = '0' + digit;
-            }
-            if (negative) { *cursor-- = '-'; }
-            return string(cursor + 1);
+            return (static_cast<bool>(res.ec)) ? string() : string(buffer);
         }
 	}
 }

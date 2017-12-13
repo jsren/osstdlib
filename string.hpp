@@ -1,11 +1,11 @@
 #pragma once
-#include "iterator.hpp"
-#include "cstring.hpp"
-#include "allocator.hpp"
-#include "memory.hpp"
-#include "stdexcept.hpp"
-#include ".string-decl.hpp"
-#include "string_view.hpp"
+#include <iterator>
+#include <cstring>
+#include <allocator>
+#include <memory>
+#include <stdexcept>
+#include <__string-decl>
+#include <string_view>
 
 
 namespace std
@@ -344,17 +344,8 @@ namespace std
 
     namespace __detail
     {
-        string _int_to_string(unsigned long long, bool);
-
-        inline string uint_to_string(unsigned long long value) {
-            return _int_to_string(value, false);
-        }
-        inline string int_to_string(long long value)
-        {
-            if (value < 0) {
-                return _int_to_string(-value, true);
-            } else return _int_to_string(value, false);
-        }
+        string uint_to_string(unsigned long long value);
+        string int_to_string(long long value);
     }
 
     inline string to_string(int value) {

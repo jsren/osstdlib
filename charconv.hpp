@@ -1,4 +1,4 @@
-#include "system_error.hpp"
+#include <system_error>
 
 namespace std
 {
@@ -18,36 +18,46 @@ namespace std
 
     namespace __detail
     {
-        static constexpr const char characters[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-
         to_chars_result _to_chars(unsigned long long value, bool negative,
-            int base, char* first, char* last)
-        {
-            if (base < 2 || base > 36) return to_chars_result{last, errc::value_too_large};
-
-            // Perform to-string as usual
-            constexpr auto maxDigits = numeric_limits<unsigned long long>::digits10 + 1;
-            char buffer[maxDigits];
-            auto end = buffer + maxDigits - 1;
-            auto cursor = end;
-
-            auto digit = value % base;
-            *cursor = characters[digit];
-
-            while (value >= base) {
-                value /= base;
-                auto digit = value % base;
-                *--cursor = characters[digit];
-            }
-            if (negative) { *--cursor = '-'; }
-
-            // Now copy
-            for (; cursor != end && first != last; cursor++, first++) {
-                *first = *cursor;
-            }
-            return {first, static_cast<errc>(false)};
-        }
+            int base, char* first, char* last);
     }
 
-    to_chars_result to_chars(char* first, char* last, char value, int base = 10);
+    inline to_chars_result to_chars(char* first, char* last, long long value, int base = 10)
+    {
+        if (value < 0) {
+            return __detail::_to_chars(static_cast<unsigned long long>(-value),
+                true, base, first, last);
+        }
+        else return __detail::_to_chars(static_cast<unsigned long long>(value),
+            false, base, first, last);
+    }
+
+    inline to_chars_result to_chars(char* first, char* last, unsigned long long value, int base = 10)
+    {
+        return __detail::_to_chars(static_cast<unsigned long long>(value),
+            false, base, first, last);
+    }
+
+    inline to_chars_result to_chars(char* first, char* last, char value, int base = 10) {
+        static_assert(sizeof(char) != sizeof(long long), "Unsupported on this platform.");
+        return to_chars(first, last, static_cast<long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, signed char value, int base = 10) {
+        return to_chars(first, last, static_cast<long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, unsigned char value, int base = 10) {
+        return to_chars(first, last, static_cast<unsigned long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, unsigned int value, int base = 10) {
+        return to_chars(first, last, static_cast<unsigned long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, signed int value, int base = 10) {
+        return to_chars(first, last, static_cast<long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, unsigned long value, int base = 10) {
+        return to_chars(first, last, static_cast<unsigned long long>(value), base);
+    }
+    inline to_chars_result to_chars(char* first, char* last, signed long value, int base = 10) {
+        return to_chars(first, last, static_cast<long long>(value), base);
+    }
 }

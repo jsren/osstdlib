@@ -26,3 +26,18 @@ where otherwise stated.
 - vector
 - small string optimisation
 - iostream
+
+## Building ##
+1. Requires GNU Make, Python 2, and G++/Clang with C++14 support
+1. Run `make static` or `make dynamic`
+1. Static and shared object files are in `build/`
+1. Headers are in `build/include/`
+
+## Usage ##
+1. Add generated include directory to your include directories (e.g. with -I)
+1. (Both static and dynamic) link with `osstdc++.o`
+1. (Dynamic only) link with `libosstdc++.so`
+
+### Optimisation ###
+Link-time optimisation builds can be enabled by setting the Make variable `LTO` to `-flto`.
+Optimisation level defaults to `Os`, but can be changed via the Make variable `OPT_LVL`.

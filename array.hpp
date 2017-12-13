@@ -1,9 +1,9 @@
 #pragma once
 
-#include "iterator.hpp"
-#include "functional.hpp"
-#include "stdexcept.hpp"
-#include "type_traits.hpp"
+#include <iterator>
+#include <functional>
+#include <stdexcept>
+#include <type_traits>
 
 namespace std
 {

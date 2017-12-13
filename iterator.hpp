@@ -1,6 +1,6 @@
 #pragma once
-#include "type_traits.hpp"
-#include "cstddef.hpp"
+#include <type_traits>
+#include <cstddef>
 
 namespace std
 {
@@ -17,7 +17,7 @@ namespace std
     template<typename T>
     struct iterator_traits<T*>
     {
-        using difference_type = ptrdiff_t;  
+        using difference_type = ptrdiff_t;
         using value_type = T;
         using pointer = T*;
         using reference = T&;
@@ -54,14 +54,14 @@ namespace std
 
             constexpr pointer_iterator(T* pointer) noexcept : pointer(pointer) { }
 
-            constexpr pointer_iterator(const pointer_iterator& other) noexcept 
+            constexpr pointer_iterator(const pointer_iterator& other) noexcept
                 : pointer(other.pointer) { }
 
             constexpr pointer_iterator& operator=(const pointer_iterator& other) noexcept {
                 pointer = other.pointer; return *this;
             }
 
-        public:    
+        public:
             constexpr pointer_iterator& operator++() noexcept {
                 pointer++; return *this;
             }
@@ -106,38 +106,38 @@ namespace std
 
 
         template<typename T, typename Y>
-        inline constexpr bool operator==(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator==(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() == rhs.base();
         }
         template<typename T, typename Y>
-        inline constexpr bool operator!=(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator!=(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() != rhs.base();
         }
         template<typename T, typename Y>
-        inline constexpr bool operator>(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator>(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() > rhs.base();
         }
         template<typename T, typename Y>
-        inline constexpr bool operator<(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator<(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() < rhs.base();
         }
         template<typename T, typename Y>
-        inline constexpr bool operator>=(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator>=(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() >= rhs.base();
         }
         template<typename T, typename Y>
-        inline constexpr bool operator<=(const pointer_iterator<T>& lhs, 
-            const pointer_iterator<Y>& rhs) noexcept 
+        inline constexpr bool operator<=(const pointer_iterator<T>& lhs,
+            const pointer_iterator<Y>& rhs) noexcept
         {
             return lhs.base() <= rhs.base();
         }
@@ -145,13 +145,13 @@ namespace std
         template<typename T>
         inline constexpr pointer_iterator<T> operator+(
             typename pointer_iterator<T>::difference_type offset,
-            const pointer_iterator<T>& lhs) noexcept 
+            const pointer_iterator<T>& lhs) noexcept
         {
             return lhs + offset;
         }
         template<typename T, typename Y>
         inline constexpr typename pointer_iterator<T>::difference_type operator-(
-            const pointer_iterator<T>& lhs, const pointer_iterator<Y>& rhs) noexcept 
+            const pointer_iterator<T>& lhs, const pointer_iterator<Y>& rhs) noexcept
         {
             return &*lhs - &*rhs;
         }
@@ -163,7 +163,7 @@ namespace std
 
 
     template<typename Iterator>
-    class reverse_iterator 
+    class reverse_iterator
     {
         using postfix = int;
 
@@ -181,11 +181,11 @@ namespace std
     public:
         constexpr reverse_iterator() { }
 
-        constexpr explicit reverse_iterator(Iterator iterator) 
+        constexpr explicit reverse_iterator(Iterator iterator)
             : current(iterator) { }
 
         template<typename U>
-        constexpr reverse_iterator(const reverse_iterator<U>& other) 
+        constexpr reverse_iterator(const reverse_iterator<U>& other)
             : current(other) { }
 
         template<typename U>
@@ -232,37 +232,37 @@ namespace std
     };
 
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator==(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator==(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() == rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator!=(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator!=(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() != rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator>(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator>(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() < rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator<(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator<(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() > rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator>=(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator>=(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() <= rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator<=(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator<=(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return lhs.base() >= rhs.base();
@@ -277,7 +277,7 @@ namespace std
     }
 
     template<typename Iterator1, typename Iterator2>
-    inline constexpr auto operator-(const reverse_iterator<Iterator1>& lhs, 
+    inline constexpr auto operator-(const reverse_iterator<Iterator1>& lhs,
         const reverse_iterator<Iterator2>& rhs)
     {
         return rhs.base() - lhs.base();
@@ -296,7 +296,7 @@ namespace std
 
 
     template<typename Iterator>
-    class move_iterator 
+    class move_iterator
     {
         using postfix = int;
 
@@ -319,11 +319,11 @@ namespace std
     public:
         constexpr move_iterator() { }
 
-        constexpr explicit move_iterator(Iterator iterator) 
+        constexpr explicit move_iterator(Iterator iterator)
             : current(iterator) { }
 
         template<typename U>
-        constexpr move_iterator(const move_iterator<U>& other) 
+        constexpr move_iterator(const move_iterator<U>& other)
             : current(other) { }
 
         template<typename U>
@@ -370,37 +370,37 @@ namespace std
     };
 
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator==(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator==(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() == rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator!=(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator!=(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() != rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator>(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator>(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() > rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator<(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator<(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() < rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator>=(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator>=(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() >= rhs.base();
     }
     template<typename Iterator1, typename Iterator2>
-    inline constexpr bool operator<=(const move_iterator<Iterator1>& lhs, 
+    inline constexpr bool operator<=(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() <= rhs.base();
@@ -415,7 +415,7 @@ namespace std
     }
 
     template<typename Iterator1, typename Iterator2>
-    inline constexpr auto operator-(const move_iterator<Iterator1>& lhs, 
+    inline constexpr auto operator-(const move_iterator<Iterator1>& lhs,
         const move_iterator<Iterator2>& rhs)
     {
         return lhs.base() - rhs.base();

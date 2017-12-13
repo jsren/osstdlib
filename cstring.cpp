@@ -1,4 +1,4 @@
-#include "cstring.hpp"
+#include <cstring>
 
 void* std::memcpy(void* dest, const void* src, std::size_t count)
 {
