@@ -9,7 +9,7 @@ LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
 
-FLAGS := -Ibuild/include -nostdlib -fno-exceptions -fno-rtti -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM)
+FLAGS := -Ibuild/include -nostdlib -fno-exceptions -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM)
 
 .PHONY: prepare main-static main-dynamic default test clean
 

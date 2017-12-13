@@ -757,6 +757,21 @@ namespace std
     using add_pointer_t = typename add_pointer<T>::type;
 
 
+    template<typename T>
+    struct remove_pointer { using type = T; };
+    template<typename T>
+    struct remove_pointer<T*> { using type = T; };
+    template<typename T>
+    struct remove_pointer<const T*> { using type = T; };
+    template<typename T>
+    struct remove_pointer<volatile T*> { using type = T; };
+    template<typename T>
+    struct remove_pointer<const volatile T*> { using type = T; };
+
+    template<typename T>
+    using remove_pointer_t = typename remove_pointer<T>::type;
+
+
     template<typename T> struct remove_extent { typedef T type; };
     template<typename T> struct remove_extent<T[]> { typedef T type; };
 

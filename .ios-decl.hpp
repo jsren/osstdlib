@@ -1,7 +1,7 @@
 #pragma once
-#include "cwchar.hpp"
-#include <cstddef.hpp>
-#include <type_traits.hpp>
+#include <cwchar>
+#include <cstddef>
+#include <type_traits>
 
 namespace std
 {

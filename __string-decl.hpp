@@ -5,6 +5,38 @@
 
 namespace std
 {
+    namespace __detail
+    {
+        inline static constexpr int memcmp(const void* lhs, const void* rhs, size_t count) noexcept
+        {
+            auto* p1 = static_cast<const unsigned char*>(lhs);
+            auto* p2 = static_cast<const unsigned char*>(rhs);
+            for (size_t i = 0; i < count; i++)
+            {
+                if (p1[i] < p2[i]) return -1;
+                if (p1[i] > p2[i]) return 1;
+            }
+            return 0;
+        }
+
+        inline static constexpr void* memcpy(void* dest, const void* src, size_t count) noexcept
+        {
+            auto* _dest = reinterpret_cast<char*>(dest);
+            auto* _src = reinterpret_cast<const char*>(src);
+
+            for (size_t i = 0; i < count; i++) {
+                _dest[i] = _src[i];
+            }
+            return dest;
+        }
+
+        inline static constexpr size_t strlen(const char* str) noexcept {
+            for (size_t i = 0; true; i++) {
+                if (str[i] == '\0') return i;
+            }
+        }
+    }
+
     template<typename Char>
     struct char_traits;
     template<>
@@ -42,18 +74,18 @@ namespace std
         static char_type* copy(char_type* dest, const char_type* source,
             size_t size)
         {
-            memcpy(dest, source, size * sizeof(char));
+            __detail::memcpy(dest, source, size * sizeof(char));
             return dest;
         }
 
         static constexpr int compare(const char_type* lhs,
             const char_type* rhs, size_t size)
         {
-            return memcmp(lhs, rhs, size * sizeof(char));
+            return __detail::memcmp(lhs, rhs, size * sizeof(char));
         }
 
         static constexpr size_t length(const char_type* string) {
-            return strlen(string);
+            return __detail::strlen(string);
         }
 
         static constexpr const char_type* find(const char_type* string,
