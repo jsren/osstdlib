@@ -1,5 +1,5 @@
 STD ?= c++1z
-OPT_LVL ?= Os
+OPT_LVL ?= O3
 
 TARGET_STATIC := osstdc++.o
 TARGET_DYNAMIC := osstdc++
@@ -9,7 +9,7 @@ LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
 
-FLAGS := -Ibuild/include -nostdlib -fno-exceptions -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM)
+FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM)
 
 .PHONY: prepare main-static main-dynamic default test clean
 
@@ -17,10 +17,10 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)
@@ -44,7 +44,7 @@ default:
 	clang -std=c++14 -Wall -Werror -Wextra -pedantic -Wno-unknown-pragmas -Wno-keyword-macro -Wno-ambiguous-ellipsis -I. string.cpp iterator_test.cpp -O3 -fno-exceptions -o test
 	gcc-7 -std=c++14 -Wall -Werror -Wextra -pedantic -Wno-unknown-pragmas -I. string.cpp iterator_test.cpp -O3 -fno-exceptions -o test
 
-test:
-	git submodule update --init
-	g++-7 -std=c++1z -I. -Itesting/ostest *.cpp testing/*.cpp -O3 -fno-exceptions -fno-rtti testing/ostest/ostest.o -o testing/test.exe
-#clang -std=c++1z -I. -Itesting/ostest *.cpp testing/*.cpp -O3 -fno-exceptions -fno-rtti testing/ostest/ostest.o -o testing/test.exe
+test: static
+#	git submodule update --init
+	make -C testing/ostest PROFILE=bare
+	$(CXX) $(FLAGS) -DOSTEST_NO_ALLOC -g -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe

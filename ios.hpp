@@ -232,10 +232,10 @@ namespace std
     const error_category& iostream_category();
 
 
-    template<typename Char, typename Traits = char_traits<Char>>
+    template<typename Char, typename Traits>
     class basic_ostream;
 
-    template<typename Char, typename Traits = char_traits<Char>>
+    template<typename Char, typename Traits>
     class basic_streambuf;
 
 

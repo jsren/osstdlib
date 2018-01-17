@@ -8,13 +8,15 @@ namespace std
 }
 
 
-auto print(const std::string& string)
+static auto print(const std::string& string)
 {
-     return __platform::__write(__platform::__stdout, string.c_str(), string.size());
+    __platform::size_t count;
+    __platform::__write(__platform::__stdout, string.c_str(), string.size(), count);
+    return count;
 }
 
 
-int main()
+int main2()
 {
     char buffer[124]{};
     //auto count = __platform::__read(__platform::__stdin, buffer, sizeof(buffer));

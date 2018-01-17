@@ -3,6 +3,9 @@
 #include <cstring>
 #include <functional>
 #include <limits>
+#include <__string-decl>
+#include <exception>
+#include <stdexcept>
 
 namespace std
 {
@@ -28,7 +31,7 @@ namespace std
         size_type _size{};
 
     public:
-        constexpr basic_string_view() noexcept;
+        constexpr basic_string_view() noexcept = default;
         constexpr basic_string_view(const basic_string_view& other) noexcept = default;
         constexpr basic_string_view(const Char* string, size_type size) : _data(string), _size(size) { }
         constexpr basic_string_view(const Char* string) : _data(string), _size(std::strlen(string)) { }

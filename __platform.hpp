@@ -8,6 +8,8 @@ namespace __platform
 {
     struct __file_handle;
 
+    struct __result_t;
+
     struct __open_options
     {
         bool read : 1;
@@ -16,6 +18,7 @@ namespace __platform
         bool append : 1;
         bool create : 1;
         bool failExists : 1;
+        bool binary : 1;
     };
 
     struct __file_acl
@@ -45,11 +48,11 @@ namespace __platform
     extern const __file_handle __stderr;
 
     [[noreturn]] void __exit(int rc) noexcept;
-    __file_handle __open(const char* filename, __open_options, __file_acl) noexcept;
-    ssize_t __close(__file_handle handle) noexcept;
-    ssize_t __read(__file_handle handle, const void* buffer, size_t size) noexcept;
-    ssize_t __write(__file_handle handle, const void* data, size_t size) noexcept;
-    ssize_t __seek(__file_handle handle, ssize_t offset, __seek_whence whence) noexcept;
+    __result_t __open(const char* filename, __open_options, __file_acl, __file_handle& handle_out) noexcept;
+    __result_t __close(__file_handle handle) noexcept;
+    __result_t __read(__file_handle handle, const void* buffer, size_t size, size_t& count_out) noexcept;
+    __result_t __write(__file_handle handle, const void* data, size_t size, size_t& count_out) noexcept;
+    __result_t __seek(__file_handle handle, ssize_t offset, __seek_whence whence, size_t& pos_out) noexcept;
 }
 
 #endif
