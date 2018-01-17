@@ -1,7 +1,15 @@
 #include "common.hpp"
-#include <stdio.h>
+#include <string>
+#include <__platform>
 
 using namespace ostest;
+
+static auto print(const std::string& string)
+{
+    __platform::size_t count = 0;
+    __platform::__write(__platform::__stdout, string.c_str(), string.size(), count);
+    return count;
+}
 
 
 void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
@@ -10,8 +18,20 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
     static const char* failStr = "FAIL";
 
     // Print test result
-    std::printf("[%s] [%s::%s] at %s:%i\n", result ? passStr : failStr, test.suiteName,
-        test.testName, test.file, test.line);
+    print("[");
+    print(result ? passStr : failStr);
+    print("] ");
+    print("[");
+    print(test.suiteName);
+    print("::");
+    print(test.testName);
+    print("] at ");
+    print(test.file);
+    print(":");
+    print(std::to_string(test.line));
+    print("\n");
+    //std::printf("[%s] [%s::%s] at %s:%i\n", result ? passStr : failStr, test.suiteName,
+    //    test.testName, test.file, test.line);
 
 	if (!result.succeeded())
 	{
@@ -21,7 +41,7 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 			const Assertion& result = enum_.current();
 			if (result.passed()) continue;
 
-			std::printf("\t%s:%i: %s\n", result.file, result.line, result.getMessage());
+			//std::printf("\t%s:%i: %s\n", result.file, result.line, result.getMessage());
 		}
 	}
 }

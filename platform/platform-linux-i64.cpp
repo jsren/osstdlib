@@ -57,11 +57,13 @@ namespace __platform
             "syscall"
             :
             : "r" (rc)
-            : "rax", "rdi"
+            : "rax", "rcx", "r11", "rdi"
         );
     }
 
-    __file_handle __open(const char* filename, __open_options cppflags, __file_acl cppmode) noexcept
+
+    __result_t __open(const char* filename, __open_options cppflags, __file_acl cppmode,
+        __file_handle& handle_out) noexcept
     {
         // Get Linux file flags
         size_t flags = O_RDONLY;
@@ -84,6 +86,11 @@ namespace __platform
             if (cppmode.othersRead   ) mode |= S_IROTH;
             if (cppmode.othersWrite  ) mode |= S_IWOTH;
             if (cppmode.othersExecute) mode |= S_IXOTH;
+
+            // Set default mode
+            if (mode == 0) {
+                mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+            }
         }
 
         ssize_t rc;
@@ -96,14 +103,15 @@ namespace __platform
             "movq %%rax, %0"
             : "=r"(rc)
             : "g"(filename), "g"(flags), "g"(mode)
-            : "rax", "rdi", "rsi", "rdx"
+            : "rax", "rcx", "r11", "rdi", "rsi", "rdx"
         );
-        return __file_handle{rc};
+        handle_out = __file_handle{rc};
+        return __result_t{rc < 0 ? rc : 0};
     }
 
-    ssize_t __close(__file_handle file) noexcept
+    __result_t __close(__file_handle file) noexcept
     {
-        ssize_t rc;
+        size_t rc;
         __asm__ volatile(
             "movq $3, %%rax\n"
             "movq %1, %%rdi\n"
@@ -111,12 +119,12 @@ namespace __platform
             "movq %%rax, %0"
             : "=r"(rc)
             : "g"(file.value)
-            : "rax", "rdi"
+            : "rax", "rcx", "r11", "rdi"
         );
-        return rc;
+        return __result_t{rc};
     }
 
-    ssize_t __read(__file_handle handle, const void* buffer, unsigned long size) noexcept
+    __result_t __read(__file_handle handle, const void* buffer, unsigned long size, size_t& count_out) noexcept
     {
         ssize_t rc;
         __asm__ volatile(
@@ -128,12 +136,13 @@ namespace __platform
             "movq %%rax, %0"
             : "=r"(rc)
             : "g"(handle.value), "g"(buffer), "g"(size)
-            : "rax", "rdi", "rsi", "rdx"
+            : "rax", "rcx", "r11", "rdi", "rsi", "rdx"
         );
-        return rc;
+        if (rc > 0) { count_out = rc; return __result_t{}; }
+        else return __result_t{rc};
     }
 
-    ssize_t __write(__file_handle handle, const void* data, unsigned long size) noexcept
+    __result_t __write(__file_handle handle, const void* data, unsigned long size, size_t& count_out) noexcept
     {
         ssize_t rc;
         __asm__ volatile(
@@ -145,12 +154,13 @@ namespace __platform
             "movq %%rax, %0"
             : "=r"(rc)
             : "g"(handle.value), "g"(data), "g"(size)
-            : "rax", "rdi", "rsi", "rdx"
+            : "rax", "rcx", "r11", "rdi", "rsi", "rdx"
         );
-        return rc;
+        if (rc > 0) { count_out = rc; return __result_t{}; }
+        else return __result_t{rc};
     }
 
-    ssize_t __seek(__file_handle handle, ssize_t offset, __seek_whence cppwhence) noexcept
+    __result_t __seek(__file_handle handle, ssize_t offset, __seek_whence cppwhence, size_t& pos_out) noexcept
     {
         size_t whence;
         switch (cppwhence) {
@@ -169,9 +179,10 @@ namespace __platform
             "movq %%rax, %0"
             : "=r"(rc)
             : "g"(handle.value), "g"(offset), "g"(whence)
-            : "rax", "rdi", "rsi", "rdx"
+            : "rax", "rcx", "r11", "rdi", "rsi", "rdx"
         );
-        return rc;
+        if (rc > 0) { pos_out = rc; return __result_t{}; }
+        else return __result_t{rc};
     }
 
 }

@@ -21,11 +21,18 @@ namespace std
     {
         template<typename Char, typename Traits>
         void write_int(basic_ostream<Char, Traits>& os, long long value, bool negative);
+
+        template<typename Char, typename Traits>
+        void write_sint(basic_ostream<Char, Traits>& os, signed long long value);
     }
+
 
     template <typename Char, typename Traits = char_traits<Char>>
     class basic_ostream : public basic_ios<Char, Traits>
     {
+    private:
+        static const constexpr auto badbit = basic_ios<Char, Traits>::badbit;
+
     public:
         using char_type = Char;
         using int_type = typename Traits::int_type;
@@ -33,8 +40,10 @@ namespace std
         using off_type = typename Traits::off_type;
         using traits_type = Traits;
 
+        using basic_ios<Char, Traits>::rdbuf;
+
         explicit basic_ostream(basic_streambuf<char_type, Traits>* sb)
-            : basic_ios(sb) { }
+            : basic_ios<Char, Traits>(sb) { }
 
         virtual ~basic_ostream();
 
@@ -70,7 +79,7 @@ namespace std
             }
             sentry& operator=(const sentry&) = delete;
             sentry& operator=(sentry&&) = delete;
-        }
+        };
 
         // Formatted output:
         basic_ostream& operator <<(basic_ostream& (*func)(basic_ostream&)) {
@@ -118,13 +127,33 @@ namespace std
         basic_ostream& operator <<(nullptr_t) {
             *this << "nullptr"; return *this;
         }
-        basic_ostream& operator <<(basic_streambuf<char_type, traits>* sb);
+        basic_ostream& operator <<(basic_streambuf<char_type, Traits>* sb);
 
         // Unformatted output:
-        basic_ostream<Char, Traits>& put(char_type c);
-        basic_ostream<Char, Traits>& write(const char_type* s, streamsize n);
+        basic_ostream<Char, Traits>& put(char_type c)
+        {
+            sentry _sentry{*this};
+            if (rdbuf()->sputc(c) == Traits::eof()) {
+                setstate(badbit);
+            }
+            return *this;
+        }
+        basic_ostream<Char, Traits>& write(const char_type* s, streamsize n)
+        {
+            sentry _sentry{*this};
+            if (rdbuf()->sputn(s, n) == Traits::eof()) {
+                setstate(badbit);
+            }
+            return *this;
+        }
 
-        basic_ostream<Char, Traits>& flush();
+        basic_ostream<Char, Traits>& flush()
+        {
+            if (rdbuf()->pubsync() == -1) {
+                setstate(badbit);
+            }
+            return *this;
+        }
 
         // seeks:
         pos_type tellp();
@@ -172,7 +201,7 @@ namespace std
             while (count > 0)
             {
                 size_t i = 0;
-                for (count != 0 && i < bufferSize; i++, count--) {
+                for (; count != 0 && i < bufferSize; i++, count--) {
                     buffer[i] = os.widen(*string++);
                 }
                 os.write(buffer, i);
@@ -243,7 +272,7 @@ namespace std
         template<typename Char, typename Traits>
         void write_uint(basic_ostream<Char, Traits>& os, unsigned long long value)
         {
-            constexpr auto buffSize = numeric_limits<unsigned long long>::max();
+            constexpr auto buffSize = numeric_limits<unsigned long long>::max_digits10;
             char buffer[buffSize];
 
             auto res = to_chars(buffer, buffer + buffSize, value);
@@ -254,7 +283,7 @@ namespace std
         template<typename Char, typename Traits>
         void write_sint(basic_ostream<Char, Traits>& os, signed long long value)
         {
-            constexpr auto buffSize = numeric_limits<signed long long>::max();
+            constexpr auto buffSize = numeric_limits<signed long long>::max_digits10;
             char buffer[buffSize];
 
             auto res = to_chars(buffer, buffer + buffSize, value);

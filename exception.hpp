@@ -22,5 +22,13 @@ namespace std
 }
 
 namespace __abi {
+    bool __uncaught_exception() noexcept;
     [[noreturn]] void __throw_exception(const std::exception&) noexcept;
+}
+
+namespace std
+{
+    inline bool uncaught_exception() noexcept {
+        return __abi::__uncaught_exception();
+    }
 }

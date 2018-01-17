@@ -103,7 +103,7 @@ namespace std
         int_type sputbackc(char_type value)
         {
             if (_get_next == _get_start || !Traits::eq(value, _get_next[-1])) {
-                return bpackfail(Traits::to_int_type(value));
+                return pbackfail(Traits::to_int_type(value));
             }
             else return Traits::to_int_type(*_get_next--);
         }
@@ -175,10 +175,10 @@ namespace std
             if (value != Traits::eof()) _get_next++;
             return value;
         }
-        virtual int_type overflow() {
+        virtual int_type overflow(int_type value = Traits::eof()) {
             return Traits::eof();
         }
-        virtual streamsize xsgetn()(char_type* buffer, streamsize size)
+        virtual streamsize xsgetn(char_type* buffer, streamsize size)
         {
             for (streamsize i = 0; i < size; i++)
             {
@@ -188,7 +188,7 @@ namespace std
             }
             return size;
         }
-        virtual streamsize xsputn()(const char_type* string, streamsize size)
+        virtual streamsize xsputn(const char_type* string, streamsize size)
         {
             for (streamsize i = 0; i < size; i++)
             {

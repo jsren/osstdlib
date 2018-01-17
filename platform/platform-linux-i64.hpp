@@ -22,4 +22,13 @@ namespace __platform
     {
         ssize_t value;
     };
+
+    struct __result_t
+    {
+        ssize_t rc{};
+
+        operator bool() const noexcept {
+            rc == 0;
+        }
+    };
 }
