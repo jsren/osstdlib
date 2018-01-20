@@ -1,5 +1,5 @@
 STD ?= c++1z
-OPT_LVL ?= O3
+OPT_LVL ?= O2
 
 TARGET_STATIC := osstdc++.o
 TARGET_DYNAMIC := osstdc++
@@ -17,10 +17,10 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp ostream.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp ostream.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)

@@ -232,10 +232,10 @@ namespace std
     const error_category& iostream_category();
 
 
-    template<typename Char, typename Traits>
+    template<typename Char, typename Traits = char_traits<Char>>
     class basic_ostream;
 
-    template<typename Char, typename Traits>
+    template<typename Char, typename Traits = char_traits<Char>>
     class basic_streambuf;
 
 
@@ -319,14 +319,18 @@ namespace std
             return !fail();
         }
         void setstate(iostate state) {
-            clear(rdstate() | state);
+            clear(static_cast<iostate>(rdstate() | state));
         }
         void clear(iostate state = ios_base::goodbit) {
-            _iostate = state | (rdbuf() == nullptr ? badbit : 0);
+            _iostate = static_cast<iostate>(state | (rdbuf() == nullptr ? badbit : 0));
         }
 
         char narrow(char_type value, char default_) const;
-        char_type widen(char value) const;
+
+        char_type widen(char value) const
+        {
+            return value;
+        }
 
     protected:
         void init(basic_streambuf<Char, Traits>* streambuf)

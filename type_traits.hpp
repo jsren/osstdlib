@@ -95,7 +95,7 @@ namespace std
 
 
     template<typename T> struct add_rvalue_reference { typedef T&& type; };
-    template<typename T> struct add_rvalue_reference<T&> { typedef T&& type; };
+    template<typename T> struct add_rvalue_reference<T&> { typedef T& type; };
     template<typename T> struct add_rvalue_reference<T&&> { typedef T&& type; };
     template<typename T> using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 
@@ -156,7 +156,7 @@ namespace std
 
 
     template<class T>
-    std::remove_reference_t<T>&& declval();
+    std::add_rvalue_reference_t<T> declval() noexcept;
 
 
     template<typename T> struct is_volatile : false_type {  };

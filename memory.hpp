@@ -2,7 +2,7 @@
 #pragma once
 #include <type_traits>
 #include <cstddef>
-
+#include <limits>
 
 namespace std
 {
@@ -56,6 +56,103 @@ namespace std
 		{
 			auto operator()(T&& allocator) {
 				return forward<T>(allocator);
+			}
+		};
+
+
+		template<typename Alloc, typename T, typename ...Args>
+		class has_allocator_construct
+		{
+			template<typename A, class = decltype(
+				declval<A>().construct(declval<T*>(), declval<Args>()...))>
+			static true_type test(int);
+			template<class>
+			static false_type test(...);
+		public:
+			static const constexpr bool value = decltype(test<Alloc>(0))::value;
+		};
+
+		template<typename Alloc, typename T>
+		class has_allocator_destroy
+		{
+			template<typename A, class = decltype(
+				declval<A>().destroy(declval<T*>()))>
+			static true_type test(int);
+			template<class>
+			static false_type test(...);
+		public:
+			static const constexpr bool value = decltype(test<Alloc>(0))::value;
+		};
+
+		template<typename Alloc>
+		class has_allocator_max_size
+		{
+			template<typename A, class = decltype(
+				declval<A>().max_size())>
+			static true_type test(int);
+			template<class>
+			static false_type test(...);
+		public:
+			static const constexpr bool value = decltype(test<const Alloc>(0))::value;
+		};
+
+
+		template<typename Alloc, typename T, bool Enable, typename ...Args>
+		struct _call_allocator_construct {
+			auto operator()(Alloc& allocator, T* object, Args&&... args) {
+				return allocator.construct(object, forward<Args>(args)...);
+			}
+		};
+		template<typename Alloc, typename T, typename ...Args>
+		struct _call_allocator_construct<Alloc, T, false, Args...>
+		{
+			auto operator()(Alloc& allocator, T* object, Args&&... args) {
+				return ::new(static_cast<void*>(object)) T(forward<Args>(args)...);
+			}
+		};
+
+		template<typename Alloc, typename T, typename ...Args>
+		auto call_allocator_construct(Alloc& alloc, T* t, Args&&... args)
+		{
+			return _call_allocator_construct<Alloc, T,
+				has_allocator_construct<Alloc, T, Args...>::value, Args...>()(
+					alloc, t, forward<Args>(args)...
+				);
+		}
+
+		template<typename Alloc, typename T, bool Enable =
+			has_allocator_destroy<Alloc, T>::value>
+		struct call_allocator_destroy
+		{
+			void operator()(Alloc& allocator, T* object) {
+				allocator.destroy(object);
+			}
+		};
+
+		template<typename Alloc, typename T>
+		struct call_allocator_destroy<Alloc, T, false>
+		{
+			void operator()(Alloc& allocator, T* object) {
+				object->~T();
+			}
+		};
+
+		template<typename Alloc, typename size_type, typename value_type,
+			bool Enable = has_allocator_max_size<Alloc>::value>
+		struct call_allocator_max_size
+		{
+			auto operator()(const Alloc& alloc) {
+				return alloc.max_size();
+			}
+		};
+
+		template<typename Alloc, typename size_type, typename value_type>
+		struct call_allocator_max_size<Alloc, size_type, value_type, false>
+		{
+			auto operator()(const Alloc& alloc)
+			{
+				return numeric_limits<size_type>::max() /
+					sizeof(typename Alloc::value_type);
 			}
 		};
 	}
@@ -220,10 +317,29 @@ namespace std
             alloc.deallocate(p, count);
         }
 
+		template<typename T, typename ...Args>
+		static void construct(Alloc& alloc, T* object, Args&& ...args)
+		{
+			__detail::call_allocator_construct(alloc, object, forward<Args>(args)...);
+		}
+
+		template<typename T>
+		static void destroy(Alloc& alloc, T* object)
+		{
+			__detail::call_allocator_destroy<Alloc, T>()(alloc, object);
+		}
+
+		static size_type max_size(const Alloc& alloc) noexcept
+		{
+			return __detail::call_allocator_max_size<Alloc, size_type, value_type>()(alloc);
+		}
+
 		static Alloc select_on_container_copy_construction(const Alloc& allocator)
 		{
 			return __detail::call_select_on_container_copy_construction<Alloc>()(allocator);
 		}
+
+
     };
 
 
