@@ -1,3 +1,4 @@
+#pragma once
 #include <cstddef>
 #include <__iterator>
 
@@ -14,18 +15,17 @@ namespace std
         using iterator = const T*;
         using const_iterator = const T*;
 
-    private:
         iterator _begin{};
-        iterator _end{};
+        size_type _size{};
 
         constexpr size_type size() const noexcept {
-            return _end - _begin;
+            return _size;
         }
         constexpr iterator begin() const noexcept {
             return _begin;
         }
         constexpr iterator end() const noexcept {
-            return _end;
+            return _begin + _size;
         }
     };
 

@@ -1,6 +1,7 @@
 #pragma once
 #include <charconv>
 #include <ios>
+#include <streambuf>
 
 namespace std
 {
@@ -11,6 +12,8 @@ namespace std
     basic_ostream<Char, Traits>& operator <<(basic_ostream<Char, Traits>& os, const Char* string);
     template<typename Char, typename Traits>
     basic_ostream<Char, Traits>& operator <<(basic_ostream<Char, Traits>& os, const char* string);
+    template<typename Traits>
+    basic_ostream<char, Traits>& operator <<(basic_ostream<char, Traits>& os, const char* string);
     template<typename Traits>
     basic_ostream<char, Traits>& operator <<(basic_ostream<char, Traits>& os, const signed char* string);
     template<typename Traits>
@@ -27,7 +30,7 @@ namespace std
     }
 
 
-    template <typename Char, typename Traits = char_traits<Char>>
+    template <typename Char, typename Traits>
     class basic_ostream : public basic_ios<Char, Traits>
     {
     private:
@@ -41,17 +44,19 @@ namespace std
         using traits_type = Traits;
 
         using basic_ios<Char, Traits>::rdbuf;
+        using basic_ios<Char, Traits>::setstate;
 
         explicit basic_ostream(basic_streambuf<char_type, Traits>* sb)
             : basic_ios<Char, Traits>(sb) { }
 
-        virtual ~basic_ostream();
+        virtual ~basic_ostream() = default;
 
         class sentry
         {
             bool _success{};
             basic_ostream& os;
 
+        public:
             explicit sentry(basic_ostream& os) : os(os)
             {
                 if (os.good())
@@ -66,7 +71,7 @@ namespace std
             ~sentry()
             {
                 if (os.flags() & unitbuf != unitbuf &&
-                    !uncaught_exception() && os.goood())
+                    !uncaught_exception() && os.good())
                 {
                     if (os.rdbuf()->pubsync() == -1) {
                         os.setstate(badbit);
@@ -172,9 +177,8 @@ namespace std
 
     namespace __detail
     {
-        template<typename Char, typename Traits,
-            class Stream = basic_ostream<Char, Traits>>
-        void put_fill(Stream& os, streamsize count)
+        template<typename Char, typename Traits>
+        void put_fill(basic_ostream<Char, Traits>& os, streamsize count)
         {
             constexpr const size_t bufferSize = 10; // Sane buffer size for os.width
             Char buffer[bufferSize];
@@ -190,13 +194,12 @@ namespace std
             }
         }
 
-        template<typename Char, typename Traits, typename T,
-            class Stream = basic_ostream<Char, Traits>>
-        void put_str(Stream& os, const T* string, size_t length)
+        template<typename Char, typename Traits, typename T>
+        void put_str(basic_ostream<Char, Traits>& os, const T* string, size_t length)
         {
             constexpr const size_t bufferSize = 16; // Sane buffer size
             Char buffer[bufferSize];
-            size_t count = strlen;
+            size_t count = length;
 
             while (count > 0)
             {
@@ -208,9 +211,9 @@ namespace std
             }
         }
 
-        template<typename Char, typename Traits, typename T,
-            class Stream = basic_ostream<Char, Traits>>
-        Stream& put_str_fmt(Stream& os, const T* string, size_t length)
+        template<typename Char, typename Traits, typename T>
+        basic_ostream<Char, Traits>& put_str_fmt(
+            basic_ostream<Char, Traits>& os, const T* string, size_t length)
         {
             if (os.flags() & ios_base::adjustfield == ios_base::left)
             {
@@ -253,6 +256,10 @@ namespace std
         return __detail::put_str_fmt(os, string, char_traits<char>::length(string));
     }
     template<typename Traits>
+    basic_ostream<char, Traits>& operator <<(basic_ostream<char, Traits>& os, const char* string) {
+        return __detail::put_str_fmt(os, string, Traits::length(string));
+    }
+    template<typename Traits>
     basic_ostream<char, Traits>& operator <<(basic_ostream<char, Traits>& os, const signed char* string) {
         return __detail::put_str_fmt(os, string, Traits::length(reinterpret_cast<const char*>(string)));
     }
@@ -261,8 +268,7 @@ namespace std
         return __detail::put_str_fmt(os, string, Traits::length(reinterpret_cast<const char*>(string)));
     }
 
-    template<typename Char, typename Traits, typename T,
-        class = decltype(declval<basic_ostream<Char, Traits>>() << declval<T>())>
+    template<typename Char, typename Traits, typename T>
     basic_ostream<Char, Traits>& operator <<(basic_ostream<Char, Traits>&& os, const T& value) {
         return os << value;
     }

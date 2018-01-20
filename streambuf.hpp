@@ -1,9 +1,10 @@
+#pragma once
 #include <__string-decl>
 #include <ios>
 
 namespace std
 {
-    template<typename Char, typename Traits = char_traits<Char>>
+    template<typename Char, typename Traits>
     class basic_streambuf
     {
     public:

@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include <string>
 #include <__platform>
+#include <ostream>
 
 using namespace ostest;
 
@@ -16,6 +17,8 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 {
     static const char* passStr = "PASS";
     static const char* failStr = "FAIL";
+
+    //std::cout << "[";
 
     // Print test result
     print("[");
@@ -41,6 +44,13 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 			const Assertion& result = enum_.current();
 			if (result.passed()) continue;
 
+            print("\t");
+            print(result.file);
+            print(":");
+            print(std::to_string(result.line));
+            print(": ");
+            print(result.getMessage());
+            print("\n");
 			//std::printf("\t%s:%i: %s\n", result.file, result.line, result.getMessage());
 		}
 	}

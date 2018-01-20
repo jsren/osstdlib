@@ -145,7 +145,7 @@ extern "C"
 
     void _init()
     {
-        for (auto table = __abi__init_array - 2; *table != nullptr; table--) {
+        for (auto table = __abi__init_array - 1; *table != nullptr; table--) {
             (*table)();
         }
     }
