@@ -138,6 +138,11 @@ extern "C"
 
     }
 
+    void* __cxa_allocate_exception(__platform::size_t size)
+    {
+        return new __platform::uint8_t[size]();
+    }
+
     [[noreturn]] void _exit(int rc)
     {
         __platform::__exit(rc);

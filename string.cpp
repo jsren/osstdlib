@@ -6,12 +6,6 @@ namespace std
 {
 	namespace __detail
 	{
-		char* __empty_cstring = "\0";
-		wchar_t* __empty_wstring = L"\0";
-		char16_t* __empty_ustring = u"\0";
-		char32_t* __empty_Ustring = U"\0";
-
-
         string int_to_string(signed long long value)
         {
             constexpr auto maxDigits = numeric_limits<signed long long>::digits10;
