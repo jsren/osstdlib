@@ -150,7 +150,11 @@ extern "C"
 
     void _init()
     {
-        for (auto table = __abi__init_array - 1; *table != nullptr; table--) {
+        auto table = __abi__init_array - 1;
+        for (; *table != nullptr; table--) {
+        }
+        table++;
+        for (; *table != nullptr; table++) {
             (*table)();
         }
     }

@@ -9,7 +9,7 @@ LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
 
-FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM)
+FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option
 
 .PHONY: prepare main-static main-dynamic default test clean
 
@@ -46,5 +46,5 @@ default:
 
 test: static
 #	git submodule update --init
-	make -C testing/ostest PROFILE=bare
+	make -C testing/ostest PROFILE=bare CXX=$(CXX)
 	$(CXX) $(FLAGS) -DOSTEST_NO_ALLOC -g -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe

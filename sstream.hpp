@@ -23,11 +23,11 @@ namespace std
         ios_base::openmode mode{};
 
     public:
-        explicit basic_stringbuf(ios_base::openmode mode =
-            ios_base::in | ios_base::out) : mode(mode) { };
+        explicit basic_stringbuf(ios_base::openmode mode = static_cast<ios_base::openmode>(
+            ios_base::in | ios_base::out)) : mode(mode) { };
 
         explicit basic_stringbuf(const basic_string<Char, Traits, Alloc>& string,
-            ios_base::openmode mode = ios_base::in | ios_base::out)
+            ios_base::openmode mode = static_cast<ios_base::openmode>(ios_base::in | ios_base::out))
             : string(string), mode(mode) { }
 
         basic_stringbuf(basic_stringbuf&& other) = default;
@@ -44,16 +44,16 @@ namespace std
         void str(const basic_string<Char, Traits, Alloc>& string)
         {
             this->string = string;
-            if (mode & ios_base::in == ios_base::in)
+            if ((mode & ios_base::in) == ios_base::in)
             {
                 setg(this->string.data(), this->string.data(),
                     this->string.data() + this->string.size());
             }
-            if (mode & ios_base::out == ios_base::out)
+            if ((mode & ios_base::out) == ios_base::out)
             {
                 auto end = this->string.data() + (
-                    mode & ios_base::app == ios_base::app ||
-                    mode & ios_base::ate == ios_base::ate
+                    (mode & ios_base::app) == ios_base::app ||
+                    (mode & ios_base::ate) == ios_base::ate
                     ? this->string.size() : 0);
 
                 setp(this->string.data(), this->string.data(),

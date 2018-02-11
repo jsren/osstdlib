@@ -28,7 +28,7 @@ namespace __platform
         ssize_t rc{};
 
         operator bool() const noexcept {
-            rc == 0;
+            return rc == 0;
         }
     };
 }

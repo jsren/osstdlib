@@ -70,7 +70,7 @@ namespace std
 
             ~sentry()
             {
-                if (os.flags() & unitbuf != unitbuf &&
+                if ((os.flags() & unitbuf) != unitbuf &&
                     !uncaught_exception() && os.good())
                 {
                     if (os.rdbuf()->pubsync() == -1) {
@@ -105,7 +105,7 @@ namespace std
         }
 
         basic_ostream& operator <<(bool n) {
-            *this << n ? "true" : "false"; return *this;
+            *this << (n ? "true" : "false"); return *this;
         }
         basic_ostream& operator <<(short n) {
             return *this << static_cast<long long>(n);
@@ -215,7 +215,7 @@ namespace std
         basic_ostream<Char, Traits>& put_str_fmt(
             basic_ostream<Char, Traits>& os, const T* string, size_t length)
         {
-            if (os.flags() & ios_base::adjustfield == ios_base::left)
+            if ((os.flags() & ios_base::adjustfield) == ios_base::left)
             {
                 put_str(os, string, length);
                 if (os.width() > length) put_fill(os, os.width() - length);

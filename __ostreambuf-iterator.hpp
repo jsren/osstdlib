@@ -39,7 +39,7 @@ namespace std
 
         ostreambuf_iterator& operator =(Char value)
         {
-            if (!failed) {
+            if (!_failed) {
                 _failed = _buffer->sputc(value) == Traits::eof();
             }
             return *this;

@@ -21,8 +21,8 @@ namespace std
 
         inline static constexpr void* memcpy(void* dest, const void* src, size_t count) noexcept
         {
-            auto* _dest = reinterpret_cast<char*>(dest);
-            auto* _src = reinterpret_cast<const char*>(src);
+            auto* _dest = static_cast<char*>(dest);
+            auto* _src = static_cast<const char*>(src);
 
             for (size_t i = 0; i < count; i++) {
                 _dest[i] = _src[i];
