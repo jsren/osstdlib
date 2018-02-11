@@ -69,7 +69,7 @@ namespace std
 
         constexpr size_type eval_capacity(size_type size) noexcept
         {
-            size = (size & 0b1 == 0) ? size : size + 1;
+            size = ((size & 0b1) == 0) ? size : size + 1;
             if (size > max_size() || size == 0) {
                 __abi::__throw_exception(length_error("size"));
             }
@@ -171,7 +171,7 @@ namespace std
         basic_string(size_type length, Char character,
             const allocator_type& alloc = allocator_type()) : _alloc(alloc)
         {
-            auto data = _reallocate(eval_capacity(length + 1));
+            auto data = _reallocate(length + 1);
             for (size_t i = 0; i < length; i++) {
                 data[i] = character;
             }
@@ -182,11 +182,7 @@ namespace std
         basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
             : _alloc(alloc)
         {
-            if (length == 24) {
-                _set_size(24);
-            }
-
-            auto data = _reallocate(eval_capacity(length + 1));
+            auto data = _reallocate(length + 1);
             for (size_t i = 0; i < length; i++) {
                 data[i] = cstr[i];
             }
@@ -336,7 +332,7 @@ namespace std
                 auto finalLength = size() + otherLength;
 
                 if (finalLength > capacity()) {
-                    data = _reallocate(eval_capacity(finalLength));
+                    data = _reallocate(finalLength);
                 }
                 traits_type::copy(data + size(), otherData, otherLength);
                 data[finalLength] = '\0';
