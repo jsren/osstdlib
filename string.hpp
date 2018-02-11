@@ -64,7 +64,7 @@ namespace std
         } _repr{};
 
         constexpr bool is_sso() const noexcept {
-            return _repr._long._capacity & 0b1 == 0b1;
+            return (_repr._long._capacity & 0b1) == 0b1;
         }
 
         constexpr size_type eval_capacity(size_type size) noexcept
@@ -76,7 +76,8 @@ namespace std
             return size;
         }
 
-        constexpr void _set_size(size_type size) noexcept {
+        void _set_size(size_type size) noexcept
+        {
             if (is_sso()) _repr._short._length = 0b1 | (size << 1);
             else _repr._long._length = size;
         }
@@ -295,7 +296,7 @@ namespace std
         }
         size_type max_size() const noexcept {
             auto v = numeric_limits<size_type>::max() - 1;
-            return (v & 0b1 == 0) ? v : v - 1;
+            return ((v & 0b1) == 0) ? v : v - 1;
         }
     private:
         size_type _capacity() const noexcept {
@@ -320,7 +321,7 @@ namespace std
         void clear() noexcept
         {
             _destroy();
-            _set_size(length);
+            _set_size(0);
         }
 
     private:

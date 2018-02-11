@@ -10,7 +10,7 @@ namespace std
 
     enum class byte : unsigned char { };
 
-	class nullptr_t
+	/*class nullptr_t
 	{
 	private:
 		unsigned : sizeof(void*);
@@ -27,5 +27,6 @@ namespace std
 
 		inline constexpr bool operator==(const nullptr_t&) const { return true; }
 		inline constexpr bool operator!=(const nullptr_t&) const { return false; }
-	};
+	};*/
+	using nullptr_t = decltype(nullptr);
 }

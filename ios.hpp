@@ -303,14 +303,14 @@ namespace std
             return rdstate() == 0;
         }
         bool eof() const {
-            return rdstate() & iostate::eofbit == iostate::eofbit;
+            return (rdstate() & iostate::eofbit) == iostate::eofbit;
         }
         bool fail() const {
-            return rdstate() & iostate::failbit == iostate::failbit
-                || rdstate() & iostate::badbit == iostate::badbit;
+            return (rdstate() & iostate::failbit) == iostate::failbit
+                || (rdstate() & iostate::badbit) == iostate::badbit;
         }
         bool bad() const {
-            return rdstate() & iostate::badbit == iostate::badbit;
+            return (rdstate() & iostate::badbit) == iostate::badbit;
         }
         bool operator!() const {
             return fail();

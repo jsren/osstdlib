@@ -111,7 +111,7 @@ namespace __platform
 
     __result_t __close(__file_handle file) noexcept
     {
-        size_t rc;
+        ssize_t rc;
         __asm__ volatile(
             "movq $3, %%rax\n"
             "movq %1, %%rdi\n"
