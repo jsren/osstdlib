@@ -123,21 +123,21 @@ namespace std
 
     };
 
-#define __STD_ARRAY_OPERATOR(op) \
+#define __STD_ARRAY_OPERATOR(op, basis) \
     template<typename T, size_t N> \
     inline bool operator op (const array<T,N>& lhs, const array<T,N>& rhs) { \
         for (size_t i = 0; i < N; i++) { \
-            if (!(lhs[i] op rhs[i])) return false; \
+            if (!(lhs[i] op rhs[i])) return (!basis); \
         } \
-        return true; \
+        return (basis); \
     }
 
-    __STD_ARRAY_OPERATOR(==)
-    __STD_ARRAY_OPERATOR(!=)
-    __STD_ARRAY_OPERATOR(<)
-    __STD_ARRAY_OPERATOR(>)
-    __STD_ARRAY_OPERATOR(<=)
-    __STD_ARRAY_OPERATOR(>=)
+    __STD_ARRAY_OPERATOR(==, true)
+    __STD_ARRAY_OPERATOR(!=, false)
+    __STD_ARRAY_OPERATOR(<, false)
+    __STD_ARRAY_OPERATOR(>, false)
+    __STD_ARRAY_OPERATOR(<=, true)
+    __STD_ARRAY_OPERATOR(>=, true)
 
 
     template<size_t Index, typename T, size_t N>

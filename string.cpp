@@ -17,7 +17,7 @@ namespace std
             return (static_cast<bool>(res.ec)) ? string() : string(buffer);
         }
 
-        string int_to_string(unsigned long long value)
+        string uint_to_string(unsigned long long value)
         {
             constexpr auto maxDigits = numeric_limits<unsigned long long>::digits10;
             char buffer[maxDigits + 1];

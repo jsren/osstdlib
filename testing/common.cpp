@@ -5,7 +5,7 @@
 
 using namespace ostest;
 
-static auto print(const std::string& string)
+__platform::size_t print(const std::string& string)
 {
     __platform::size_t count = 0;
     __platform::__write(__platform::__stdout, string.c_str(), string.size(), count);
