@@ -60,4 +60,14 @@ namespace std
             : __detail::exception_base(what_arg) { }
         out_of_range(const out_of_range&) = default;
     };
+
+    class length_error : public __detail::exception_base
+    {
+    public:
+        inline explicit length_error(const std::string& what_arg)
+            : __detail::exception_base(what_arg) { }
+        inline explicit length_error(const char* what_arg)
+            : __detail::exception_base(what_arg) { }
+        length_error(const length_error&) = default;
+    };
 }

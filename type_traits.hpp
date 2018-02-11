@@ -862,4 +862,19 @@ namespace std
 	template<typename T>
 	struct is_nothrow_copy_constructible :
 		is_nothrow_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
+
+    template<typename T>
+    struct alignment_of : integral_constant<size_t, alignof(T)> { };
+
+
+    template<size_t Size, size_t Align = sizeof(max_align_t)>
+    struct aligned_storage
+    {
+        struct type {
+            alignas(Align) unsigned char data[Size];
+        };
+    };
+
+    template<size_t Size, size_t Align = sizeof(max_align_t)>
+    using aligned_storage_t = typename aligned_storage<Size, Align>::type;
 }
