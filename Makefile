@@ -1,5 +1,5 @@
 STD ?= c++1z
-OPT_LVL ?= O2
+OPT_LVL ?= O3
 
 TARGET_STATIC := osstdc++.o
 TARGET_DYNAMIC := osstdc++
@@ -9,7 +9,7 @@ LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
 
-FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option
+FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option
 
 .PHONY: prepare main-static main-dynamic default test clean
 
@@ -17,10 +17,10 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp ostream.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp ostream.cpp charconv.cpp cstring.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)
@@ -33,6 +33,7 @@ main-dynamic: dynamic
 	$(CXX) $(FLAGS) -Wl,--gc-sections -s $(BUILD_DIR)/$(TARGET_STATIC) -L$(BUILD_DIR) -l$(TARGET_DYNAMIC) testing/main.cpp -o testing/main
 
 clean:
+	make -C testing/ostest clean
 	rm -f *.so
 	rm -f *.o
 	rm -f testing/main

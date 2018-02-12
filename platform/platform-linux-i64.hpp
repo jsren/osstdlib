@@ -2,7 +2,7 @@
 
 namespace __platform
 {
-    using size_t = unsigned long;
+    using size_t = decltype(sizeof(int));
     using ssize_t = signed long;
     using ptrdiff_t = signed long long;
 
