@@ -9,7 +9,7 @@ LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
 
-FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option
+FLAGS := -I$(BUILD_DIR)/include -Wall -Wextra -pedantic -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option
 
 .PHONY: prepare main-static main-dynamic default test clean
 

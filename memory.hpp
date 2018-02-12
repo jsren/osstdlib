@@ -106,7 +106,7 @@ namespace std
 		template<typename Alloc, typename T, typename ...Args>
 		struct _call_allocator_construct<Alloc, T, false, Args...>
 		{
-			auto operator()(Alloc& allocator, T* object, Args&&... args) {
+			auto operator()(Alloc&, T* object, Args&&... args) {
 				return ::new(static_cast<void*>(object)) T(forward<Args>(args)...);
 			}
 		};
@@ -132,7 +132,7 @@ namespace std
 		template<typename Alloc, typename T>
 		struct call_allocator_destroy<Alloc, T, false>
 		{
-			void operator()(Alloc& allocator, T* object) {
+			void operator()(Alloc&, T* object) {
 				object->~T();
 			}
 		};
@@ -149,7 +149,7 @@ namespace std
 		template<typename Alloc, typename size_type, typename value_type>
 		struct call_allocator_max_size<Alloc, size_type, value_type, false>
 		{
-			auto operator()(const Alloc& alloc)
+			auto operator()(const Alloc&)
 			{
 				return numeric_limits<size_type>::max() /
 					sizeof(typename Alloc::value_type);

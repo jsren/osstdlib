@@ -329,7 +329,7 @@ namespace std
         {
             if (otherLength != 0)
             {
-                pointer data;
+                pointer data = this->data();
                 auto finalLength = size() + otherLength;
 
                 if (finalLength > capacity()) {

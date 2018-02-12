@@ -19,23 +19,23 @@ namespace std
     namespace __detail
     {
         to_chars_result _to_chars(unsigned long long value, bool negative,
-            int base, char* first, char* last);
+            unsigned base, char* first, char* last);
     }
 
     inline to_chars_result to_chars(char* first, char* last, long long value, int base = 10)
     {
         if (value < 0) {
             return __detail::_to_chars(static_cast<unsigned long long>(-value),
-                true, base, first, last);
+                true, static_cast<unsigned>(base), first, last);
         }
         else return __detail::_to_chars(static_cast<unsigned long long>(value),
-            false, base, first, last);
+            false, static_cast<unsigned>(base), first, last);
     }
 
     inline to_chars_result to_chars(char* first, char* last, unsigned long long value, int base = 10)
     {
         return __detail::_to_chars(static_cast<unsigned long long>(value),
-            false, base, first, last);
+            false, static_cast<unsigned>(base), first, last);
     }
 
     inline to_chars_result to_chars(char* first, char* last, char value, int base = 10) {

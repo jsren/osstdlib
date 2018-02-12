@@ -50,7 +50,7 @@ namespace std
 			constexpr tuple_item() = default;
 
 			template<typename Y>
-			constexpr tuple_item(Y&& value) { }
+			constexpr tuple_item(Y&&) { }
 		};
 
 	}
@@ -150,7 +150,7 @@ namespace std
 		};
 		template<typename... Ys>
 		struct copy_from<0, Ys...> {
-			constexpr void operator()(tuple<Ts...>& self, const tuple<Ys...>& other) { }
+			constexpr void operator()(tuple<Ts...>&, const tuple<Ys...>&) { }
 		};
 		template<typename ...Ys>
 		constexpr auto copy_from_f(const tuple<Ys...>& other) {
@@ -166,7 +166,7 @@ namespace std
 		};
 		template<typename... Ys>
 		struct move_from<0, Ys...> {
-			constexpr void operator()(tuple<Ts...>& self, tuple<Ys...>&& other) { }
+			constexpr void operator()(tuple<Ts...>&, tuple<Ys...>&&) { }
 		};
 		template<typename ...Ys>
 		constexpr auto move_from_f(tuple<Ys...>&& other) {

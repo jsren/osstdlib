@@ -48,6 +48,16 @@ namespace __platform
 
     }
 
+    void __align_stack() noexcept
+    {
+        // Linux-x64 compiler ABI requires 16-byte stack alignment
+        // to an 8-byte boundary. So add 8 to offset stack.
+        asm volatile (
+            "pop %rdi\n"
+            "sub $0x8, %rsp\n"
+            "push %rdi"
+        );
+    }
 
     [[noreturn]] void __exit(int rc) noexcept
     {

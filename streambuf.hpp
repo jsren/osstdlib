@@ -151,14 +151,17 @@ namespace std
         }
 
         virtual basic_streambuf* setbuf(char_type* buffer, streamsize size) {
-            return this;
+            (void)buffer; (void)size; return this;
         }
         virtual pos_type seekoff(off_type offset, ios_base::seekdir direction,
             ios_base::openmode which)
         {
+            (void)offset; (void)direction; (void)which;
             return static_cast<pos_type>(off_type(-1));
         }
-        virtual pos_type seekpos(pos_type position, ios_base::openmode which) {
+        virtual pos_type seekpos(pos_type position, ios_base::openmode which)
+        {
+            (void)position; (void)which;
             return static_cast<pos_type>(off_type(-1));
         }
         virtual int sync() {
@@ -177,7 +180,7 @@ namespace std
             return value;
         }
         virtual int_type overflow(int_type value = Traits::eof()) {
-            return Traits::eof();
+            (void)value; return Traits::eof();
         }
         virtual streamsize xsgetn(char_type* buffer, streamsize size)
         {
@@ -199,7 +202,7 @@ namespace std
             return size;
         }
         virtual int_type pbackfail(int_type value = Traits::eof()) {
-            return Traits::eof();
+            (void)value; return Traits::eof();
         }
     };
 

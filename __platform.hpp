@@ -47,6 +47,7 @@ namespace __platform
     extern const __file_handle __stdout;
     extern const __file_handle __stderr;
 
+    void __align_stack() noexcept;
     [[noreturn]] void __exit(int rc) noexcept;
     __result_t __open(const char* filename, __open_options, __file_acl, __file_handle& handle_out) noexcept;
     __result_t __close(__file_handle handle) noexcept;
