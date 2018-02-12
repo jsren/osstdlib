@@ -66,6 +66,7 @@ namespace __abi
 namespace std {
     void* memcpy(void* dest, const void* src, __platform::size_t count);
     void* memset(void* ptr, int value, __platform::size_t num);
+    void abort();
 }
 
 constexpr const __platform::size_t atexit_entries = 16;
@@ -172,5 +173,10 @@ extern "C"
     void* memset(void* ptr, int value, __platform::size_t num)
     {
         return std::memset(ptr, value, num);
+    }
+
+    void __stack_chk_fail()
+    {
+        std::abort();
     }
 }
