@@ -1,7 +1,7 @@
 #pragma once
 #include <allocator>
 #include <cstring>
-#include <__ios-decl>
+#include <.ios-decl>
 
 namespace std
 {

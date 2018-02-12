@@ -1,9 +1,9 @@
-/* ios.hpp - (c) 2017 James Renwick */
+/* ios.hpp - (c) 2017-18 James Renwick */
 #pragma once
 #include <system_error>
 #include <atomic>
 #include <memory>
-#include <__ios-decl>
+#include <.ios-decl>
 
 namespace std
 {

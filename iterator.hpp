@@ -2,7 +2,7 @@
 #include <type_traits>
 #include <cstddef>
 #include <__iterator>
-#include <__ostreambuf-iterator>
+#include <.ostreambuf-iterator>
 
 namespace std
 {
