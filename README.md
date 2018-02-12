@@ -3,12 +3,14 @@ A portable C++14 standard library implementation for embedded/custom OS projects
 
 This project is a work in progress.
 
-All source (c) 2017 James Renwick except
+All source (c) 2017-18 James Renwick except
 where otherwise stated.
 
 ## Project Status ##
 ### Done ###
 - array
+- string_view
+- initializer_list
 ### Mostly Done ###
 - pointer_traits
 - type_traits
@@ -17,17 +19,17 @@ where otherwise stated.
 - system_error
 - tuple
 - iterators
+- unique/smart_ptr
 ### Started ###
 - exception
-- string
+- string (w/SSO)
 - ios
-- string_view
 - iostream
+- streambuf
 - locale
-- initializer_list
+- limits
 ### Targeted ###
 - vector
-- small string optimisation
 - chrono
 
 ## Building ##
