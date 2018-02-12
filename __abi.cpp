@@ -3,27 +3,27 @@
 #include <exception>
 
 
-inline static bool getInitFlag(const __platform::uint64_t& guard)
+static bool getInitFlag(const __platform::uint64_t& guard)
 {
-    return reinterpret_cast<const __platform::uint8_t&>(guard);
+    return static_cast<__platform::uint8_t>(guard);
 }
-inline static void setInitFlag(__platform::uint64_t& guard)
+static void setInitFlag(__platform::uint64_t& guard)
 {
-    reinterpret_cast<__platform::uint8_t&>(guard) = true;
+    guard |= static_cast<__platform::uint8_t>(0x1);
 }
 
-inline static bool getBusyFlag(const __platform::uint64_t& guard)
+static bool getBusyFlag(const __platform::uint64_t& guard)
 {
-    return reinterpret_cast<const __platform::uint8_t*>(&guard)[1];
+    return static_cast<__platform::uint8_t>(guard >> 8);
 }
-inline static void setBusyFlag(__platform::uint64_t& guard, bool value)
+static void setBusyFlag(__platform::uint64_t& guard, bool value)
 {
-    reinterpret_cast<__platform::uint8_t*>(&guard)[1] = value;
+    guard |= static_cast<__platform::uint8_t>(0x1 << 8);
 }
 
 int main();
 
-unsigned char heap[4096];
+unsigned char heap[8192];
 unsigned char* heapStart = heap;
 
 
@@ -89,6 +89,7 @@ extern "C"
 
     int __cxa_atexit(void(*dtor)(void*), void* obj, void* dso_handle)
     {
+        (void)dso_handle;
         if (atexit_index == atexit_entries) return -1;
         atexit_array[atexit_index].dtor = dtor;
         atexit_array[atexit_index].obj = obj;
@@ -96,7 +97,7 @@ extern "C"
         return 0;
     }
 
-    void __cxa_finalize(void* dtor)
+    void __cxa_finalize(void (*dtor)(void*))
     {
         if (dtor == nullptr)
         {
@@ -162,6 +163,7 @@ extern "C"
 
     void _start()
     {
+        __platform::__align_stack();
         _init();
         _exit(main());
     }

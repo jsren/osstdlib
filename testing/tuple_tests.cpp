@@ -36,11 +36,15 @@ TEST(TupleSuite, EmptyTuple)
 {
 	std::tuple<> tuple{};
 	std::tuple<std::tuple<>> tuple2{};
+
+	(void)tuple;
+	(void)tuple2;
 }
 
 TEST(TupleSuite, SingleTuple)
 {
 	std::tuple<bool> tuple{};
+	(void)tuple;
 }
 
 TEST(TupleSuite, ComponentTypes)

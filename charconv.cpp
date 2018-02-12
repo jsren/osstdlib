@@ -7,7 +7,7 @@ namespace std
         static constexpr const char characters[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
         to_chars_result _to_chars(unsigned long long value, bool negative,
-            int base, char* first, char* last)
+            unsigned base, char* first, char* last)
         {
             if (base < 2 || base > 36) return to_chars_result{last, errc::value_too_large};
 

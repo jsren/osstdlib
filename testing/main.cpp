@@ -19,6 +19,7 @@ static auto print(const std::string& string)
 int main2()
 {
     char buffer[124]{};
+    (void)buffer;
     //auto count = __platform::__read(__platform::__stdin, buffer, sizeof(buffer));
 
    /* __platform::__open_options opts{};
@@ -82,6 +83,8 @@ int main2()
     print(std::to_string(-111) += "\n");
     print(std::to_string(-999) += "\n");
     print(std::to_string(-1000) += "\n");
+
+    return 0;
 }
 #else
 
