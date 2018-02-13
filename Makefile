@@ -1,4 +1,4 @@
-STD ?= c++1z
+STD ?= c++14
 OPT_LVL ?= O3
 
 TARGET_STATIC := osstdc++.o
@@ -17,10 +17,10 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)
@@ -48,4 +48,4 @@ default:
 test: static
 #	git submodule update --init
 	make -C testing/ostest PROFILE=bare CXX=$(CXX)
-	$(CXX) $(FLAGS) -DOSTEST_NO_ALLOC -g -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe
+	$(CXX) $(FLAGS) -Wl,--gc-sections -DOSTEST_NO_ALLOC -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe

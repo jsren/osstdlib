@@ -1,24 +1,10 @@
 #pragma once
 #include <type_traits>
+#include <.limits-decl>
+#include <__platform-impl>
 
 namespace std
 {
-    enum float_round_style
-    {
-        round_indeterminate       = -1,
-        round_toward_zero         = 0,
-        round_to_nearest          = 1,
-        round_toward_infinity     = 2,
-        round_toward_neg_infinity = 3
-    };
-
-    enum float_denorm_style
-    {
-        denorm_indeterminate = -1,
-        denorm_absent        = 0,
-        denorm_present       = 1
-    };
-
     namespace __detail
     {
         template<typename T,
@@ -84,145 +70,145 @@ namespace std
             static constexpr auto signaling_NaN() noexcept { return T{}; }
         };
 
-        constexpr const unsigned char bitsPerByte = 8;
+        constexpr const unsigned char bitsPerByte = __platform::bitsPerByte;
 
-        constexpr const bool char_is_signed = false;
-        constexpr const bool wchar_is_signed = false;
-        constexpr const bool float_has_infty = true;
-        constexpr const bool double_has_infty = true;
-        constexpr const bool ldouble_has_infty = true;
-        constexpr const bool float_has_qnan = true;
-        constexpr const bool double_has_qnan = true;
-        constexpr const bool ldouble_has_qnan = true;
-        constexpr const bool float_has_snan = true;
-        constexpr const bool double_has_snan = true;
-        constexpr const bool ldouble_has_snan = true;
-        constexpr const float_denorm_style float_denorm_st = denorm_present;
-        constexpr const float_denorm_style double_denorm_st = denorm_present;
-        constexpr const float_denorm_style ldouble_denorm_st = denorm_present;
-        constexpr const bool float_has_dnorm_loss = true;
-        constexpr const bool double_has_dnorm_loss = true;
-        constexpr const bool ldouble_has_dnorm_loss = true;
-        constexpr const float_round_style float_round_st = round_to_nearest;
-        constexpr const float_round_style double_round_st = round_to_nearest;
-        constexpr const float_round_style ldouble_round_st = round_to_nearest;
-        constexpr const bool float_iec559 = true;
-        constexpr const bool double_iec559 = true;
-        constexpr const bool ldouble_iec559 = true;
+        constexpr const bool char_is_signed = __platform::char_is_signed;
+        constexpr const bool wchar_is_signed = __platform::wchar_is_signed;
+        constexpr const bool float_has_infty = __platform::float_has_infty;
+        constexpr const bool double_has_infty = __platform::double_has_infty;
+        constexpr const bool ldouble_has_infty = __platform::ldouble_has_infty;
+        constexpr const bool float_has_qnan = __platform::float_has_qnan;
+        constexpr const bool double_has_qnan = __platform::double_has_qnan;
+        constexpr const bool ldouble_has_qnan = __platform::ldouble_has_qnan;
+        constexpr const bool float_has_snan = __platform::float_has_snan;
+        constexpr const bool double_has_snan = __platform::double_has_snan;
+        constexpr const bool ldouble_has_snan = __platform::ldouble_has_snan;
+        constexpr const float_denorm_style float_denorm_st = __platform::float_denorm_st;
+        constexpr const float_denorm_style double_denorm_st = __platform::double_denorm_st;
+        constexpr const float_denorm_style ldouble_denorm_st = __platform::ldouble_denorm_st;
+        constexpr const bool float_has_dnorm_loss = __platform::float_has_dnorm_loss;
+        constexpr const bool double_has_dnorm_loss = __platform::double_has_dnorm_loss;
+        constexpr const bool ldouble_has_dnorm_loss = __platform::ldouble_has_dnorm_loss;
+        constexpr const float_round_style float_round_st = __platform::float_round_st;
+        constexpr const float_round_style double_round_st = __platform::double_round_st;
+        constexpr const float_round_style ldouble_round_st = __platform::ldouble_round_st;
+        constexpr const bool float_iec559 = __platform::float_iec559;
+        constexpr const bool double_iec559 = __platform::double_iec559;
+        constexpr const bool ldouble_iec559 = __platform::ldouble_iec559;
 
-        constexpr const bool char_is_modulo = false;
-        constexpr const bool schar_is_modulo = false;
-        constexpr const bool wchar_is_modulo = false;
-        constexpr const bool char16_is_modulo = false;
-        constexpr const bool char32_is_modulo = false;
-        constexpr const bool short_is_modulo = false;
-        constexpr const bool int_is_modulo = false;
-        constexpr const bool long_is_modulo = false;
-        constexpr const bool llong_is_modulo = false;
+        constexpr const bool char_is_modulo = __platform::char_is_modulo;
+        constexpr const bool schar_is_modulo = __platform::schar_is_modulo;
+        constexpr const bool wchar_is_modulo = __platform::wchar_is_modulo;
+        constexpr const bool char16_is_modulo = __platform::char16_is_modulo;
+        constexpr const bool char32_is_modulo = __platform::char32_is_modulo;
+        constexpr const bool short_is_modulo = __platform::short_is_modulo;
+        constexpr const bool int_is_modulo = __platform::int_is_modulo;
+        constexpr const bool long_is_modulo = __platform::long_is_modulo;
+        constexpr const bool llong_is_modulo = __platform::llong_is_modulo;
 
-        constexpr const int float_mantissa_digits = 0;
-        constexpr const int double_mantissa_digits = 0;
-        constexpr const int ldouble_mantissa_digits = 0;
-        constexpr const int float_b10_digits = 6;
-        constexpr const int double_b10_digits = 15;
-        constexpr const int ldouble_b10_digits = 18;
-        constexpr const int float_max_b10_digits = 9;
-        constexpr const int double_max_b10_digits = 17;
-        constexpr const int ldouble_max_b10_digits = 19;
-        constexpr const int float_radix = 2;
-        constexpr const int double_radix = 2;
-        constexpr const int ldouble_radix = 2;
-        constexpr const int float_min_exp = 0;
-        constexpr const int double_min_exp = 0;
-        constexpr const int ldouble_min_exp = 0;
-        constexpr const int float_min_b10_exp = 0;
-        constexpr const int double_min_b10_exp = 0;
-        constexpr const int ldouble_min_b10_exp = 0;
-        constexpr const int float_max_exp = 0;
-        constexpr const int double_max_exp = 0;
-        constexpr const int ldouble_max_exp = 0;
-        constexpr const int float_max_b10_exp = 0;
-        constexpr const int double_max_b10_exp = 0;
-        constexpr const int ldouble_max_b10_exp = 0;
+        constexpr const int float_mantissa_digits = __platform::float_mantissa_digits;
+        constexpr const int double_mantissa_digits = __platform::double_mantissa_digits;
+        constexpr const int ldouble_mantissa_digits = __platform::ldouble_mantissa_digits;
+        constexpr const int float_b10_digits = __platform::float_b10_digits;
+        constexpr const int double_b10_digits = __platform::double_b10_digits;
+        constexpr const int ldouble_b10_digits = __platform::ldouble_b10_digits;
+        constexpr const int float_max_b10_digits = __platform::float_max_b10_digits;
+        constexpr const int double_max_b10_digits = __platform::double_max_b10_digits;
+        constexpr const int ldouble_max_b10_digits = __platform::ldouble_max_b10_digits;
+        constexpr const int float_radix = __platform::float_radix;
+        constexpr const int double_radix = __platform::double_radix;
+        constexpr const int ldouble_radix = __platform::ldouble_radix;
+        constexpr const int float_min_exp = __platform::float_min_exp;
+        constexpr const int double_min_exp = __platform::double_min_exp;
+        constexpr const int ldouble_min_exp = __platform::ldouble_min_exp;
+        constexpr const int float_min_b10_exp = __platform::float_min_b10_exp;
+        constexpr const int double_min_b10_exp = __platform::double_min_b10_exp;
+        constexpr const int ldouble_min_b10_exp = __platform::ldouble_min_b10_exp;
+        constexpr const int float_max_exp = __platform::float_max_exp;
+        constexpr const int double_max_exp = __platform::double_max_exp;
+        constexpr const int ldouble_max_exp = __platform::ldouble_max_exp;
+        constexpr const int float_max_b10_exp = __platform::float_max_b10_exp;
+        constexpr const int double_max_b10_exp = __platform::double_max_b10_exp;
+        constexpr const int ldouble_max_b10_exp = __platform::ldouble_max_b10_exp;
 
-        constexpr const int char_padding = char_is_signed ? 1 : 0;
-        constexpr const int schar_padding = 0;
-        constexpr const int uchar_padding = 0;
-        constexpr const int wchar_padding = wchar_is_signed ? 1 : 0;
-        constexpr const int char16_padding = 0;
-        constexpr const int char32_padding = 0;
-        constexpr const int short_padding = 1;
-        constexpr const int ushort_padding = 0;
-        constexpr const int int_padding = 1;
-        constexpr const int uint_padding = 0;
-        constexpr const int long_padding = 1;
-        constexpr const int ulong_padding = 0;
-        constexpr const int llong_padding = 1;
-        constexpr const int ullong_padding = 0;
+        constexpr const int char_padding = __platform::char_padding;
+        constexpr const int schar_padding = __platform::schar_padding;
+        constexpr const int uchar_padding = __platform::uchar_padding;
+        constexpr const int wchar_padding = __platform::wchar_padding;
+        constexpr const int char16_padding = __platform::char16_padding;
+        constexpr const int char32_padding = __platform::char32_padding;
+        constexpr const int short_padding = __platform::short_padding;
+        constexpr const int ushort_padding = __platform::ushort_padding;
+        constexpr const int int_padding = __platform::int_padding;
+        constexpr const int uint_padding = __platform::uint_padding;
+        constexpr const int long_padding = __platform::long_padding;
+        constexpr const int ulong_padding = __platform::ulong_padding;
+        constexpr const int llong_padding = __platform::llong_padding;
+        constexpr const int ullong_padding = __platform::ullong_padding;
 
-        constexpr const int char_traps = true;
-        constexpr const int schar_traps = true;
-        constexpr const int uchar_traps = true;
-        constexpr const int wchar_traps = true;
-        constexpr const int char16_traps = true;
-        constexpr const int char32_traps = true;
-        constexpr const int short_traps = true;
-        constexpr const int ushort_traps = true;
-        constexpr const int int_traps = true;
-        constexpr const int uint_traps = true;
-        constexpr const int long_traps = true;
-        constexpr const int ulong_traps = true;
-        constexpr const int llong_traps = true;
-        constexpr const int ullong_traps = true;
-        constexpr const int float_traps = false;
-        constexpr const int double_traps = false;
-        constexpr const int ldouble_traps = false;
+        constexpr const int char_traps = __platform::char_traps;
+        constexpr const int schar_traps = __platform::schar_traps;
+        constexpr const int uchar_traps = __platform::uchar_traps;
+        constexpr const int wchar_traps = __platform::wchar_traps;
+        constexpr const int char16_traps = __platform::char16_traps;
+        constexpr const int char32_traps = __platform::char32_traps;
+        constexpr const int short_traps = __platform::short_traps;
+        constexpr const int ushort_traps = __platform::ushort_traps;
+        constexpr const int int_traps = __platform::int_traps;
+        constexpr const int uint_traps = __platform::uint_traps;
+        constexpr const int long_traps = __platform::long_traps;
+        constexpr const int ulong_traps = __platform::ulong_traps;
+        constexpr const int llong_traps = __platform::llong_traps;
+        constexpr const int ullong_traps = __platform::ullong_traps;
+        constexpr const int float_traps = __platform::float_traps;
+        constexpr const int double_traps = __platform::double_traps;
+        constexpr const int ldouble_traps = __platform::ldouble_traps;
 
-        constexpr const int float_tinyness_before = false;
-        constexpr const int double_tinyness_before = false;
-        constexpr const int ldouble_tinyness_before = false;
+        constexpr const int float_tinyness_before = __platform::float_tinyness_before;
+        constexpr const int double_tinyness_before = __platform::double_tinyness_before;
+        constexpr const int ldouble_tinyness_before = __platform::ldouble_tinyness_before;
 
-        constexpr const signed char schar_min = -128;
-        constexpr const signed char schar_max = 127;
-        constexpr const unsigned char uchar_max = 255;
-        constexpr const char char_min = char_is_signed ? schar_min : 0;
-        constexpr const char char_max = char_is_signed ? schar_max : uchar_max;
-        constexpr const wchar_t wchar_min = 0;
-        constexpr const wchar_t wchar_max = static_cast<wchar_t>(-1);
+        constexpr const signed char schar_min = __platform::schar_min;
+        constexpr const signed char schar_max = __platform::schar_max;
+        constexpr const unsigned char uchar_max = __platform::uchar_max;
+        constexpr const char char_min = __platform::char_min;
+        constexpr const char char_max = __platform::char_max;
+        constexpr const wchar_t wchar_min = __platform::wchar_min;
+        constexpr const wchar_t wchar_max = __platform::wchar_max;
         static_assert(!wchar_is_signed,"");
-        constexpr const char16_t char16_max = 0xFFFF;
-        constexpr const char32_t char32_max = 0xFFFFFFFF;
-        constexpr const short short_min = static_cast<short>(0x8000);
-        constexpr const short short_max = static_cast<short>(0x7FFF);
-        constexpr const unsigned short ushort_max = 0xFFFF;
-        constexpr const int int_min = static_cast<short>(0x80000000);
-        constexpr const int int_max = static_cast<short>(0x7FFFFFFF);
-        constexpr const unsigned int uint_max = 0xFFFFFFFF;
-        constexpr const long long_min = static_cast<short>(0x8000000000000000);
-        constexpr const long long_max = static_cast<short>(0x7FFFFFFFFFFFFFFF);
-        constexpr const unsigned long ulong_max = 0xFFFFFFFFFFFFFFFF;
-        constexpr const long long llong_min = static_cast<short>(0x8000000000000000);
-        constexpr const long long llong_max = static_cast<short>(0x7FFFFFFFFFFFFFFF);
-        constexpr const unsigned long long ullong_max = 0xFFFFFFFFFFFFFFFF;
+        constexpr const char16_t char16_max = __platform::char16_max;
+        constexpr const char32_t char32_max = __platform::char32_max;
+        constexpr const short short_min = __platform::short_min;
+        constexpr const short short_max = __platform::short_max;
+        constexpr const unsigned short ushort_max = __platform::ushort_max;
+        constexpr const int int_min = __platform::int_min;
+        constexpr const int int_max = __platform::int_max;
+        constexpr const unsigned int uint_max = __platform::uint_max;
+        constexpr const long long_min = __platform::long_min;
+        constexpr const long long_max = __platform::long_max;
+        constexpr const unsigned long ulong_max = __platform::ulong_max;
+        constexpr const long long llong_min = __platform::llong_min;
+        constexpr const long long llong_max = __platform::llong_max;
+        constexpr const unsigned long long ullong_max = __platform::ullong_max;
 
-        constexpr const float float_min = -1;
-        constexpr const float float_max = 1;
-        constexpr const float float_epsilon = 1;
-        constexpr const float float_infty = 1;
-        constexpr const float float_qnan = 1;
-        constexpr const float float_snan = 1;
-        constexpr const double double_min = -1;
-        constexpr const double double_max = 1;
-        constexpr const double double_epsilon = 1;
-        constexpr const double double_infty = 1;
-        constexpr const double double_qnan = 1;
-        constexpr const double double_snan = 1;
-        constexpr const long double ldouble_min = -1;
-        constexpr const long double ldouble_max = 1;
-        constexpr const long double ldouble_epsilon = 1;
-        constexpr const long double ldouble_infty = 1;
-        constexpr const long double ldouble_qnan = 1;
-        constexpr const long double ldouble_snan = 1;
+        constexpr const float float_min = __platform::float_min;
+        constexpr const float float_max = __platform::float_max;
+        constexpr const float float_epsilon = __platform::float_epsilon;
+        constexpr const float float_infty = __platform::float_infty;
+        constexpr const float float_qnan = __platform::float_qnan;
+        constexpr const float float_snan = __platform::float_snan;
+        constexpr const double double_min = __platform::double_min;
+        constexpr const double double_max = __platform::double_max;
+        constexpr const double double_epsilon = __platform::double_epsilon;
+        constexpr const double double_infty = __platform::double_infty;
+        constexpr const double double_qnan = __platform::double_qnan;
+        constexpr const double double_snan = __platform::double_snan;
+        constexpr const long double ldouble_min = __platform::ldouble_min;
+        constexpr const long double ldouble_max = __platform::ldouble_max;
+        constexpr const long double ldouble_epsilon = __platform::ldouble_epsilon;
+        constexpr const long double ldouble_infty = __platform::ldouble_infty;
+        constexpr const long double ldouble_qnan = __platform::ldouble_qnan;
+        constexpr const long double ldouble_snan = __platform::ldouble_snan;
 
 
         static constexpr const int char_digits = bitsPerByte*sizeof(char) - char_padding;

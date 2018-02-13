@@ -26,7 +26,7 @@ namespace std
 			constexpr ignore(ignore&&) noexcept = default;
 
 			template<typename T>
-			constexpr ignore(T&) noexcept { };
+			constexpr ignore(T&) noexcept { }
 			template<typename T>
 			constexpr ignore& operator=(T&&) noexcept { return *this; }
 			template<typename T>
@@ -212,15 +212,15 @@ namespace std
 
 		template<typename... Ys, class=enable_if_t<sizeof...(Ys) != 0 && sizeof...(Ys) == sizeof...(Ts)>>
 		explicit constexpr tuple(Ys&&... values)
-			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(forward<Ys>(values)...) { };
+			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(forward<Ys>(values)...) { }
 
 		template<typename... Ys>
 		constexpr tuple(const tuple<Ys...>& other)
-			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(other) { };
+			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(other) { }
 
 		template<typename... Ys>
 		constexpr tuple(tuple<Ys...>&& other)
-			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(move(other)) { };
+			: __detail::tuple_base<make_index_sequence<sizeof...(Ts)>, Ts...>(move(other)) { }
 
 		//template<typename Y, typename P>
 		//constexpr tuple(const std::pair<Y, P>& pair);
@@ -256,7 +256,7 @@ namespace std
 	template<typename ...Ts>
 	struct tuple_size<tuple<Ts...>>
 		: integral_constant<size_t, sizeof...(Ts)> { };
-    
+
 #if defined(__cpp_variable_templates)
     template<typename... Ts>
     constexpr size_t tuple_size_v = tuple_size<Ts...>::value;

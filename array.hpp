@@ -120,7 +120,115 @@ namespace std
         {
             for (size_t i = 0; i < N; i++) std::swap(_data[i], other[i]);
         }
+    };
 
+    template<typename T>
+    struct array<T, 0>
+    {
+        using value_type = T;
+        using size_type = size_t;
+        using difference_type = ptrdiff_t;
+        using reference = value_type&;
+        using const_reference = const value_type&;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using iterator = __detail::pointer_iterator<T>;
+        using const_iterator = __detail::pointer_iterator<const T>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        char _data;
+
+        constexpr reference at(size_type) {
+            __abi::__throw_exception(out_of_range("index"));
+        }
+        constexpr const_reference at(size_type index) const {
+            __abi::__throw_exception(out_of_range("index"));
+        }
+
+        constexpr reference operator[](size_type) {
+            return *reinterpret_cast<pointer>(&_data);
+        }
+        constexpr const_reference operator[](size_type) const {
+            return *reinterpret_cast<const_pointer>(&_data);
+        }
+
+        constexpr reference front() {
+            return *reinterpret_cast<pointer>(&_data);
+        }
+        constexpr reference front() const {
+            return *reinterpret_cast<pointer>(&_data);
+        }
+
+        constexpr reference back() {
+            return *reinterpret_cast<pointer>(&_data);
+        }
+        constexpr reference back() const {
+            return *reinterpret_cast<pointer>(&_data);
+        }
+
+        constexpr T* data() noexcept {
+            return nullptr;
+        }
+        constexpr const T* data() const noexcept {
+            return nullptr;
+        }
+
+        constexpr iterator begin() noexcept {
+            return iterator();
+        }
+        constexpr const_iterator begin() const noexcept {
+            return const_iterator();
+        }
+        constexpr const_iterator cbegin() const noexcept {
+            return const_iterator();
+        }
+
+        constexpr reverse_iterator rbegin() noexcept {
+            return reverse_iterator();
+        }
+        constexpr const_reverse_iterator rbegin() const noexcept {
+            return reverse_iterator();
+        }
+        constexpr const_reverse_iterator crbegin() const noexcept {
+            return reverse_iterator();
+        }
+
+        constexpr iterator end() noexcept {
+            return iterator();
+        }
+        constexpr const_iterator end() const noexcept {
+            return const_iterator();
+        }
+        constexpr const_iterator cend() const noexcept {
+            return const_iterator();
+        }
+
+        constexpr reverse_iterator rend() noexcept {
+            return reverse_iterator();
+        }
+        constexpr const_reverse_iterator rend() const noexcept {
+            return const_reverse_iterator();
+        }
+        constexpr const_reverse_iterator crend() const noexcept {
+            return const_reverse_iterator();
+        }
+
+        constexpr bool empty() const noexcept {
+            return true;
+        }
+        constexpr size_type size() const noexcept {
+            return 0;
+        }
+        constexpr size_type max_size() const noexcept {
+            return 0;
+        }
+
+        void fill(const T& value) {
+        }
+
+        void swap(array& other) noexcept {
+        }
     };
 
 #define __STD_ARRAY_OPERATOR(op, basis) \

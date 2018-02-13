@@ -4,11 +4,10 @@
 using namespace std::string_view_literals;
 
 
-TEST_SUITE(StringViewSuite);
+TEST_SUITE(StringViewSuite)
 
 TEST(StringViewSuite, EmptyView)
 {
-
     std::string_view view{};
 
     EXPECT_ZERO(view.length());

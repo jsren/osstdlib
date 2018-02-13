@@ -47,7 +47,11 @@ namespace std
         using basic_ios<Char, Traits>::setstate;
 
         explicit basic_ostream(basic_streambuf<char_type, Traits>* sb)
-            : basic_ios<Char, Traits>(sb) { }
+            : basic_ios<Char, Traits>(sb)
+        {
+            size_t c;
+            __platform::__write(__platform::__file_handle{1}, "ABC\n", 4, c);
+        }
 
         virtual ~basic_ostream() = default;
 
@@ -70,7 +74,7 @@ namespace std
 
             ~sentry()
             {
-                if ((os.flags() & unitbuf) != unitbuf &&
+                if ((os.flags() & ios_base::unitbuf) != ios_base::unitbuf &&
                     !uncaught_exception() && os.good())
                 {
                     if (os.rdbuf()->pubsync() == -1) {
@@ -278,7 +282,7 @@ namespace std
         template<typename Char, typename Traits>
         void write_uint(basic_ostream<Char, Traits>& os, unsigned long long value)
         {
-            constexpr auto buffSize = numeric_limits<unsigned long long>::max_digits10;
+            constexpr auto buffSize = numeric_limits<unsigned long long>::digits10;
             char buffer[buffSize];
 
             auto res = to_chars(buffer, buffer + buffSize, value);
@@ -289,7 +293,7 @@ namespace std
         template<typename Char, typename Traits>
         void write_sint(basic_ostream<Char, Traits>& os, signed long long value)
         {
-            constexpr auto buffSize = numeric_limits<signed long long>::max_digits10;
+            constexpr auto buffSize = numeric_limits<signed long long>::digits10;
             char buffer[buffSize];
 
             auto res = to_chars(buffer, buffer + buffSize, value);

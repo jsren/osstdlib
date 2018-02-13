@@ -48,7 +48,7 @@ namespace __platform
 
     }
 
-    void __align_stack() noexcept
+    void __pre_start() noexcept
     {
         // Linux-x64 compiler ABI requires 16-byte stack alignment
         // to an 8-byte boundary. So add 8 to offset stack.
@@ -61,12 +61,13 @@ namespace __platform
 
     [[noreturn]] void __exit(int rc) noexcept
     {
+        auto code = static_cast<uint64_t>(rc & 0xFF);
         __asm__ volatile (
             "movq $60, %%rax\n"
-            "movl %0, %%edi\n"
+            "movq %0, %%rdi\n"
             "syscall"
             :
-            : "r" (rc)
+            : "g"(code)
             : "rax", "rcx", "r11", "rdi"
         );
     }
@@ -172,7 +173,7 @@ namespace __platform
 
     __result_t __seek(__file_handle handle, ssize_t offset, __seek_whence cppwhence, size_t& pos_out) noexcept
     {
-        size_t whence;
+        size_t whence = 0;
         switch (cppwhence) {
             case __seek_whence::start: { whence = SEEK_SET; break; }
             case __seek_whence::current: { whence = SEEK_CUR; break; }

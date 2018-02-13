@@ -31,4 +31,10 @@ namespace std
     inline bool uncaught_exception() noexcept {
         return __abi::__uncaught_exception();
     }
+
+    using terminate_handler = void(*)();
+
+    [[noreturn]] void terminate() noexcept;
+    terminate_handler get_terminate() noexcept;
+    terminate_handler set_terminate(terminate_handler handler) noexcept;
 }
