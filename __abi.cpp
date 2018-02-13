@@ -67,6 +67,7 @@ namespace std {
     void* memcpy(void* dest, const void* src, __platform::size_t count);
     void* memset(void* ptr, int value, __platform::size_t num);
     void abort();
+    void exit(int);
 }
 
 constexpr const __platform::size_t atexit_entries = 16;
@@ -85,6 +86,9 @@ extern "C"
     static const func_ptr __abi__init_end[1]
         __attribute__((used, section (".init_array"), aligned (sizeof (func_ptr)))) = { nullptr };
 
+    //static const func_ptr __abi__fini_end[1]
+    //    __attribute__((used, section (".fini_array"), aligned (sizeof (func_ptr)))) = { nullptr };
+
     static volatile func_ptr* __abi__init_array = (func_ptr*)(void*)__abi__init_end;
 
     int __cxa_atexit(void(*dtor)(void*), void* obj, void* dso_handle)
@@ -101,7 +105,7 @@ extern "C"
     {
         if (dtor == nullptr)
         {
-            for (__platform::size_t i = atexit_index; i > 0; i++)
+            for (__platform::size_t i = atexit_index; i > 0; i--)
             {
                 if (atexit_array[i-1].dtor != nullptr)
                 {
@@ -112,7 +116,7 @@ extern "C"
         }
         else
         {
-            for (__platform::size_t i = atexit_index; i > 0; i++)
+            for (__platform::size_t i = atexit_index; i > 0; i--)
             {
                 if (atexit_array[i-1].dtor == dtor)
                 {
@@ -164,8 +168,8 @@ extern "C"
     void _start()
     {
         __platform::__align_stack();
-        _init();
-        _exit(main());
+        ::_init();
+        std::exit(main());
     }
 
     void* memcpy(void* dest, const void* src, __platform::size_t count)

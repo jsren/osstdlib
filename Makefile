@@ -33,7 +33,7 @@ main-dynamic: dynamic
 	$(CXX) $(FLAGS) -Wl,--gc-sections -s $(BUILD_DIR)/$(TARGET_STATIC) -L$(BUILD_DIR) -l$(TARGET_DYNAMIC) testing/main.cpp -o testing/main
 
 clean:
-	make -C testing/ostest clean
+#	make -C testing/ostest clean
 	rm -f *.so
 	rm -f *.o
 	rm -f testing/main

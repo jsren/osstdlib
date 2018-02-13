@@ -61,12 +61,13 @@ namespace __platform
 
     [[noreturn]] void __exit(int rc) noexcept
     {
+        auto code = static_cast<uint64_t>(rc & 0xFF);
         __asm__ volatile (
             "movq $60, %%rax\n"
-            "movl %0, %%edi\n"
+            "movq %0, %%rdi\n"
             "syscall"
             :
-            : "r" (rc)
+            : "g"(code)
             : "rax", "rcx", "r11", "rdi"
         );
     }
