@@ -1,4 +1,4 @@
-#include "common.hpp"
+#include "ostest/ostest.h"
 #include <string>
 #include <__platform>
 #include <ostream>

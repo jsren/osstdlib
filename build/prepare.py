@@ -17,22 +17,11 @@ def get_platform_header(path):
     platform = os.environ.get("OSSTDLIB_PLATFORM")
     if not platform:
         raise Exception("Required environment variable OSSTDLIB_PLATFORM not set or empty")
-    file = os.path.join(path, "impl", "platform-" + platform + ".hpp")
+    file = os.path.join(path, "impl", platform, "platform.hpp")
     if not os.path.exists(file):
         raise Exception("Platform header '%s' does not exist"%(file))
     else:
         return file
-
-def get_platform_cpp(path):
-    platform = os.environ.get("OSSTDLIB_PLATFORM")
-    if not platform:
-        raise Exception("Required environment variable OSSTDLIB_PLATFORM not set or empty")
-    file = os.path.join(path, "impl", "platform-" + platform + ".cpp")
-    if not os.path.exists(file):
-        raise Exception("Platform cpp '%s' does not exist"%(file))
-    else:
-        return file
-
 
 if __name__ == "__main__":
     if not os.path.exists(includedir):
@@ -44,6 +33,3 @@ if __name__ == "__main__":
 
     target = "__platform-impl"
     shutil.copy(get_platform_header("."), os.path.join(includedir, target))
-
-    target = "__platform.cpp"
-    shutil.copy(get_platform_cpp("."), os.path.join(includedir, target))

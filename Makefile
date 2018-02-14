@@ -17,10 +17,10 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp __platform.cpp exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r __abi.cpp impl/$(OSSTDLIB_PLATFORM)/*.cpp impl/$(OSSTDLIB_PLATFORM)/*.s exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared __platform.cpp exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -fPIC -shared impl/$(OSSTDLIB_PLATFORM)/*.cpp impl/$(OSSTDLIB_PLATFORM)/*.s exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)

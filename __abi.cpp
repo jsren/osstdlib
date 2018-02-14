@@ -105,7 +105,7 @@ extern "C"
     using func_ptr = void(*)();
 
     static func_ptr __abi__init_end[1]
-        __attribute__((section (".init_array"), aligned (sizeof (func_ptr)))) = { nullptr };
+        __attribute__((section (".init_array"), used, aligned (sizeof (func_ptr)))) = { nullptr };
 
     static volatile func_ptr* __abi__init_array = (func_ptr*)(void*)__abi__init_end;
 
@@ -198,7 +198,7 @@ extern "C"
 
     void _start()
     {
-        __platform::__pre_start();
+        __platform__pre_start();
         ::_init();
         std::exit(main());
     }
