@@ -72,4 +72,6 @@ namespace std
 
     using streampos = fpos<mbstate_t>;
     using wstreampos = fpos<mbstate_t>;
+    using u16streampos = fpos<mbstate_t>;
+    using u32streampos = fpos<mbstate_t>;
 }

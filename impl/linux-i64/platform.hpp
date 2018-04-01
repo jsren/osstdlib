@@ -8,6 +8,9 @@ namespace __platform
     using ptrdiff_t = signed long long;
 
     using max_align_t = long double;
+    using wint_t = wchar_t;
+
+    constexpr const wint_t WEOF = static_cast<wint_t>(-1);
 
     typedef signed char int8_t;
     typedef short       int16_t;
@@ -18,6 +21,34 @@ namespace __platform
     typedef unsigned short     uint16_t;
     typedef unsigned long      uint32_t;
     typedef unsigned long long uint64_t;
+
+    using int_fast8_t = int8_t;
+    using int_fast16_t = int16_t;
+    using int_fast32_t = int32_t;
+    using int_fast64_t = int64_t;
+
+    using int_least8_t = int8_t;
+    using int_least16_t = int16_t;
+    using int_least32_t = int32_t;
+    using int_least64_t = int64_t;
+
+    using intmax_t = int64_t;
+    using intptr = int64_t;
+
+    using uint_fast8_t = uint8_t;
+    using uint_fast16_t = uint16_t;
+    using uint_fast32_t = uint32_t;
+    using uint_fast64_t = uint64_t;
+
+    using uint_least8_t = uint8_t;
+    using uint_least16_t = uint16_t;
+    using uint_least32_t = uint32_t;
+    using uint_least64_t = uint64_t;
+
+    using uintmax_t = uint64_t;
+    using uintptr = uint64_t;
+
+
 
     struct __file_handle
     {

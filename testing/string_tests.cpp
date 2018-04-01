@@ -14,6 +14,7 @@ TEST(StringSuite, EmptyString)
     EXPECT_EQ(s1.length(), 0);
     EXPECT_EQ(s1.size(), 0);
     EXPECT_EQ(s1, "");
+    EXPECT_EQ(s1, ""s);
     EXPECT_EQ(s1, std::string{});
     EXPECT_EQ(s1.substr(0, 0), s1);
     EXPECT_EQ(s1.c_str()[0], '\0');
@@ -22,11 +23,13 @@ TEST(StringSuite, EmptyString)
 
 TEST(StringSuite, SingleCharString)
 {
+    using namespace std::literals;
     static const char t1[] = "a";
 
     std::string s1{t1};
     EXPECT_EQ(s1.at(0), t1[0]);
     EXPECT_EQ(s1[0], t1[0]);
+    EXPECT_EQ(s1, "a"s);
     EXPECT_EQ(s1.back(), t1[0]);
     EXPECT_EQ(s1.front(), t1[0]);
     EXPECT_EQ(*s1.begin(), t1[0]);

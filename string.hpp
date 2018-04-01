@@ -429,3 +429,29 @@ namespace std
         return __detail::uint_to_string(value);
     }
 }
+
+namespace std
+{
+    inline namespace literals
+    {
+        inline namespace string_literals
+        {
+            #pragma GCC diagnostic ignored "-Wliteral-suffix"
+            #pragma GCC diagnostic ignored "-Wuser-defined-literals"
+            inline string operator"" s(const char* string, size_t length) {
+                return std::string(string, length);
+            }
+            inline wstring operator"" s(const wchar_t* string, size_t length) {
+                return std::wstring(string, length);
+            }
+            inline u16string operator"" s(const char16_t* string, size_t length) {
+                return std::u16string(string, length);
+            }
+            inline u32string operator"" s(const char32_t* string, size_t length) {
+                return std::u32string(string, length);
+            }
+        }
+        using namespace string_view_literals;
+    }
+    using namespace literals;
+}

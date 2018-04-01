@@ -2,6 +2,8 @@
 #include <allocator>
 #include <cstring>
 #include <.ios-decl>
+#include <cwchar>
+#include <cstdint>
 
 namespace std
 {
@@ -39,14 +41,41 @@ namespace std
 
     template<typename Char>
     struct char_traits;
-    template<>
-    struct char_traits<char>
+
+    template<typename char_type>
+    struct char_traits_comp_base
     {
-        using char_type = char;
-        using int_type = int;
-        using off_type = streamoff;
-        using pos_type = streampos;
+        static constexpr bool eq(char_type lhs, char_type rhs) noexcept {
+            return lhs == rhs;
+        }
+        static constexpr bool lt(char_type lhs, char_type rhs) noexcept  {
+            return lhs < rhs;
+        }
+    };
+
+    template<>
+    struct char_traits_comp_base<char>
+    {
+        static constexpr bool eq(char lhs, char rhs) noexcept {
+            return static_cast<unsigned char>(lhs) == static_cast<unsigned char>(rhs);
+        }
+        static constexpr bool lt(char lhs, char rhs) noexcept  {
+            return static_cast<unsigned char>(lhs) < static_cast<unsigned char>(rhs);
+        }
+    };
+
+
+    template<typename CharType, typename IntType, typename PosType>
+    struct char_traits_base : char_traits_comp_base<CharType>
+    {
+        using char_type  = CharType;
+        using int_type   = IntType;
+        using off_type   = streamoff;
+        using pos_type   = PosType;
         using state_type = mbstate_t;
+
+        using char_traits_comp_base<CharType>::eq;
+        using char_traits_comp_base<CharType>::lt;
 
         static constexpr void assign(char_type& lhs, const char_type& rhs) noexcept {
             lhs = rhs;
@@ -58,13 +87,6 @@ namespace std
             return string;
         }
 
-        static constexpr bool eq(char_type lhs, char_type rhs) noexcept {
-            return lhs == rhs;
-        }
-        static constexpr bool lt(char_type lhs, char_type rhs) noexcept  {
-            return lhs < rhs;
-        }
-
         static char_type* move(char_type* dest, const char_type* source,
             size_t size)
         {
@@ -74,14 +96,14 @@ namespace std
         static char_type* copy(char_type* dest, const char_type* source,
             size_t size)
         {
-            __detail::memcpy(dest, source, size * sizeof(char));
+            __detail::memcpy(dest, source, size * sizeof(char_type));
             return dest;
         }
 
         static constexpr int compare(const char_type* lhs,
             const char_type* rhs, size_t size)
         {
-            return __detail::memcmp(lhs, rhs, size * sizeof(char));
+            return __detail::memcmp(lhs, rhs, size * sizeof(char_type));
         }
 
         static constexpr size_t length(const char_type* string) {
@@ -108,22 +130,99 @@ namespace std
         static constexpr bool eq_int_type(int_type lhs, int_type rhs) noexcept {
             return lhs == rhs;
         }
+    };
+
+    template<>
+    struct char_traits<char> : char_traits_base<char, int, streampos>
+    {
+        using base = char_traits_base<char, int, streampos>;
+
+        using base::char_type;
+        using base::int_type;
+        using base::off_type;
+        using base::pos_type;
+        using base::state_type;
 
         static constexpr int_type eof() noexcept
         {
-            static_assert(sizeof(char) != sizeof(int),
+            static_assert(sizeof(char_type) != sizeof(int_type),
                 "Unsupported value for EOF on this platform");
             return -1;
         }
 
         static constexpr int_type not_eof(int_type e) noexcept {
-            return e == -1 ? 0 : e;
+            return e == eof() ? 0 : e;
         }
     };
+
+    template<>
+    struct char_traits<wchar_t> : char_traits_base<wchar_t, wint_t, wstreampos>
+    {
+        using base = char_traits_base<wchar_t, wint_t, wstreampos>;
+
+        using base::char_type;
+        using base::int_type;
+        using base::off_type;
+        using base::pos_type;
+        using base::state_type;
+
+        static constexpr int_type eof() noexcept {
+            return __platform::WEOF;
+        }
+
+        static constexpr int_type not_eof(int_type e) noexcept {
+            return e == eof() ? 0 : e;
+        }
+    };
+
+    template<>
+    struct char_traits<char16_t> : char_traits_base<char16_t, uint_least16_t, u16streampos>
+    {
+        using base = char_traits_base<char16_t, uint_least16_t, u16streampos>;
+
+        using base::char_type;
+        using base::int_type;
+        using base::off_type;
+        using base::pos_type;
+        using base::state_type;
+
+        static constexpr int_type eof() noexcept {
+            return static_cast<char16_t>(-1);
+        }
+
+        static constexpr int_type not_eof(int_type e) noexcept {
+            return e == eof() ? 0 : e;
+        }
+    };
+
+    template<>
+    struct char_traits<char32_t> : char_traits_base<char32_t, uint_least32_t, u32streampos>
+    {
+        using base = char_traits_base<char32_t, uint_least32_t, u32streampos>;
+
+        using base::char_type;
+        using base::int_type;
+        using base::off_type;
+        using base::pos_type;
+        using base::state_type;
+
+        static constexpr int_type eof() noexcept {
+            return static_cast<char32_t>(-1);
+        }
+
+        static constexpr int_type not_eof(int_type e) noexcept {
+            return e == eof() ? 0 : e;
+        }
+    };
+
+
 
     // Forward declare string
     template<typename Char, typename=char_traits<Char>, typename=allocator<Char>>
     class basic_string;
 
     typedef basic_string<char> string;
+    typedef basic_string<wchar_t> wstring;
+    typedef basic_string<char16_t> u16string;
+    typedef basic_string<char32_t> u32string;
 }
