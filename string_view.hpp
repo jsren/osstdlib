@@ -7,6 +7,12 @@
 #include <exception>
 #include <stdexcept>
 
+#if __has_cpp_attribute(nodiscard) && __cplusplus >= 201703L
+#define __std_nodiscard [[nodiscard]]
+#else
+#define __std_nodiscard
+#endif
+
 namespace std
 {
     template<typename Char, typename Traits = char_traits<Char>>
@@ -99,7 +105,7 @@ namespace std
         constexpr size_type max_size() const noexcept {
             return numeric_limits<size_type>::max() - 1;
         }
-        [[nodiscard]] constexpr bool empty() const noexcept {
+        __std_nodiscard constexpr bool empty() const noexcept {
             return _size == 0;
         }
 

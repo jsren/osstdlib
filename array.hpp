@@ -24,11 +24,13 @@ namespace std
 
         T _data[N];
 
-        constexpr reference at(size_type index) {
+        constexpr reference at(size_type index)
+        {
             if (index >= N) __abi::__throw_exception(out_of_range("index"));
             else return _data[index];
         }
-        constexpr const_reference at(size_type index) const {
+        constexpr const_reference at(size_type index) const
+        {
             if (index >= N) __abi::__throw_exception(out_of_range("index"));
             else return _data[index];
         }
@@ -139,11 +141,11 @@ namespace std
 
         char _data;
 
-        constexpr reference at(size_type) {
-            __abi::__throw_exception(out_of_range("index"));
+        constexpr reference at(size_type index) {
+            (void)(index); __abi::__throw_exception(out_of_range("index"));
         }
         constexpr const_reference at(size_type index) const {
-            __abi::__throw_exception(out_of_range("index"));
+            (void)(index); __abi::__throw_exception(out_of_range("index"));
         }
 
         constexpr reference operator[](size_type) {
@@ -225,9 +227,11 @@ namespace std
         }
 
         void fill(const T& value) {
+            (void)(value);
         }
 
         void swap(array& other) noexcept {
+            (void)(other);
         }
     };
 

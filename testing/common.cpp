@@ -18,8 +18,6 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
     static const char* passStr = "PASS";
     static const char* failStr = "FAIL";
 
-    //std::cout << "[";
-
     // Print test result
     print("[");
     print(result ? passStr : failStr);

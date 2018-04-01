@@ -3,6 +3,7 @@ import os
 import shutil
 
 thisdir = os.path.dirname(__file__)
+basedir = os.path.join(thisdir, "..")
 includedir = os.path.join(thisdir, "include")
 
 
@@ -27,9 +28,9 @@ if __name__ == "__main__":
     if not os.path.exists(includedir):
         os.mkdir(includedir)
 
-    for header in get_public_headers("."):
+    for header in get_public_headers(basedir):
         target = os.path.splitext(os.path.split(header)[1])[0]
         shutil.copy(header, os.path.join(includedir, target))
 
     target = "__platform-impl"
-    shutil.copy(get_platform_header("."), os.path.join(includedir, target))
+    shutil.copy(get_platform_header(basedir), os.path.join(includedir, target))

@@ -104,10 +104,8 @@ extern "C"
 
     using func_ptr = void(*)();
 
-    static func_ptr __abi__init_end[1]
-        __attribute__((section (".init_array"), used, aligned (sizeof (func_ptr)))) = { nullptr };
-
-    static volatile func_ptr* __abi__init_array = (func_ptr*)(void*)__abi__init_end;
+    extern const func_ptr __abi_init_array_start;
+    extern const func_ptr __abi_init_array_end;
 
     int __cxa_atexit(void(*dtor)(void*), void* obj, void* dso_handle)
     {
@@ -187,11 +185,9 @@ extern "C"
 
     void _init()
     {
-        auto table = __abi__init_array - 1;
-        for (; *table != nullptr; table--) {
-        }
-        table++;
-        for (; *table != nullptr; table++) {
+        for (auto table = &__abi_init_array_start;
+            table < &__abi_init_array_end; table++)
+        {
             (*table)();
         }
     }
