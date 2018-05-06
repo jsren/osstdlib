@@ -1,5 +1,5 @@
 /* tuple_tests.cpp - (c) 2017 James Renwick */
-#include "ostest/ostest.h"
+#include "ostest/ostest.hpp"
 #include <tuple>
 
 TEST_SUITE(TupleSuite)

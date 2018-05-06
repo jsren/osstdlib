@@ -5,13 +5,17 @@ TARGET_STATIC := osstdc++.o
 TARGET_DYNAMIC := osstdc++
 BUILD_DIR := build
 
-LINKER_SCRIPT := impl/gnu/linker.ld
-
 LTO ?=
 
 export OSSTDLIB_PLATFORM ?= linux-i64
+export OSSTDLIB_COMPILER ?= gnu
 
-FLAGS := -I$(BUILD_DIR)/include -Wall -Wextra -pedantic -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-unknown-warning-option -Wno-invalid-noreturn -Wno-main
+ABI_DIR := osabi
+PLATFORM_DIR := $(ABI_DIR)/$(OSSTDLIB_PLATFORM)
+LINKER_SCRIPT := $(ABI_DIR)/$(OSSTDLIB_COMPILER)/linker.ld
+
+FLAGS := -I$(BUILD_DIR)/include -Wall -Wextra -pedantic -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-main
+SOURCES := exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp
 
 .PHONY: prepare main-static main-dynamic default test clean
 
@@ -19,11 +23,11 @@ prepare:
 	python ./build/prepare.py
 
 $(BUILD_DIR)/$(TARGET_STATIC): prepare
-	$(CXX) $(FLAGS) -r __abi.cpp impl/$(OSSTDLIB_PLATFORM)/*.cpp impl/$(OSSTDLIB_PLATFORM)/*.s exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -r $(ABI_DIR)/__abi.cpp $(PLATFORM_DIR)/*.cpp $(PLATFORM_DIR)/*.s $(SOURCES) -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
-	$(CXX) $(FLAGS) -fPIC -shared impl/$(OSSTDLIB_PLATFORM)/*.cpp impl/$(OSSTDLIB_PLATFORM)/*.s exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
-	$(CXX) $(FLAGS) -r __abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
+	$(CXX) $(FLAGS) -fPIC -shared $(PLATFORM_DIR)/*.cpp $(PLATFORM_DIR)/*.s $(SOURCES) -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
+	$(CXX) $(FLAGS) -r $(ABI_DIR)/__abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 
 static: $(BUILD_DIR)/$(TARGET_STATIC)
 dynamic: $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
@@ -45,4 +49,4 @@ clean:
 
 test: static
 	make -C testing/ostest PROFILE=bare CXX=$(CXX)
-	$(CXX) $(FLAGS) -Wl,--script=$(LINKER_SCRIPT) -Wl,--gc-sections -DOSTEST_NO_ALLOC -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe
+	$(CXX) $(FLAGS) -Wno-unused-parameter -Wl,--script=$(LINKER_SCRIPT) -Wl,--gc-sections -DOSTEST_NO_ALLOC -Itesting/ostest testing/*.cpp $(BUILD_DIR)/$(TARGET_STATIC) testing/ostest/ostest.o -o testing/test.exe

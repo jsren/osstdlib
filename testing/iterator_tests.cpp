@@ -6,7 +6,7 @@
 #include <tuple>
 #include <type_traits>
 #include <cstddef>
-#include "ostest/ostest.h"
+#include "ostest/ostest.hpp"
 
 static int nums[] = { 1, 2, 3, 4 };
 static constexpr const std::size_t numsCount = sizeof(nums)/sizeof(nums[0]);

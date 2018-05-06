@@ -1,4 +1,4 @@
-#include "ostest/ostest.h"
+#include "ostest/ostest.hpp"
 #include <string_view>
 
 using namespace std::string_view_literals;

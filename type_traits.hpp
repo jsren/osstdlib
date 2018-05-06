@@ -217,7 +217,7 @@ namespace std
 		};
 	}
 
-#pragma warn "is_constructable is not exhaustive"
+#pragma message "is_constructable is not exhaustive"
 	template<typename T, typename ...Args>
 	struct is_constructible : bool_constant<__detail::is_constructable<T, Args...>::value> { };
 #endif
@@ -327,7 +327,7 @@ namespace std
 #endif
 
 
-#pragma warn "TODO: result_of/invoke_result are hacks"
+#pragma message "TODO: result_of/invoke_result are hacks"
 
     template<typename>
     struct result_of;

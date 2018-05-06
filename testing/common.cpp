@@ -1,4 +1,4 @@
-#include "ostest/ostest.h"
+#include "ostest/ostest.hpp"
 #include <string>
 #include <__platform>
 #include <ostream>
@@ -23,9 +23,9 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
     print(result ? passStr : failStr);
     print("] ");
     print("[");
-    print(test.suiteName);
+    print(test.suite.name);
     print("::");
-    print(test.testName);
+    print(test.name);
     print("] at ");
     print(test.file);
     print(":");
@@ -36,18 +36,16 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 
 	if (!result.succeeded())
 	{
-		auto enum_ = result.getAssertions();
-		while (enum_.next())
-		{
-			const Assertion& result = enum_.current();
-			if (result.passed()) continue;
+		for (auto& assert : result.getAssertions())
+        {
+			if (assert.passed()) continue;
 
             print("\t");
-            print(result.file);
+            print(assert.file);
             print(":");
-            print(std::to_string(result.line));
+            print(std::to_string(assert.line));
             print(": ");
-            print(result.getMessage());
+            print(assert.getMessage());
             print("\n");
 			//std::printf("\t%s:%i: %s\n", result.file, result.line, result.getMessage());
 		}
@@ -56,9 +54,12 @@ void ostest::handleTestComplete(const TestInfo& test, const TestResult& result)
 
 int main()
 {
-    auto tests = ostest::getUnitTests();
-    while (tests.next()) {
-        TestRunner(tests.current()).run();
+    for (auto& suiteInfo : ostest::getSuites())
+    {
+        auto suite = suiteInfo.getSingletonSmartPtr();
+        for (auto& test : suiteInfo.tests()) {
+            TestRunner(*suite, test).run();
+        }
     }
     return 0;
 }

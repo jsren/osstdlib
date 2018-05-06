@@ -284,8 +284,7 @@ namespace std
     {
         inline namespace string_view_literals
         {
-            #pragma GCC diagnostic ignored "-Wliteral-suffix"
-            #pragma GCC diagnostic ignored "-Wuser-defined-literals"
+            #pragma GCC system_header
             inline constexpr string_view operator"" sv(const char* string, size_t length) noexcept {
                 return std::string_view(string, length);
             }

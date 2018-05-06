@@ -1,4 +1,4 @@
-#include "ostest/ostest.h"
+#include "ostest/ostest.hpp"
 #include <array>
 #include <__platform>
 #include <string>

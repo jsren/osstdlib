@@ -83,14 +83,24 @@ namespace std
         }
 
     public:
+        /**
+         * @brief Construct a new basic string object
+         * Creates a new string with a default-constructed allocator.
+         */
         basic_string() noexcept(noexcept(allocator_type())) : _alloc() {
             _repr._short._length = 1;
         };
 
+        /**
+         * @brief Construct a new basic string object
+         * Creates a new string with the given allocator.
+         * @param alloc The allocator to use
+         */
         explicit basic_string(const allocator_type& alloc) noexcept : _alloc(alloc) {
             _repr._short._length = 1;
         }
 
+    private:
         void _destroy(pointer data, size_type size, size_type capacity)
         {
             for (size_type i = 0; i < size; i++) {
@@ -169,6 +179,7 @@ namespace std
             return data;
         }
 
+    public:
         basic_string(size_type length, Char character,
             const allocator_type& alloc = allocator_type()) : _alloc(alloc)
         {
@@ -436,8 +447,7 @@ namespace std
     {
         inline namespace string_literals
         {
-            #pragma GCC diagnostic ignored "-Wliteral-suffix"
-            #pragma GCC diagnostic ignored "-Wuser-defined-literals"
+            #pragma GCC system_header
             inline string operator"" s(const char* string, size_t length) {
                 return std::string(string, length);
             }

@@ -1,3 +1,6 @@
 [submodule "testing/ostest"]
 	path = testing/ostest
 	url = https://github.com/jsren/ostest
+[submodule "osabi"]
+	path = osabi
+	url = git@github.com:jsren/osabi
