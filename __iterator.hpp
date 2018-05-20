@@ -1,5 +1,6 @@
 #pragma once
 #include <cstddef>
+#include <type_traits>
 
 namespace std
 {
@@ -8,6 +9,23 @@ namespace std
     struct forward_iterator_tag : input_iterator_tag { };
     struct bidirectional_iterator_tag : forward_iterator_tag { };
     struct random_access_iterator_tag : bidirectional_iterator_tag { };
+
+
+    namespace __detail
+    {
+        static void implicit_bool(bool b);
+
+        template<typename T>
+        static auto _is_input_iterator(T&& t) -> decltype(
+            implicit_bool(t != t), *t, ++t, (void)t++, std::true_type{});
+
+        static std::false_type _is_input_iterator(...);
+
+        template<typename T>
+        constexpr bool is_input_iterator() noexcept {
+            return decltype(_is_input_iterator(std::declval<T>()))::value;
+        }
+    }
 
 
     template<typename Iterator>
