@@ -3,10 +3,12 @@
 import os
 import shutil
 
+abidir = os.environ.get("ABI_DIR")
+
 thisdir = os.path.dirname(__file__)
 basedir = os.path.join(thisdir, "..")
 includedir = os.path.join(thisdir, "include")
-abidir = os.path.join(basedir, "osabi")
+abidir = abidir if abidir else os.path.join(basedir, "osabi")
 
 
 def get_files_by_ext(ext, path):
