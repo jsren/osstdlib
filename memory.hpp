@@ -1,6 +1,7 @@
 /* memory.hpp - (c) 2017 James Renwick */
 #pragma once
 #include <type_traits>
+#include <utility>
 #include <cstddef>
 #include <limits>
 

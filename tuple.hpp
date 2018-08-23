@@ -1,6 +1,7 @@
 /* tuple.hpp - (c) 2017 James S Renwick */
 
 #pragma once
+#include <utility>
 #include <type_traits>
 #include <cstddef>
 
