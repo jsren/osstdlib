@@ -49,6 +49,7 @@ clean:
 	rm -f build/*.o
 	rm -f build/*.so
 	rm -f build/include/*
+	rm -f build/linker.ld
 
 test: static
 	make -C testing/ostest PROFILE=bare CXX=$(CXX)
