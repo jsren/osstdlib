@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <cstddef>
 
+extern "C++" {
 namespace std
 {
 	namespace chrono
@@ -114,4 +115,5 @@ namespace std
 		constexpr timestamp(uint8_t hour, uint8_t minute, uint8_t second) noexcept :
 			ticks(hour * 60*60*1000 + minute * 60*1000 + second * 1000) { }
 	};
+}
 }

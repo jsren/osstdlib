@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <type_traits>
 
+extern "C++" {
 namespace std
 {
     template<typename T, size_t N>
@@ -319,4 +320,5 @@ namespace std
     constexpr array<remove_cv_t<T>, N> to_array(T (&a)[N]) {
         return __detail::to_array(a, make_index_sequence<N>());
     }
+}
 }

@@ -2,6 +2,7 @@
 #include <ostream>
 #include <streambuf>
 
+extern "C++" {
 namespace std
 {
     struct output_iterator_tag;
@@ -57,4 +58,5 @@ namespace std
         }
     };
 
+}
 }

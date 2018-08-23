@@ -1,6 +1,7 @@
 /* exception.cpp - (c) 2018 James Renwick */
 #include <exception>
 
+extern "C++" {
 namespace std
 {
     void abort();
@@ -32,4 +33,5 @@ namespace std
     {
         return _detail::_term;
     }
+}
 }

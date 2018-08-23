@@ -1,6 +1,7 @@
 #pragma once
 #include <__platform>
 
+extern "C++" {
 namespace std
 {
     using int8_t = __platform::int8_t;
@@ -37,4 +38,5 @@ namespace std
 
     using uintmax_t = __platform::uintmax_t;
     using uintptr = __platform::uintptr;
+}
 }

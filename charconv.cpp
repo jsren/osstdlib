@@ -1,5 +1,6 @@
 #include <charconv>
 
+extern "C++" {
 namespace std
 {
     namespace __detail
@@ -39,4 +40,5 @@ namespace std
             return {first, static_cast<errc>(false)};
         }
     }
+}
 }

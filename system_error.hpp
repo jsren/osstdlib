@@ -3,6 +3,7 @@
 #include <string>
 #include <stdexcept>
 
+extern "C++" {
 namespace std
 {
     class error_condition;
@@ -179,4 +180,5 @@ namespace std
     // Hash support
     template <class T> struct hash;
     template <> struct hash<error_code>;
+}
 }

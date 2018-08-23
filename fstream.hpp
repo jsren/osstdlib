@@ -2,6 +2,7 @@
 #include <__platform>
 #include <string>
 
+extern "C++" {
 namespace std
 {
     template<typename Char, typename Traits = char_traits<Char>>
@@ -146,4 +147,5 @@ namespace std
 
     using filebuf = basic_filebuf<char>;
     using wfilebuf = basic_filebuf<wchar_t>;
+}
 }

@@ -7,6 +7,7 @@
 #include <__iterator>
 #include <initializer_list>
 
+extern "C++" {
 namespace std
 {
 	template<typename T, typename Allocator = allocator<T>>
@@ -184,4 +185,5 @@ namespace std
 		 */
 		const_reference at(size_type index) const;
 	};
+}
 }

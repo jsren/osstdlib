@@ -1,5 +1,6 @@
 #include ".ostreambuf-iterator.hpp"
 
+extern "C++" {
 namespace std
 {
     namespace locale
@@ -38,4 +39,5 @@ namespace std
         explicit num_put(size_t refCountStart)
             : locale::facet(refCountStart) { }
     };
+}
 }

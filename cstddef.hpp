@@ -1,6 +1,7 @@
 #pragma once
 #include <__platform>
 
+extern "C++" {
 namespace std
 {
     using size_t = __platform::size_t;
@@ -10,4 +11,5 @@ namespace std
     enum class byte : unsigned char { };
 
 	using nullptr_t = decltype(nullptr);
+}
 }

@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <cstddef>
 
+extern "C++" {
 namespace std
 {
 	namespace __detail
@@ -324,4 +325,5 @@ namespace std
 	//template<typename Alloc, typename ...Ts>
 	//tuple(allocator_arg_t, Alloc, tuple<Ts...>) -> tuple<Ts...>;
 #endif
+}
 }

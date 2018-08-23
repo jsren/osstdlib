@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <type_traits>
 
+extern "C++" {
 namespace std
 {
     typedef make_signed_t<size_t> streamsize;
@@ -74,4 +75,5 @@ namespace std
     using wstreampos = fpos<mbstate_t>;
     using u16streampos = fpos<mbstate_t>;
     using u32streampos = fpos<mbstate_t>;
+}
 }

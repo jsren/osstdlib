@@ -2,6 +2,7 @@
 #include <limits>
 #include <charconv>
 
+extern "C++" {
 namespace std
 {
 	namespace __detail
@@ -28,4 +29,5 @@ namespace std
             return (static_cast<bool>(res.ec)) ? string() : string(buffer);
         }
 	}
+}
 }

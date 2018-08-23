@@ -16,17 +16,19 @@ LINKER_SCRIPT := $(ABI_DIR)/$(OSSTDLIB_COMPILER)/linker.ld
 
 FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-main
 SOURCES := exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp
+HEADERS := $(wildcard *.hpp) $(wildcard *.h) $(wildcard $(ABI_DIR)/*.hpp) $(wildcard $(ABI_DIR)/*.h) $(wildcard $(PLATFORM_DIR)/*.hpp) $(wildcard $(PLATFORM_DIR)/*.h)
+ABI_SOURCES := $(wildcard $(ABI_DIR)/*.cpp) $(wildcard $(PLATFORM_DIR)/*.cpp) $(wildcard $(PLATFORM_DIR)/*.s)
 
 .PHONY: prepare main-static main-dynamic default test clean
 
-prepare:
+./build/linker.ld: $(HEADERS)
 	python ./build/prepare.py
-	cp $(LINKER_SCRIPT) ./build/
+	cp $(LINKER_SCRIPT) ./build/linker.ld
 
-$(BUILD_DIR)/$(TARGET_STATIC): prepare
+$(BUILD_DIR)/$(TARGET_STATIC): ./build/linker.ld $(SOURCES) $(ABI_SOURCES)
 	$(CXX) $(FLAGS) -r $(ABI_DIR)/__abi.cpp $(PLATFORM_DIR)/*.cpp $(PLATFORM_DIR)/*.s $(SOURCES) -o $(BUILD_DIR)/$(TARGET_STATIC)
 
-$(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: prepare
+$(BUILD_DIR)/lib$(TARGET_DYNAMIC).so: ./build/linker.ld $(SOURCES) $(ABI_SOURCES)
 	$(CXX) $(FLAGS) -fPIC -shared $(PLATFORM_DIR)/*.cpp $(PLATFORM_DIR)/*.s $(SOURCES) -o $(BUILD_DIR)/lib$(TARGET_DYNAMIC).so
 	$(CXX) $(FLAGS) -r $(ABI_DIR)/__abi.cpp -o $(BUILD_DIR)/$(TARGET_STATIC)
 

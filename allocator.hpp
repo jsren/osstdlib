@@ -1,6 +1,7 @@
 #pragma once
 #include <type_traits>
 
+extern "C++" {
 namespace std
 {
     template<typename T>
@@ -22,4 +23,5 @@ namespace std
         inline bool operator !=(const allocator& other) { return (void)other,false; }
     };
 
+}
 }

@@ -2,6 +2,7 @@
 #include <__string-decl>
 #include <ios>
 
+extern "C++" {
 namespace std
 {
     template<typename Char, typename Traits>
@@ -208,4 +209,5 @@ namespace std
 
     using streambuf = basic_streambuf<char>;
     using wstreambuf = basic_streambuf<wchar_t>;
+}
 }

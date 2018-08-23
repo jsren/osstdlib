@@ -4,6 +4,7 @@
 #include <cstring>
 #include <__string-decl>
 
+extern "C++" {
 namespace std
 {
     namespace __detail
@@ -70,4 +71,5 @@ namespace std
             : __detail::exception_base(what_arg) { }
         length_error(const length_error&) = default;
     };
+}
 }

@@ -13,6 +13,7 @@
 #define __std_nodiscard
 #endif
 
+extern "C++" {
 namespace std
 {
     template<typename Char, typename Traits = char_traits<Char>>
@@ -301,4 +302,5 @@ namespace std
         using namespace string_view_literals;
     }
     using namespace literals;
+}
 }

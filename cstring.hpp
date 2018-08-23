@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 
+extern "C++" {
 namespace std
 {
     void* memcpy(void* dest, const void* src, size_t count);
@@ -12,4 +13,5 @@ namespace std
     inline char* strcpy(char* dest, const char* src) {
         memcpy(dest, src, strlen(src)); return dest;
     }
+}
 }

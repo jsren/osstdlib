@@ -4,6 +4,7 @@
 #pragma once
 #include <cstddef>
 
+extern "C++" {
 namespace std
 {
     template<class...>
@@ -877,4 +878,5 @@ namespace std
 
     template<size_t Size, size_t Align = sizeof(max_align_t)>
     using aligned_storage_t = typename aligned_storage<Size, Align>::type;
+}
 }

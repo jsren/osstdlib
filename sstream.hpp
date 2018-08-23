@@ -1,6 +1,7 @@
 #include <streambuf>
 #include <string>
 
+extern "C++" {
 namespace std
 {
     template<typename Char, typename Traits = char_traits<Char>,
@@ -64,4 +65,5 @@ namespace std
 
     using stringbuf = basic_stringbuf<char>;
     using wstringbuf = basic_stringbuf<wchar_t>;
+}
 }

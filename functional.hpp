@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <cstdint>
 
+extern "C++" {
 namespace std
 {
     template<typename T>
@@ -212,4 +213,5 @@ namespace std
     template<> struct hash<long double> : __detail::default_hash<long double>::type { };
     template<class T> struct hash<T*> : __detail::default_hash<T*>::type { };
 
+}
 }

@@ -5,6 +5,7 @@
 #include <memory>
 #include <.ios-decl>
 
+extern "C++" {
 namespace std
 {
 	namespace __detail
@@ -384,4 +385,5 @@ namespace std
         return error_condition(static_cast<int>(static_cast<underlying_type_t<io_errc>>(e)),
             iostream_category());
     }*/
+}
 }

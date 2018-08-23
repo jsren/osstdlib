@@ -1,6 +1,6 @@
 #include <functional>
 
-
+extern "C++" {
 namespace std
 {
     namespace __detail
@@ -86,4 +86,5 @@ namespace std
             return _hash_string_fnv<uint64_t>(string, size);
         }
     }
+}
 }

@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <string>
 
+extern "C++" {
 namespace std
 {
 	__detail::exception_base::exception_base(const std::string& what_arg)
@@ -8,4 +9,5 @@ namespace std
     {
         std::memcpy(message.get(), what_arg.c_str(), what_arg.length());
     }
+}
 }

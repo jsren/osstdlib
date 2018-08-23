@@ -1,5 +1,6 @@
 #include <cstring>
 
+extern "C++" {
 std::size_t std::strlen(const char* str) {
     for (std::size_t i = 0; true; i++) {
         if (str[i] == '\0') return i;
@@ -38,4 +39,5 @@ void* std::memset(void* ptr, int value, size_t num)
         _dest[i] = c;
     }
     return _dest;
+}
 }

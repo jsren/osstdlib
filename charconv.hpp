@@ -1,5 +1,6 @@
 #include <system_error>
 
+extern "C++" {
 namespace std
 {
     enum class chars_format
@@ -60,4 +61,5 @@ namespace std
     inline to_chars_result to_chars(char* first, char* last, signed long value, int base = 10) {
         return to_chars(first, last, static_cast<long long>(value), base);
     }
+}
 }

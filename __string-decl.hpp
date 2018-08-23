@@ -5,6 +5,7 @@
 #include <cwchar>
 #include <cstdint>
 
+extern "C++" {
 namespace std
 {
     namespace __detail
@@ -225,4 +226,5 @@ namespace std
     typedef basic_string<wchar_t> wstring;
     typedef basic_string<char16_t> u16string;
     typedef basic_string<char32_t> u32string;
+}
 }

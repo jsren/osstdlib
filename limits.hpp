@@ -3,6 +3,7 @@
 #include <.limits-decl>
 #include <__platform-impl>
 
+extern "C++" {
 namespace std
 {
     namespace __detail
@@ -524,4 +525,5 @@ namespace std
 
     template<typename T>
     struct numeric_limits : __detail::numeric_limits<remove_cv_t<T>>  { };
+}
 }

@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <__iterator>
 
+extern "C++" {
 namespace std
 {
     template<typename T>
@@ -48,4 +49,5 @@ namespace std
     constexpr reverse_iterator<const T*> end(initializer_list<T> list) noexcept {
         return reverse_iterator<const T*>(list.begin());
     }
+}
 }

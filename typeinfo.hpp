@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 
+extern "C++" {
 namespace std
 {
     class type_info
@@ -24,4 +25,5 @@ namespace std
         const char* name() const noexcept;
         size_t hash_code() const;
     };
+}
 }

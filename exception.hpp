@@ -1,6 +1,6 @@
 #pragma once
 
-
+extern "C++" {
 namespace std
 {
     class exception
@@ -37,4 +37,5 @@ namespace std
     [[noreturn]] void terminate() noexcept;
     terminate_handler get_terminate() noexcept;
     terminate_handler set_terminate(terminate_handler handler) noexcept;
+}
 }

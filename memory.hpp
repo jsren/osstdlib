@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <limits>
 
+extern "C++" {
 namespace std
 {
 	namespace __detail
@@ -602,4 +603,5 @@ namespace std
 		shared_ptr(shared_ptr&& value)             = delete;
 		shared_ptr& operator =(shared_ptr&& value) = delete;
 	};
+}
 }

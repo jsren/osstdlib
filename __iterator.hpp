@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <type_traits>
 
+extern "C++" {
 namespace std
 {
     struct input_iterator_tag { };
@@ -305,4 +306,5 @@ namespace std
     {
         return reverse_iterator<Iterator>(iterator);
     }
+}
 }

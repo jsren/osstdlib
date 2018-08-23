@@ -3,6 +3,7 @@
 #include <streambuf>
 #include <charconv>
 
+extern "C++" {
 namespace std
 {
     template <typename Char, typename Traits>
@@ -309,4 +310,5 @@ namespace std
 
     extern ostream cout;
     //extern wostream wcout;
+}
 }

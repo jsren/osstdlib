@@ -1,6 +1,7 @@
 /* .limits-decl.hpp - (c) 2018 James Renwick */
 #pragma once
 
+extern "C++" {
 namespace std
 {
     enum float_round_style
@@ -18,4 +19,5 @@ namespace std
         denorm_absent        = 0,
         denorm_present       = 1
     };
+}
 }

@@ -4,6 +4,7 @@
 #include <__iterator>
 #include <.ostreambuf-iterator>
 
+extern "C++" {
 namespace std
 {
     template<typename Iterator>
@@ -140,4 +141,5 @@ namespace std
 
     // ---------------------------------------------------------------------------
     // TODO: Other iterator adapter types
+}
 }

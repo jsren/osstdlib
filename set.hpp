@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <allocator>
 
+extern "C++" {
 namespace std
 {
     template<typename Key, typename Comparer = less<Key>,
@@ -23,4 +24,5 @@ namespace std
         using const_pointer = const Allocator::value_type*;
     };
 
+}
 }

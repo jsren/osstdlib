@@ -1,6 +1,7 @@
 #pragma once
 #include <__platform>
 
+extern "C++" {
 namespace std
 {
     struct mbstate_t
@@ -10,4 +11,5 @@ namespace std
     };
 
     using wint_t = __platform::wint_t;
+}
 }

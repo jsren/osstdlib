@@ -10,7 +10,7 @@
 #include <limits>
 #include <initializer_list>
 
-
+extern "C++" {
 namespace std
 {
     template<typename Char, typename Traits, typename Allocator>
@@ -464,4 +464,5 @@ namespace std
         using namespace string_view_literals;
     }
     using namespace literals;
+}
 }
