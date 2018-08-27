@@ -1,8 +1,8 @@
-STD ?= c++14
-OPT_LVL ?= O0
+STD ?= c++17
+OPT_LVL ?= O3
 
-TARGET_STATIC := osstdc++.o
-TARGET_DYNAMIC := osstdc++
+TARGET_STATIC ?= osstdc++.o
+TARGET_DYNAMIC ?= osstdc++
 BUILD_DIR := build
 
 LTO ?=
@@ -14,7 +14,7 @@ ABI_DIR ?= osabi
 PLATFORM_DIR := $(ABI_DIR)/$(OSSTDLIB_PLATFORM)
 LINKER_SCRIPT := $(ABI_DIR)/$(OSSTDLIB_COMPILER)/linker.ld
 
-FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -g -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -ffunction-sections -fdata-sections -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-main
+FLAGS := -I$(BUILD_DIR)/include -nostdlib -fno-exceptions -fno-stack-protector -fno-rtti -Wno-pragmas -$(OPT_LVL) -std=$(STD) $(LTO) -D_OSSTDLIB_PLATFORM=$(OSSTDLIB_PLATFORM) -Wno-main $(EXTRA_FLAGS)
 SOURCES := exception.cpp ostream.cpp charconv.cpp cstring.cpp cstdlib.cpp functional.cpp stdexcept.cpp string.cpp tuple.cpp
 HEADERS := $(wildcard *.hpp) $(wildcard *.h) $(wildcard $(ABI_DIR)/*.hpp) $(wildcard $(ABI_DIR)/*.h) $(wildcard $(PLATFORM_DIR)/*.hpp) $(wildcard $(PLATFORM_DIR)/*.h)
 ABI_SOURCES := $(wildcard $(ABI_DIR)/*.cpp) $(wildcard $(PLATFORM_DIR)/*.cpp) $(wildcard $(PLATFORM_DIR)/*.s)

@@ -17,7 +17,6 @@ namespace std
 
     public:
         fpos() = default;
-        fpos(int offset) : _offset(offset) { }
         fpos(streamoff offset) : _offset(offset) { }
 
         fpos(const fpos&) = default;
