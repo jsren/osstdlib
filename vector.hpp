@@ -10,7 +10,8 @@
 namespace std
 {
 	template<typename T, typename Allocator = allocator<T>>
-	class vector
+	class alignas(alignof(T) > alignof(size_t) ? alignof(T) : alignof(size_t))
+		vector
 	{
 	public:
 		using value_type = T;
@@ -26,6 +27,56 @@ namespace std
 		using reverse_iterator = reverse_iterator<iterator>;
 		using const_reverse_iterator = reverse_iterator<const_iterator>;
 
+	private:
+		T* pointer{};
+		size_t length{};
+
+		struct long_vector_data
+		{
+			size_type _capacity;
+			size_type _length;
+			pointer _data;
+		};
+
+		static constexpr const size_type sbo_capacity =
+			(sizeof(long_vector_data) - sizeof(uint8_t)) / sizeof(T);
+
+		struct short_vector_data
+		{
+			uint8_t _length;
+			aligned_storage_t<sbo_capacity, alignof(T)> _data;
+		};
+
+		static_assert(sizeof(short_vector_data) <= sizeof(long_vector_data),
+			"Invalid sizing for Small-Buffer Optimisation");
+
+	private:
+		allocator_type _alloc{};
+		union {
+			long_vector_data _long;
+			short_vector_data _short;
+		} _repr{};
+
+		constexpr bool is_sbo() const noexcept {
+			return (_repr._long._capacity & 0b1) == 0b1;
+		}
+
+		constexpr size_type eval_capacity(size_type size) noexcept
+		{
+            size = ((size & 0b1) == 0) ? size : size + 1;
+            if (size > max_size() || size == 0) {
+                __abi::__throw_exception(length_error("size"));
+            }
+            return size;
+		}
+
+		void _set_size(size_type size) noexcept
+		{
+			if (is_sbo()) _repr._short._length = 0b1 | (size << 1);
+			else _repr._long._length = size;
+		}
+
+	public:
 		/**
 		 * Default vector constructor.
 		 */
@@ -183,5 +234,85 @@ namespace std
 		 * @return const_reference A reference to the element at the given index.
 		 */
 		const_reference at(size_type index) const;
+
+	private:
+		void _destroy(pointer data, size_type size, size_type capacity)
+		{
+			for (size_type i = 0; i < size; i++) {
+				alloc_traits::destroy(_alloc, &data[i]);
+			}
+			alloc_traits::deallocate(_alloc, data, capacity);
+		}
+
+		void _destroy()
+		{
+			if (is_sbo()) {
+				for (size_type i = 0; i < size() + 1; i++) {
+					alloc_traits::destroy(_alloc, &data()[i]);
+				}
+			}
+			else _destroy(data(), size() + 1, _capacity());
+		}
+
+        pointer _reallocate(size_type newCapacity)
+        {
+            pointer data;
+            pointer prevData = this->data();
+            size_type prevSize = size();
+            size_type prevCapacity = _capacity();
+            bool prevHeap = !is_sbo() && prevData != nullptr;
+            size_type newSize = (prevSize + 1 > newCapacity) ?
+                newCapacity - 1 : prevSize;
+
+            // Short string
+            if (newCapacity <= sbo_capacity)
+            {
+                _repr._short._length = 0b1 | (newSize << 1); // Set SbO flag
+                data = reinterpret_cast<pointer>(&_repr._short._data);
+
+                if (prevCapacity != 0)
+                {
+                    if (!prevHeap) // Destroy extra items if shrunk
+                    {
+                        for (size_type i = newSize; i < prevSize + 1; i++) {
+                            prevData[i].~Char();
+                        }
+                    }
+                    else // Copy items from heap
+                    {
+                        for (size_type i = 0; i < prevSize + 1; i++) {
+                            prevData[i].~Char();
+                        }
+                    }
+                }
+            }
+            // Long string
+            else
+            {
+                newCapacity = eval_capacity(newCapacity);
+                data = alloc_traits::allocate(_alloc, newCapacity);
+
+                // Copy and destroy previous data
+                traits_type::copy(data, prevData, prevSize < newSize ? prevSize : newSize);
+                if (!prevHeap && prevCapacity != 0)
+                {
+                    for (size_type i = 0; i < prevSize + 1; i++) {
+                        prevData[i].~Char();
+                    }
+                }
+                this->_repr._long._length = newSize;
+                this->_repr._long._capacity = newCapacity;
+                this->_repr._long._data = data;
+            }
+
+            data[newSize] = '\0';
+
+            if (prevHeap) {
+                _destroy(prevData, prevSize, prevCapacity);
+                alloc_traits::deallocate(_alloc, prevData, prevCapacity);
+            }
+            return data;
+        }
+
 	};
 }
