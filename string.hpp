@@ -9,14 +9,76 @@
 #include <string_view>
 #include <limits>
 #include <initializer_list>
-
+#include <__smallbuff>
+#include <type_traits>
 
 namespace std
 {
+    constexpr const size_t string_sbo_extra = 0;
+
+    template<typename T, bool Move=is_nothrow_move_assignable<T, T>::value>
+    struct move_if_nothrow
+    {
+        static constexpr void invoke(T& t, T& y) {
+            t = reinterpret_cast<T&&>(y);
+        }
+    };
+
+    template<typename T>
+    struct move_if_nothrow<T, false>
+    {
+        static constexpr void invoke(T& t, T& y) {
+            t = y;
+        }
+    };
+
     template<typename Char, typename Traits, typename Allocator>
-    class basic_string
+    struct string_sbo_config
+    {
+        using alloc_traits = allocator_traits<Allocator>;
+        using traits_type = Traits;
+        using allocator_type = Allocator;
+        using size_type = typename alloc_traits::size_type;
+        using pointer = typename alloc_traits::pointer;
+        using const_pointer = typename alloc_traits::const_pointer;
+
+        static constexpr size_t get_max_size() {
+            auto v = numeric_limits<size_type>::max() - 1;
+            return ((v & 0b1) == 0) ? v : v - 1;
+        }
+
+        static constexpr const size_t extra = string_sbo_extra;
+        static constexpr const size_t max_size = get_max_size();
+
+        static void move(pointer to, pointer from, size_type size)
+        {
+            for (size_type i = 0; i < size; i++) {
+                move_if_nothrow<Char>::invoke(*to, *from);
+            }
+        }
+
+        static pointer allocate(allocator_type alloc, size_type size)
+        {
+            return alloc_traits::allocate(alloc, size);
+        }
+
+        static void destroy(allocator_type alloc, pointer ptr)
+        {
+            alloc_traits::destroy(alloc, ptr);
+        }
+
+        static void deallocate(allocator_type alloc, pointer ptr, size_type size)
+        {
+            alloc_traits::deallocate(alloc, ptr, size);
+        }
+    };
+
+
+    template<typename Char, typename Traits, typename Allocator>
+    class basic_string : __detail::sbo_type<Char, string_sbo_config<Char, Traits, Allocator>>
     {
         static_assert(is_same<Char, typename Traits::char_type>::value,"");
+        using base = __detail::sbo_type<Char, string_sbo_config<Char, Traits, Allocator>>;
 
     private:
         using alloc_traits = allocator_traits<Allocator>;
@@ -36,59 +98,16 @@ namespace std
         using reverse_iterator       = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-    private:
-        struct long_string_data
-        {
-            size_type _capacity;
-            size_type _length;
-            pointer _data;
-        };
-
-        static constexpr const size_type sso_capacity =
-            (sizeof(long_string_data) - sizeof(uint8_t)) / sizeof(Char);
-
-        struct short_string_data
-        {
-            uint8_t _length;
-            aligned_storage_t<sso_capacity, alignof(Char)> _data;
-        };
-
-        static_assert(sizeof(short_string_data) <= sizeof(long_string_data),
-            "Invalid sizing for Small-String Optimisation");
-
-    private:
-        allocator_type _alloc{};
-        union {
-            long_string_data _long;
-            short_string_data _short;
-        } _repr{};
-
-        constexpr bool is_sso() const noexcept {
-            return (_repr._long._capacity & 0b1) == 0b1;
-        }
-
-        constexpr size_type eval_capacity(size_type size) noexcept
-        {
-            size = ((size & 0b1) == 0) ? size : size + 1;
-            if (size > max_size() || size == 0) {
-                __abi::__throw_exception(length_error("size"));
-            }
-            return size;
-        }
-
-        void _set_size(size_type size) noexcept
-        {
-            if (is_sso()) _repr._short._length = 0b1 | (size << 1);
-            else _repr._long._length = size;
-        }
-
     public:
         /**
          * @brief Construct a new basic string object
          * Creates a new string with a default-constructed allocator.
          */
-        basic_string() noexcept(noexcept(allocator_type())) : _alloc() {
-            _repr._short._length = 1;
+        basic_string() noexcept(noexcept(allocator_type())) : base({})
+        {
+            static_assert(base::sbo_capacity >= 1, "");
+            base::_set_size(1);
+            data()[0] = '\0';
         };
 
         /**
@@ -96,121 +115,44 @@ namespace std
          * Creates a new string with the given allocator.
          * @param alloc The allocator to use
          */
-        explicit basic_string(const allocator_type& alloc) noexcept : _alloc(alloc) {
-            _repr._short._length = 1;
+        explicit basic_string(const allocator_type& alloc) noexcept : base({}, alloc)
+        {
+            static_assert(base::sbo_capacity >= 1, "");
+            base::_set_size(1);
+            data()[0] = '\0';
         }
 
     private:
-        void _destroy(pointer data, size_type size, size_type capacity)
+        pointer reallocate(size_type newCapacity)
         {
-            for (size_type i = 0; i < size; i++) {
-                alloc_traits::destroy(_alloc, &data[i]);
-            }
-            alloc_traits::deallocate(_alloc, data, capacity);
-        }
-
-        void _destroy()
-        {
-            if (is_sso()) {
-                for (size_type i = 0; i < size() + 1; i++) {
-                    alloc_traits::destroy(_alloc, &data()[i]);
-                }
-            }
-            else _destroy(data(), size() + 1, _capacity());
-        }
-
-        pointer _reallocate(size_type newCapacity)
-        {
-            pointer data;
-            pointer prevData = this->data();
-            size_type prevSize = size();
-            size_type prevCapacity = _capacity();
-            bool prevHeap = !is_sso() && prevData != nullptr;
-            size_type newSize = (prevSize + 1 > newCapacity) ?
-                newCapacity - 1 : prevSize;
-
-            // Short string
-            if (newCapacity <= sso_capacity)
-            {
-                _repr._short._length = 0b1 | (newSize << 1); // Set SSO flag
-                data = reinterpret_cast<pointer>(&_repr._short._data);
-
-                if (prevCapacity != 0)
-                {
-                    if (!prevHeap) // Destroy extra items if shrunk
-                    {
-                        for (size_type i = newSize; i < prevSize + 1; i++) {
-                            prevData[i].~Char();
-                        }
-                    }
-                    else // Copy items from heap
-                    {
-                        for (size_type i = 0; i < prevSize + 1; i++) {
-                            prevData[i].~Char();
-                        }
-                    }
-                }
-            }
-            // Long string
-            else
-            {
-                newCapacity = eval_capacity(newCapacity);
-                data = alloc_traits::allocate(_alloc, newCapacity);
-
-                // Copy and destroy previous data
-                traits_type::copy(data, prevData, prevSize < newSize ? prevSize : newSize);
-                if (!prevHeap && prevCapacity != 0)
-                {
-                    for (size_type i = 0; i < prevSize + 1; i++) {
-                        prevData[i].~Char();
-                    }
-                }
-                this->_repr._long._length = newSize;
-                this->_repr._long._capacity = newCapacity;
-                this->_repr._long._data = data;
-            }
-
-            data[newSize] = '\0';
-
-            if (prevHeap) {
-                _destroy(prevData, prevSize, prevCapacity);
-                alloc_traits::deallocate(_alloc, prevData, prevCapacity);
-            }
-            return data;
+            return base::_reallocate(newCapacity);
         }
 
     public:
         basic_string(size_type length, Char character,
-            const allocator_type& alloc = allocator_type()) : _alloc(alloc)
+            const allocator_type& alloc = allocator_type()) : base({}, alloc)
         {
-            auto data = _reallocate(length + 1);
+            auto data = reallocate(length + 1);
             for (size_t i = 0; i < length; i++) {
                 data[i] = character;
             }
             data[length] = '\0';
-            _set_size(length);
+            base::_set_size(length + 1);
         }
 
         basic_string(const Char* cstr, size_type length, const allocator_type& alloc = allocator_type())
-            : _alloc(alloc)
+            : base({}, alloc)
         {
-            auto data = _reallocate(length + 1);
+            auto data = reallocate(length + 1);
             for (size_t i = 0; i < length; i++) {
                 data[i] = cstr[i];
             }
             data[length] = '\0';
-            _set_size(length);
+            base::_set_size(length + 1);
         }
 
         basic_string(const Char* cstr, const allocator_type& alloc = allocator_type())
             : basic_string(cstr, traits_type::length(cstr), alloc) { }
-
-
-        ~basic_string()
-        {
-            _destroy();
-            alloc_traits::deallocate(_alloc, data(), capacity());
-        }
 
         static constexpr size_type npos = numeric_limits<size_type>::max();
 
@@ -249,12 +191,10 @@ namespace std
         }
 
         pointer data() {
-            return is_sso() ? reinterpret_cast<pointer>(&_repr._short._data)
-                : _repr._long._data;
+            return base::_data();
         }
         const_pointer data() const {
-            return is_sso() ? reinterpret_cast<const_pointer>(&_repr._short._data)
-                : _repr._long._data;
+            return base::_data();
         }
         const_pointer c_str() const {
             return data();
@@ -303,36 +243,31 @@ namespace std
             return size();
         }
         size_type size() const noexcept {
-            return is_sso() ? (_repr._short._length >> 1) : _repr._long._length;
+            return base::_size() - 1;
         }
         size_type max_size() const noexcept {
-            auto v = numeric_limits<size_type>::max() - 1;
-            return ((v & 0b1) == 0) ? v : v - 1;
-        }
-    private:
-        size_type _capacity() const noexcept {
-            return is_sso() ? sso_capacity : _repr._long._capacity;
+            return base::max_size;
         }
     public:
         size_type capacity() const noexcept {
-            return _capacity() - 1;
+            return base::_capacity() - 1;
         }
 
         void reserve(size_type capacity = 0) {
-            _reallocate(capacity + 1);
+            reallocate(capacity);
         }
 
         void shrink_to_fit()
         {
-            if (!is_sso() && capacity() > size()) {
-                _reallocate(size() + 1);
+            if (!base::is_sbo() && capacity() > size()) {
+                reallocate(size());
             }
         }
 
         void clear() noexcept
         {
-            _destroy();
-            _set_size(0);
+            base::_destroy();
+            base::_set_size(0);
         }
 
     private:
@@ -344,11 +279,11 @@ namespace std
                 auto finalLength = size() + otherLength;
 
                 if (finalLength > capacity()) {
-                    data = _reallocate(finalLength);
+                    data = reallocate(finalLength);
                 }
                 traits_type::copy(data + size(), otherData, otherLength);
                 data[finalLength] = '\0';
-                _set_size(finalLength);
+                base::_set_size(finalLength + 1);
             }
             return *this;
         }
@@ -379,7 +314,7 @@ namespace std
         {
             if (index > _length) __abi::__throw_exception(std::out_of_range("index"));
 
-            if (index + count > _capacity) resize(index + count);
+            if (index + count > capacity()) resize(index + count);
 
             return *this;
         }*/

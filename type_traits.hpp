@@ -248,6 +248,10 @@ namespace std
 		template<typename T, size_t N>
 		struct is_sized_array<T[N]> : true_type { };
 
+		template<typename T, typename Y>
+		struct is_nothrow_assignable :
+			bool_constant<noexcept(declval<T>() = declval<Y>())> { };
+
 		template<typename T, bool = is_array<T>::value>
 		struct is_nothrow_default_constructible
 		{
@@ -289,6 +293,29 @@ namespace std
 				is_default_constructible<remove_all_extents_t<T>>::value;
 		};
 	}
+
+    template<typename T, typename Y>
+    class is_assignable
+    {
+        template<typename A, typename B, class=decltype(declval<A>() = declval<B>())>
+        constexpr static true_type test(int);
+        template<typename, typename>
+        constexpr static false_type test(...);
+    public:
+        static constexpr const bool value = decltype(test<T, Y>())::value;
+    };
+
+	template<typename T, typename Y>
+	struct is_nothrow_assignable :
+		bool_constant<is_assignable<T, Y>::value &&
+			__detail::is_nothrow_assignable<T, Y>::value> { };
+
+	template<typename T, typename Y>
+    struct is_nothrow_move_assignable :
+		bool_constant<is_assignable<add_lvalue_reference_t<T>,
+                                    add_rvalue_reference_t<Y>>::value &&
+            __detail::is_nothrow_assignable<add_lvalue_reference_t<T>,
+                                    add_rvalue_reference_t<Y>>::value> { };
 
 	template<typename T, typename ...Args>
 	struct is_nothrow_constructible :
