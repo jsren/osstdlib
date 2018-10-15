@@ -305,4 +305,46 @@ namespace std
     {
         return reverse_iterator<Iterator>(iterator);
     }
+
+    namespace __detail
+    {
+        template<typename T>
+        class has_subtract
+        {
+            template<typename Y, class=decltype(declval<Y>() - declval<Y>())>
+            static true_type test(int);
+            template<typename, class>
+            static false_type test(...);
+        public:
+            using type = decltype(test<T>(0));
+            static constexpr const bool value = type::value;
+        };
+
+        template<typename Iterator>
+        typename iterator_traits<Iterator>::distance distance(
+            Iterator first, Iterator last, true_type _)
+        {
+            (void)_;
+            return last - first;
+        }
+
+        template<typename Iterator>
+        typename iterator_traits<Iterator>::distance distance(
+            Iterator first, Iterator last, false_type _)
+        {
+            (void)_;
+            size_t count = 0;
+            Iterator iter = first;
+            for (; iter != last; count++, iter++) { }
+            return count;
+        }
+    }
+
+    template<typename Iterator>
+    typename iterator_traits<Iterator>::distance distance(
+        Iterator first, Iterator last)
+    {
+        return __detail::distance(first, last,
+            __detail::has_subtract<Iterator>::type);
+    }
 }

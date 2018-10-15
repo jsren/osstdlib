@@ -27,10 +27,11 @@ namespace std
                   allocate(reinterpret_cast<Alloc&&>(allocate)) { }
         };
 
-        template<typename T, typename Traits>
+        template<typename Traits>
         struct sbo_type
         {
         protected:
+            using T = typename Traits::value_type;
             Traits traits;
             using size_type = typename Traits::size_type;
             using pointer = typename Traits::pointer;
@@ -99,22 +100,16 @@ namespace std
                 else _repr._long._count = size;
             }
 
-            void _destroy(pointer data, size_type size, size_type capacity)
-            {
-                for (size_type i = 0; i < size; i++) {
-                    traits.destroy(_alloc, &data[i]);
-                }
-                traits.deallocate(_alloc, data, capacity);
-            }
-
             void _destroy()
             {
-                if (is_sbo()) {
-                    for (size_type i = 0; i < _size(); i++) {
-                        traits.destroy(_alloc, &_data()[i]);
-                    }
+                _destroy(_data(), _size());
+            }
+
+            void _destroy(pointer data, size_type size)
+            {
+                for (size_type i = 0; i < size; i++) {
+                    traits.destroy(_alloc, data + i);
                 }
-                else _destroy(_data(), _size(), _capacity());
             }
 
             pointer _reallocate(size_type newCapacity)
@@ -170,7 +165,7 @@ namespace std
                 }
 
                 if (prevHeap) {
-                    _destroy(prevData, prevSize, prevCapacity);
+                    _destroy(prevData, prevSize);
                     traits.deallocate(_alloc, prevData, prevCapacity);
                 }
                 return data;
@@ -190,7 +185,7 @@ namespace std
             ~sbo_type()
             {
                 _destroy();
-                traits.deallocate(_alloc, _data(), _capacity());
+                if (!is_sbo()) traits.deallocate(_alloc, _data(), _capacity());
             }
         };
     }

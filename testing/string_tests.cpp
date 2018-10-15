@@ -58,7 +58,7 @@ namespace std
                     int value = *reinterpret_cast<const int*>(args[arg_index++]);
                     
                 }
-                else if (format[i] == )
+                //else if (format[i] == )
 
             }
             else len_out++;
@@ -138,17 +138,17 @@ namespace std
     };
 
     template<>
-    struct promoter<wchar_t>
+    struct promoter<char16_t>
     {
         int value;
-        promoter(wchar_t v) : value((int)v) { }
+        promoter(char16_t v) : value(v) { }
     };
 
     template<>
-    struct promoter<wchar_t>
+    struct promoter<char32_t>
     {
         int value;
-        promoter(wchar_t v) : value(v) { }
+        promoter(char32_t v) : value(v) { }
     };
 
     void build_args(const void** arg_addresses) noexcept

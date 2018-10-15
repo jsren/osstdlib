@@ -11,74 +11,65 @@
 #include <initializer_list>
 #include <__smallbuff>
 #include <type_traits>
+#include <new>
 
 namespace std
 {
-    constexpr const size_t string_sbo_extra = 0;
-
-    template<typename T, bool Move=is_nothrow_move_assignable<T, T>::value>
-    struct move_if_nothrow
+    namespace _config
     {
-        static constexpr void invoke(T& t, T& y) {
-            t = reinterpret_cast<T&&>(y);
-        }
-    };
+        constexpr const size_t string_sbo_extra = 0;
+    }
 
-    template<typename T>
-    struct move_if_nothrow<T, false>
+    namespace __detail
     {
-        static constexpr void invoke(T& t, T& y) {
-            t = y;
-        }
-    };
-
-    template<typename Char, typename Traits, typename Allocator>
-    struct string_sbo_config
-    {
-        using alloc_traits = allocator_traits<Allocator>;
-        using traits_type = Traits;
-        using allocator_type = Allocator;
-        using size_type = typename alloc_traits::size_type;
-        using pointer = typename alloc_traits::pointer;
-        using const_pointer = typename alloc_traits::const_pointer;
-
-        static constexpr size_t get_max_size() {
-            auto v = numeric_limits<size_type>::max() - 1;
-            return ((v & 0b1) == 0) ? v : v - 1;
-        }
-
-        static constexpr const size_t extra = string_sbo_extra;
-        static constexpr const size_t max_size = get_max_size();
-
-        static void move(pointer to, pointer from, size_type size)
+        template<typename Char, typename Allocator>
+        struct string_sbo_config
         {
-            for (size_type i = 0; i < size; i++) {
-                move_if_nothrow<Char>::invoke(*to, *from);
+            using value_type = Char;
+            using alloc_traits = allocator_traits<Allocator>;
+            using allocator_type = Allocator;
+            using size_type = typename alloc_traits::size_type;
+            using pointer = typename alloc_traits::pointer;
+            using const_pointer = typename alloc_traits::const_pointer;
+
+            static constexpr size_t get_max_size() {
+                auto v = numeric_limits<size_type>::max() - 1;
+                return ((v & 0b1) == 0) ? v : v - 1;
             }
-        }
 
-        static pointer allocate(allocator_type alloc, size_type size)
-        {
-            return alloc_traits::allocate(alloc, size);
-        }
+            static constexpr const size_t extra = _config::string_sbo_extra;
+            static constexpr const size_t max_size = get_max_size();
 
-        static void destroy(allocator_type alloc, pointer ptr)
-        {
-            alloc_traits::destroy(alloc, ptr);
-        }
+            static void move(pointer to, pointer from, size_type size)
+            {
+                for (size_type i = 0; i < size; i++) {
+                    __detail::move_construct_if_nothrow<Char>::invoke(to, *from);
+                }
+            }
 
-        static void deallocate(allocator_type alloc, pointer ptr, size_type size)
-        {
-            alloc_traits::deallocate(alloc, ptr, size);
-        }
-    };
+            static pointer allocate(allocator_type alloc, size_type size)
+            {
+                return alloc_traits::allocate(alloc, size);
+            }
+
+            static void destroy(allocator_type alloc, pointer ptr)
+            {
+                alloc_traits::destroy(alloc, ptr);
+            }
+
+            static void deallocate(allocator_type alloc, pointer ptr, size_type size)
+            {
+                alloc_traits::deallocate(alloc, ptr, size);
+            }
+        };
+    }
 
 
     template<typename Char, typename Traits, typename Allocator>
-    class basic_string : __detail::sbo_type<Char, string_sbo_config<Char, Traits, Allocator>>
+    class basic_string : std::__detail::sbo_type<__detail::string_sbo_config<Char, Allocator>>
     {
         static_assert(is_same<Char, typename Traits::char_type>::value,"");
-        using base = __detail::sbo_type<Char, string_sbo_config<Char, Traits, Allocator>>;
+        using base = __detail::sbo_type<__detail::string_sbo_config<Char, Allocator>>;
 
     private:
         using alloc_traits = allocator_traits<Allocator>;

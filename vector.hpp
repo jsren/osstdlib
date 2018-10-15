@@ -6,13 +6,67 @@
 #include <memory>
 #include <__iterator>
 #include <initializer_list>
+#include <stdexcept>
+#include <__smallbuff>
+#include <new>
 
 namespace std
 {
+    namespace _config
+    {
+        constexpr const size_t vector_sbo_extra = 0;
+    }
+
+    namespace __detail
+    {
+        template<typename T, typename Allocator>
+        struct vector_sbo_config
+        {
+			using value_type = T;
+            using alloc_traits = allocator_traits<Allocator>;
+            using allocator_type = Allocator;
+            using size_type = typename alloc_traits::size_type;
+            using pointer = typename alloc_traits::pointer;
+            using const_pointer = typename alloc_traits::const_pointer;
+
+            static constexpr size_t get_max_size() {
+                auto v = numeric_limits<size_type>::max() - 1;
+                return ((v & 0b1) == 0) ? v : v - 1;
+            }
+
+            static constexpr const size_t extra = _config::vector_sbo_extra;
+            static constexpr const size_t max_size = get_max_size();
+
+            static void move(pointer to, pointer from, size_type size)
+            {
+                for (size_type i = 0; i < size; i++) {
+                    __detail::move_construct_if_nothrow<T>::invoke(to, *from);
+                }
+            }
+
+            static pointer allocate(allocator_type alloc, size_type size)
+            {
+                return alloc_traits::allocate(alloc, size);
+            }
+
+            static void destroy(allocator_type alloc, pointer ptr)
+            {
+                alloc_traits::destroy(alloc, ptr);
+            }
+
+            static void deallocate(allocator_type alloc, pointer ptr, size_type size)
+            {
+                alloc_traits::deallocate(alloc, ptr, size);
+            }
+        };
+    }
+
+
 	template<typename T, typename Allocator = allocator<T>>
-	class alignas(alignof(T) > alignof(size_t) ? alignof(T) : alignof(size_t))
-		vector
+	class vector : __detail::sbo_type<__detail::vector_sbo_config<T, Allocator>>
 	{
+		using base = __detail::sbo_type<__detail::vector_sbo_config<T, Allocator>>;
+
 	public:
 		using value_type = T;
 		using allocator_type = Allocator;
@@ -24,63 +78,14 @@ namespace std
 		using const_pointer = typename allocator_traits<Allocator>::const_pointer;
 		using iterator = __detail::pointer_iterator<T>;
 		using const_iterator = __detail::pointer_iterator<const T>;
-		using reverse_iterator = reverse_iterator<iterator>;
-		using const_reverse_iterator = reverse_iterator<const_iterator>;
-
-	private:
-		T* pointer{};
-		size_t length{};
-
-		struct long_vector_data
-		{
-			size_type _capacity;
-			size_type _length;
-			pointer _data;
-		};
-
-		static constexpr const size_type sbo_capacity =
-			(sizeof(long_vector_data) - sizeof(uint8_t)) / sizeof(T);
-
-		struct short_vector_data
-		{
-			uint8_t _length;
-			aligned_storage_t<sbo_capacity, alignof(T)> _data;
-		};
-
-		static_assert(sizeof(short_vector_data) <= sizeof(long_vector_data),
-			"Invalid sizing for Small-Buffer Optimisation");
-
-	private:
-		allocator_type _alloc{};
-		union {
-			long_vector_data _long;
-			short_vector_data _short;
-		} _repr{};
-
-		constexpr bool is_sbo() const noexcept {
-			return (_repr._long._capacity & 0b1) == 0b1;
-		}
-
-		constexpr size_type eval_capacity(size_type size) noexcept
-		{
-            size = ((size & 0b1) == 0) ? size : size + 1;
-            if (size > max_size() || size == 0) {
-                __abi::__throw_exception(length_error("size"));
-            }
-            return size;
-		}
-
-		void _set_size(size_type size) noexcept
-		{
-			if (is_sbo()) _repr._short._length = 0b1 | (size << 1);
-			else _repr._long._length = size;
-		}
+		using reverse_iterator = std::reverse_iterator<iterator>;
+		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 	public:
 		/**
 		 * Default vector constructor.
 		 */
-		vector() noexcept(noexcept(Allocator())
+		vector() noexcept(noexcept(Allocator()))
 			: vector(Allocator()) { }
 
 		/**
@@ -88,7 +93,8 @@ namespace std
 		 *
 		 * @param alloc The allocator to use.
 		 */
-		explicit vector(const Allocator& alloc) noexcept;
+		explicit vector(const Allocator& alloc) noexcept
+			: base({}, alloc) { }
 
 		/**
 		 * Constructs a new vector with \p count copies of the given value.
@@ -201,7 +207,7 @@ namespace std
 		 * @param first The start of the range to copy.
 		 * @param last The end of the range to copy.
 		 */
-		template<typename InputIter, class=enable_if_t<__detail::is_input_iterator<InputIter>>
+		template<typename InputIter, class=enable_if_t<__detail::is_input_iterator<InputIter>>>
 		void assign(InputIter first, InputIter last);
 
 		/**
@@ -235,84 +241,209 @@ namespace std
 		 */
 		const_reference at(size_type index) const;
 
+		/**
+		 * Returns a reference to the element at the given index.
+		 *
+		 * @param index The index of the element to reference.
+		 * @return reference A reference to the element at the given index.
+		 */
+		reference operator[](size_type index);
+		/**
+		 * Returns a reference to the element at the given index.
+		 *
+		 * @param index The index of the element to reference.
+		 * @return const_reference A reference to the element at the given index.
+		 */
+		const_reference operator[](size_type index) const;
+
+		reference front();
+
+		const_reference front() const;
+
+		reference back();
+
+		const_reference back() const;
+
+		T* data() noexcept;
+
+		const T* data() const noexcept;
+
+		bool empty() const noexcept;
+
+		size_type size() const noexcept;
+
 	private:
-		void _destroy(pointer data, size_type size, size_type capacity)
-		{
-			for (size_type i = 0; i < size; i++) {
-				alloc_traits::destroy(_alloc, &data[i]);
-			}
-			alloc_traits::deallocate(_alloc, data, capacity);
-		}
-
-		void _destroy()
-		{
-			if (is_sbo()) {
-				for (size_type i = 0; i < size() + 1; i++) {
-					alloc_traits::destroy(_alloc, &data()[i]);
-				}
-			}
-			else _destroy(data(), size() + 1, _capacity());
-		}
-
-        pointer _reallocate(size_type newCapacity)
-        {
-            pointer data;
-            pointer prevData = this->data();
-            size_type prevSize = size();
-            size_type prevCapacity = _capacity();
-            bool prevHeap = !is_sbo() && prevData != nullptr;
-            size_type newSize = (prevSize + 1 > newCapacity) ?
-                newCapacity - 1 : prevSize;
-
-            // Short string
-            if (newCapacity <= sbo_capacity)
-            {
-                _repr._short._length = 0b1 | (newSize << 1); // Set SbO flag
-                data = reinterpret_cast<pointer>(&_repr._short._data);
-
-                if (prevCapacity != 0)
-                {
-                    if (!prevHeap) // Destroy extra items if shrunk
-                    {
-                        for (size_type i = newSize; i < prevSize + 1; i++) {
-                            prevData[i].~Char();
-                        }
-                    }
-                    else // Copy items from heap
-                    {
-                        for (size_type i = 0; i < prevSize + 1; i++) {
-                            prevData[i].~Char();
-                        }
-                    }
-                }
-            }
-            // Long string
-            else
-            {
-                newCapacity = eval_capacity(newCapacity);
-                data = alloc_traits::allocate(_alloc, newCapacity);
-
-                // Copy and destroy previous data
-                traits_type::copy(data, prevData, prevSize < newSize ? prevSize : newSize);
-                if (!prevHeap && prevCapacity != 0)
-                {
-                    for (size_type i = 0; i < prevSize + 1; i++) {
-                        prevData[i].~Char();
-                    }
-                }
-                this->_repr._long._length = newSize;
-                this->_repr._long._capacity = newCapacity;
-                this->_repr._long._data = data;
-            }
-
-            data[newSize] = '\0';
-
-            if (prevHeap) {
-                _destroy(prevData, prevSize, prevCapacity);
-                alloc_traits::deallocate(_alloc, prevData, prevCapacity);
-            }
-            return data;
-        }
-
+		template<typename InputIterator, class=enable_if_t<
+			__detail::is_input_iterator<InputIterator>()>>
+		vector(InputIterator first, InputIterator last, size_type size,
+			const Allocator& alloc = Allocator());
 	};
+
+
+	template<typename T, typename A>
+	vector<T, A>::vector(size_type count, const T& value, const A& alloc)
+		: base({}, alloc)
+	{
+		base::_reallocate(count);
+		base::_set_size(count);
+		for (size_t i = 0; i < count; i++) {
+			new (static_cast<void*>(base::_data() + i)) T(value);
+		}
+	}
+
+	template<typename T, typename A>
+	vector<T, A>::vector(size_type count, const A& alloc)
+		: base({}, alloc)
+	{
+		base::_reallocate(count);
+		base::_set_size(count);
+		new (static_cast<void*>(base::_data())) T[count]();
+	}
+
+	template<typename T, typename A>
+	template<typename InputIter, class>
+	vector<T, A>::vector(InputIter first, InputIter last, const A& alloc)
+		: vector(first, last, distance(first, last), alloc)
+	{
+	}
+
+	template<typename T, typename A>
+	vector<T,A>::vector(const vector<T,A>& other, const A& alloc)
+		: base({}, alloc)
+	{
+		base::_reallocate(other.size());
+		base::_set_size(other.size());
+
+		for (size_type i = 0; i < other.size(); i++) {
+			new (static_cast<void*>(base::_data() + i)) T(other.data()[i]);
+		}
+	}
+
+	template<typename T, typename A>
+	vector<T,A>::vector(vector<T,A>&& other, const A& alloc)
+		: base({}, alloc)
+	{
+		base::_reallocate(other.size());
+		base::_set_size(other.size());
+
+		for (size_type i = 0; i < other.size(); i++) {
+			__detail::move_construct_if_nothrow<T>(base::_data() + i, other.data()[i]);
+		}
+	}
+
+	template<typename T, typename A>
+	vector<T,A>::vector(vector<T,A>&& other) : vector(reinterpret_cast<T&&>(other), A())
+	{
+		base::_reallocate(other.size());
+		base::_set_size(other.size());
+
+		for (size_type i = 0; i < other.size(); i++) {
+			__detail::move_construct_if_nothrow<T>(base::_data() + i, other.data()[i]);
+		}
+	}
+
+	template<typename T, typename A>
+	vector<T,A>::vector(initializer_list<T> elements, const A& alloc)
+		: vector(elements.begin(), elements.end(), elements.size(), alloc)
+	{
+	}
+
+	template<typename T, typename A>
+	template<typename InputIterator, class>
+	vector<T, A>::vector(InputIterator first, InputIterator last, size_type size,
+		const A& alloc) : base({}, alloc)
+	{
+		// Allocate and copy vector items
+		base::_reallocate(size);
+		base::_set_size(size);
+
+		// TODO: forward if no-throw
+		for (size_t i = 0; i < size; i++, first++) {
+			new (static_cast<void*>(base::_data() + i)) T(*first);
+		}
+	}
+
+	template<typename T, typename A>
+	vector<T, A>& vector<T, A>::operator =(const vector<T, A>& other)
+	{
+		base::_destroy();
+		if (other.size() > base::_size()) {
+			base::_reallocate(other.size());
+		}
+		for (size_t i = 0; i < other.size(); i++) {
+			new (static_cast<void*>(base::_data() + i)) T(other[i]);
+		}
+		base::_set_size(other.size());
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::reference& vector<T, A>::at(size_type index)
+	{
+		if (index < 0 || index >= base::_size()) {
+			__abi::__throw_exception(std::out_of_range("index"));
+		}
+		else return base::_data()[index];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::reference vector<T, A>::operator[](size_type index)
+	{
+		return base::_data()[index];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::const_reference vector<T, A>::operator[](size_type index) const
+	{
+		return base::_data()[index];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::reference vector<T, A>::front()
+	{
+		return base::_data()[0];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::const_reference vector<T, A>::front() const
+	{
+		return base::_data()[0];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::reference vector<T, A>::back()
+	{
+		return base::_data()[base::_size() - 1];
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::const_reference vector<T, A>::back() const
+	{
+		return base::_data()[base::_size() - 1];
+	}
+
+	template<typename T, typename A>
+	T* vector<T, A>::data() noexcept
+	{
+		return base::_data();
+	}
+
+	template<typename T, typename A>
+	const T* vector<T, A>::data() const noexcept
+	{
+		return base::_data();
+	}
+
+	template<typename T, typename A>
+	bool vector<T, A>::empty() const noexcept
+	{
+		return base::_size() == 0;
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::size_type vector<T, A>::size() const noexcept
+	{
+		return base::_size();
+	}
+
+
 }

@@ -208,12 +208,12 @@ namespace std
 		template<typename T, typename ...Args>
 		struct is_constructable
 		{
-			template<typename Y, class=decltype(::new T{declval<Args>()...})>
+			template<typename Y, class=decltype(::new Y{declval<Args>()...})>
 			static true_type test(int);
-			template<typename>
+			template<typename, class>
 			static false_type test(...);
 		public:
-			static constexpr const bool value = decltype(test(0))::value;
+			static constexpr const bool value = decltype(test<T>(0))::value;
 		};
 	}
 
@@ -352,7 +352,6 @@ namespace std
     template<typename T> constexpr const bool is_member_pointer_v = is_member_pointer<T>::value;
     template<typename T> constexpr const bool is_null_pointer_v = is_null_pointer<T>::value;
 #endif
-
 
 #pragma message "TODO: result_of/invoke_result are hacks"
 
@@ -890,6 +889,10 @@ namespace std
 	struct is_nothrow_copy_constructible :
 		is_nothrow_constructible<T, add_lvalue_reference_t<add_const_t<T>>> { };
 
+	template<typename T>
+	struct is_nothrow_move_constructible :
+		is_nothrow_constructible<T, add_rvalue_reference_t<T>> { };
+
     template<typename T>
     struct alignment_of : integral_constant<size_t, alignof(T)> { };
 
@@ -904,4 +907,39 @@ namespace std
 
     template<size_t Size, size_t Align = sizeof(max_align_t)>
     using aligned_storage_t = typename aligned_storage<Size, Align>::type;
+
+    namespace __detail
+    {
+        template<typename T, typename Y, bool Move=is_nothrow_move_assignable<T, Y>::value>
+        struct move_assign_if_nothrow
+        {
+            static constexpr void invoke(T& t, Y& y) {
+                t = reinterpret_cast<Y&&>(y);
+            }
+        };
+
+        template<typename T, typename Y>
+        struct move_assign_if_nothrow<T, Y, false>
+        {
+            static constexpr void invoke(T& t, Y& y) {
+                t = y; // Fall back to copy
+            }
+        };
+
+        template<typename T, bool Move=is_nothrow_move_constructible<T>::value>
+        struct move_construct_if_nothrow
+        {
+            static constexpr T* invoke(T* t, T& y) {
+                return new (static_cast<void*>(t)) T(reinterpret_cast<T&&>(y));
+            }
+        };
+
+        template<typename T>
+        struct move_construct_if_nothrow<T, false>
+        {
+            static constexpr T* invoke(T* t, T& y) {
+                return new (static_cast<void*>(t)) T(y);
+            }
+        };
+    }
 }

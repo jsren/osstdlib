@@ -1,6 +1,10 @@
 #pragma once
+#include <cstdint>
+#include <cstddef>
 
-namespace std
-{
-
+inline void* operator new(std::size_t size, void* address) {
+    return address;
+}
+inline void* operator new[](std::size_t size, void* address) {
+    return address;
 }
