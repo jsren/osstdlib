@@ -47,15 +47,16 @@ namespace std
 		template<typename T, bool b = has_select_on_container_copy_construction<T>::value>
 		struct call_select_on_container_copy_construction
 		{
-			auto operator()(T&& allocator) {
+			auto operator()(const T& allocator) {
 				return allocator.select_on_container_copy_construction();
 			}
 		};
 		template<typename T>
 		struct call_select_on_container_copy_construction<T, false>
 		{
-			auto operator()(T&& allocator) {
-				return forward<T>(allocator);
+			template<typename Y>
+			decltype(auto) operator()(Y&& allocator) {
+				return forward<Y>(allocator);
 			}
 		};
 

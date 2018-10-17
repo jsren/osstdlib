@@ -621,7 +621,7 @@ namespace std
     template <size_t... Is_>
     using index_sequence = integer_sequence<size_t, Is_...>;
 
-    namespace _internal
+    namespace __detail
     {
         template <class T, T Start, typename, T End>
         struct _integer_sequence;
@@ -643,10 +643,10 @@ namespace std
     }
 
     template <class T, T End, T Start = 0>
-    using make_integer_sequence = typename _internal::_make_integer_sequence<T, End, Start>::type;
+    using make_integer_sequence = typename __detail::_make_integer_sequence<T, End, Start>::type;
 
     template <size_t End, size_t Start = 0>
-    using make_index_sequence = typename _internal::_make_integer_sequence<size_t, End, Start>::type;
+    using make_index_sequence = typename __detail::_make_integer_sequence<size_t, End, Start>::type;
 }
 
 

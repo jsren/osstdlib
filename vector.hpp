@@ -1,6 +1,7 @@
 /* vector - (c) 2018 James Renwick */
 #pragma once
 
+#include <__config>
 #include <allocator>
 #include <cstddef>
 #include <memory>
@@ -12,11 +13,6 @@
 
 namespace std
 {
-    namespace _config
-    {
-        constexpr const size_t vector_sbo_extra = 0;
-    }
-
     namespace __detail
     {
         template<typename T, typename Allocator>
@@ -34,6 +30,7 @@ namespace std
                 return ((v & 0b1) == 0) ? v : v - 1;
             }
 
+            static constexpr const auto realloc_factor = _config::vector_realloc_factor;
             static constexpr const size_t extra = _config::vector_sbo_extra;
             static constexpr const size_t max_size = get_max_size();
 
@@ -97,7 +94,7 @@ namespace std
 			: base({}, alloc) { }
 
 		/**
-		 * Constructs a new vector with \p count copies of the given value.
+		 * Constructs a new vector with count copies of the given value.
 		 *
 		 * @param count The number of copies with which to fill the vector.
 		 * @param value The value with which to fill the vector.
@@ -107,7 +104,7 @@ namespace std
 			const Allocator& alloc = Allocator());
 
 		/**
-		 * Constructs a new vector with \p count default-constructed elements.
+		 * Constructs a new vector with count default-constructed elements.
 		 *
 		 * @param count The number of initial elements.
 		 * @param alloc The allocator to use.
@@ -256,21 +253,148 @@ namespace std
 		 */
 		const_reference operator[](size_type index) const;
 
+		/**
+		 * @brief Returns a reference to the first element.
+		 * Behaviour is undefined if the vector is empty.
+		 *
+		 * @return reference Reference to the first element.
+		 */
 		reference front();
-
+		/**
+		 * @brief Returns a reference to the first element.
+		 * Behaviour is undefined if the vector is empty.
+		 *
+		 * @return reference Reference to the first element.
+		 */
 		const_reference front() const;
 
+		/**
+		 * @brief Returns a reference to the final element.
+		 * Behaviour is undefined if the vector is empty.
+		 *
+		 * @return reference Reference to the final element.
+		 */
 		reference back();
-
+		/**
+		 * @brief Returns a reference to the final element.
+		 * Behaviour is undefined if the vector is empty.
+		 *
+		 * @return reference Reference to the final element.
+		 */
 		const_reference back() const;
 
+		/**
+		 * @brief Gets the underlying data array.
+		 *
+		 * This array is suitable to use in place of a C array. However,
+		 * subsequent modification (push/pop) of the vector may trigger a
+		 * re-allocation, which could render the pointer returned by a previous
+		 * call to data() invalid.
+		 *
+		 * @return T* Pointer to the underlying array.
+		 */
 		T* data() noexcept;
-
+		/**
+		 * @brief Gets the underlying data array.
+		 *
+		 * This array is suitable to use in place of a C array. However,
+		 * subsequent modification (push/pop) of the vector may trigger a
+		 * re-allocation, which could render the pointer returned by a previous
+		 * call to data() invalid.
+		 *
+		 * @return T* Pointer to the underlying array.
+		 */
 		const T* data() const noexcept;
 
+		/**
+		 * @brief Gets if the vector does not contain any elements.
+		 *
+		 * @return true The vector is empty.
+		 * @return false The vector contains one or more elements.
+		 */
 		bool empty() const noexcept;
 
+		/**
+		 * @brief Gets the number of elements this vector contains.
+		 *
+		 * @return size_type The number of elements in this vector.
+		 */
 		size_type size() const noexcept;
+
+		/**
+		 * @brief Gets the maximum capacity of any vector.
+		 *
+		 * Heap space availability may limit the capacity of this vector further.
+		 *
+		 * @return size_type The maximum capacity of any one vector.
+		 */
+		size_type max_size() const noexcept;
+
+		/**
+		 * @brief Pre-allocates the memory necessary to hold
+		 *        the given number of elements.
+		 *
+		 * Where calls to this function result in re-allocation,
+		 * existing references to elements, points to the underlying
+		 * array or iterators may become invalid.
+		 *
+		 * @throws std::length_error if the requested capacity
+		 *         exceeds the value returned by max_size().
+		 * @param new_capacity The minimum number of elements for which
+		 *                     to pre-allocate memory for their storage.
+		 */
+		void reserve(size_type new_capacity);
+
+		/**
+		 * @brief Gets the number of elements the vector can currently
+		 *        hold without requiring a re-allocation.
+		 *
+		 * If this number of elements is exceeded, a re-allocation will
+		 * be triggered, which can invalidate existing iterators and
+		 * element references.
+		 *
+		 */
+		size_type capacity() const noexcept;
+
+		/**
+		 * @brief Requests reduction of this vector's capacity
+		 *        to match the space required.
+		 *
+		 * This function is typically called following copy/move-assignment
+		 * or where elements have been removed from the vector to free unused
+		 * space.
+		 *
+		 * Calls to this function may result in re-allocation, which can invalidate
+		 * existing iterators and element references.
+		 */
+		void shrink_to_fit();
+
+		/**
+		 * @brief Removes all elements from the vector.
+		 *
+		 * To subsequently free unused memory, call shrink_to_fit().
+		 */
+		void clear() noexcept;
+
+		/**
+		 * @brief Inserts the given item at the end of the vector.
+		 *
+		 * Where the current capacity is exceeded, a re-allocation may
+		 * be performed which can invalid existing iterators and element references
+		 *
+		 * @param value The item to insert.
+		 */
+		void push_back(const T& value);
+
+		/**
+		 * @brief Inserts the given item at the end of the vector.
+		 *
+		 * Where the current capacity is exceeded, a re-allocation may
+		 * be performed which can invalid existing iterators and element references
+		 *
+		 * @param value The item to insert.
+		 */
+		void push_back(T&& value);
 
 	private:
 		template<typename InputIterator, class=enable_if_t<
@@ -377,6 +501,12 @@ namespace std
 	}
 
 	template<typename T, typename A>
+	typename vector<T, A>::allocator_type vector<T, A>::get_allocator() const
+	{
+		return base::_alloc;
+	}
+
+	template<typename T, typename A>
 	typename vector<T, A>::reference& vector<T, A>::at(size_type index)
 	{
 		if (index < 0 || index >= base::_size()) {
@@ -445,5 +575,52 @@ namespace std
 		return base::_size();
 	}
 
+	template<typename T, typename A>
+	typename vector<T, A>::size_type vector<T, A>::max_size() const noexcept
+	{
+		return base::max_size;
+	}
 
+	template<typename T, typename A>
+	void vector<T, A>::reserve(size_type new_capacity)
+	{
+		if (new_capacity > base::_capacity()) {
+			base::_reallocate(new_capacity);
+		}
+	}
+
+	template<typename T, typename A>
+	typename vector<T, A>::size_type vector<T, A>::capacity() const noexcept
+	{
+		return base::_capacity();
+	}
+
+	template<typename T, typename A>
+	void vector<T, A>::shrink_to_fit()
+	{
+		base::_reallocate(base::_size());
+	}
+
+	template<typename T, typename A>
+	void vector<T, A>::clear() noexcept
+	{
+		base::_destroy();
+		base::_set_size(0);
+	}
+
+	template<typename T, typename A>
+	void vector<T, A>::push_back(const T& value)
+	{
+		reserve(size() + 1);
+		new (static_cast<void*>(data())) T(value);
+		base::_set_size(size() + 1);
+	}
+
+	template<typename T, typename A>
+	void vector<T, A>::push_back(T&& value)
+	{
+		reserve(size() + 1);
+		new (static_cast<void*>(data())) T(reinterpret_cast<T&&>(value));
+		base::_set_size(size() + 1);
+	}
 }

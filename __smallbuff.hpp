@@ -1,3 +1,4 @@
+#pragma once
 #include <type_traits>
 
 namespace std
@@ -37,6 +38,9 @@ namespace std
             using pointer = typename Traits::pointer;
             using const_pointer = typename Traits::const_pointer;
             using allocator_type = typename Traits::allocator_type;
+
+            static constexpr const size_t max_size = Traits::max_size;
+            static_assert(Traits::realloc_factor > 0, "");
 
             struct long_data
             {
@@ -87,6 +91,11 @@ namespace std
 
             constexpr size_type eval_capacity(size_type size) noexcept
             {
+                // Make re-allocation at least 1.5 times current capacity
+                size_type target = _capacity() + static_cast<size_type>(
+                    _capacity() / Traits::realloc_factor);
+                if (size < target) size = target;
+
                 size = ((size & 0b1) == 0) ? size : size + 1;
                 if (size > traits.max_size || size == 0) {
                     __abi::__throw_exception(length_error("size"));

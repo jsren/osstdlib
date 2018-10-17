@@ -1,17 +1,20 @@
 # osstdlib
+
 A portable C++14 standard library implementation for embedded/custom OS projects.
 
 This project is a work in progress.
 
-All source (c) 2017-18 James Renwick except
-where otherwise stated.
+All source (c) 2017-18 James Renwick
+except where otherwise stated.
 
-## Project Status ##
-### Done ###
+## Project Status
+
+### Done
 - array
 - string_view
 - initializer_list
-### Mostly Done ###
+
+### Mostly Done
 - pointer_traits
 - type_traits
 - allocators
@@ -20,17 +23,20 @@ where otherwise stated.
 - tuple
 - iterators
 - unique/smart_ptr
+- vector (w/SSO)
+- string (w/SSO)
+- limits
+
 ### Started ###
 - exception
-- string (w/SSO)
 - ios
 - iostream
 - streambuf
 - locale
-- limits
+
 ### Targeted ###
-- vector
 - chrono
+- bitset
 
 ## Building ##
 1. Requires GNU Make, Python 2, and G++/Clang with C++14 support
@@ -46,3 +52,21 @@ where otherwise stated.
 ### Optimisation ###
 Link-time optimisation builds can be enabled by setting the Make variable `LTO` to `-flto`.
 Optimisation level defaults to `Os`, but can be changed via the Make variable `OPT_LVL`.
+
+## (Intentional) Deviations from standard
+
+### std::vector\<bool> specialisation
+We have decided not to implement the `std::vector<bool>` specialisation where bool values are packed as in a bitvector. This is for four main reasons:
+
+1. References from operator[] are often a cause of confusion and are generally dangerous
+2. Increased testing surface, redundant code, and larger binary sizes
+3. `std::bitset` is better when the number of booleans is known at compile-time
+4. Implementing this feature is trivial for users via integer types, e.g.
+
+```c++
+bool at(const std::vector<std::uint8_t>& vector, std::size_t index)
+{
+    return vector.at(index / sizeof(std::uint8_t)) &
+            (1 << (index % sizeof(std::uint8_t))) != 0;
+}
+```

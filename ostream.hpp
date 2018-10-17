@@ -49,8 +49,6 @@ namespace std
         explicit basic_ostream(basic_streambuf<char_type, Traits>* sb)
             : basic_ios<Char, Traits>(sb)
         {
-            size_t c;
-            __platform::__write(__platform::__file_handle{1}, "ABC\n", 4, c);
         }
 
         virtual ~basic_ostream() = default;

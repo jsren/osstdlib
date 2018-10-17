@@ -1,5 +1,6 @@
 /* string.hpp - (c) 2017-18 James Renwick */
 #pragma once
+#include <__config>
 #include <__iterator>
 #include <cstring>
 #include <allocator>
@@ -15,11 +16,6 @@
 
 namespace std
 {
-    namespace _config
-    {
-        constexpr const size_t string_sbo_extra = 0;
-    }
-
     namespace __detail
     {
         template<typename Char, typename Allocator>
@@ -37,7 +33,8 @@ namespace std
                 return ((v & 0b1) == 0) ? v : v - 1;
             }
 
-            static constexpr const size_t extra = _config::string_sbo_extra;
+            static constexpr const auto realloc_factor = _config::string_realloc_factor;
+            static constexpr const size_t extra = _config::string_sso_extra;
             static constexpr const size_t max_size = get_max_size();
 
             static void move(pointer to, pointer from, size_type size)
@@ -66,7 +63,7 @@ namespace std
 
 
     template<typename Char, typename Traits, typename Allocator>
-    class basic_string : std::__detail::sbo_type<__detail::string_sbo_config<Char, Allocator>>
+    class basic_string : __detail::sbo_type<__detail::string_sbo_config<Char, Allocator>>
     {
         static_assert(is_same<Char, typename Traits::char_type>::value,"");
         using base = __detail::sbo_type<__detail::string_sbo_config<Char, Allocator>>;
