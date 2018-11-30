@@ -249,8 +249,18 @@ namespace std
 		struct is_sized_array<T[N]> : true_type { };
 
 		template<typename T, typename Y>
-		struct is_nothrow_assignable :
-			bool_constant<noexcept(declval<T>() = declval<Y>())> { };
+		class is_nothrow_assignable
+        {
+            template<typename P, typename E,
+                bool B = noexcept(declval<P>() = declval<E>())>
+            constexpr static bool_constant<B> test(int);
+
+            template<typename, typename>
+            constexpr static false_type test(...);
+
+        public:
+            static constexpr bool value = decltype(test<T, Y>(0))::value;
+        };
 
 		template<typename T, bool = is_array<T>::value>
 		struct is_nothrow_default_constructible
@@ -306,9 +316,28 @@ namespace std
     };
 
 	template<typename T, typename Y>
-	struct is_nothrow_assignable :
-		bool_constant<is_assignable<T, Y>::value &&
-			__detail::is_nothrow_assignable<T, Y>::value> { };
+	struct is_copy_assignable :
+		bool_constant<is_assignable<add_lvalue_reference_t<T>,
+                                    add_lvalue_reference_t<add_const_t<T>>>::value> { };
+
+	template<typename T, typename Y>
+	struct is_move_assignable :
+		bool_constant<is_assignable<add_lvalue_reference_t<T>,
+                                    add_rvalue_reference_t<T>>::value> { };
+
+    template<typename T, typename Y>
+    class is_nothrow_assignable
+    {
+        template<typename P, typename E,
+            bool B = noexcept(declval<P>() = declval<E>())>
+        constexpr static bool_constant<B> test(int);
+
+        template<typename, typename>
+        constexpr static false_type test(...);
+
+    public:
+        static constexpr bool value = decltype(test<T, Y>(0))::value;
+    };
 
 	template<typename T, typename Y>
     struct is_nothrow_move_assignable :
@@ -876,6 +905,9 @@ namespace std
     struct common_type<T1, T2, R...>
         : common_type_multi_impl<void, T1, T2, R...> { };
 
+	template<typename T>
+	struct is_move_constructible :
+		is_constructible<T, add_rvalue_reference_t<T>> { };
 
 	template<typename T>
 	struct is_copy_constructible :
