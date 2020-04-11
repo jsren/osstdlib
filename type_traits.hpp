@@ -218,7 +218,7 @@ namespace std
 		};
 	}
 
-#pragma message "is_constructable is not exhaustive"
+//#pragma message "is_constructable is not exhaustive"
 	template<typename T, typename ...Args>
 	struct is_constructible : bool_constant<__detail::is_constructable<T, Args...>::value> { };
 #endif
@@ -309,6 +309,10 @@ namespace std
 	struct is_trivially_constructible :
 		bool_constant<__is_trivially_constructible(T, Args...)> { };
 
+	template<typename T>
+	struct is_trivially_copyable :
+		bool_constant<__is_trivially_copyable(T)> { };
+
 	template<typename T, typename ...Args>
 	struct is_trivially_default_constructible : is_trivially_constructible<T, Args...> { };
 
@@ -328,7 +332,7 @@ namespace std
 #endif
 
 
-#pragma message "TODO: result_of/invoke_result are hacks"
+//#pragma message "TODO: result_of/invoke_result are hacks"
 
     template<typename>
     struct result_of;

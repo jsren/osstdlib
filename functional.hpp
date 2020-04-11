@@ -38,7 +38,7 @@ namespace std
         template<typename... Args>
         invoke_result_t<T&, Args...> operator()(Args&&... args) const
         {
-#pragma message "TODO: Enable if callable"
+//#pragma message "TODO: Enable if callable"
             return (*pointer)(std::forward<Args>(args)...);
         }
     };

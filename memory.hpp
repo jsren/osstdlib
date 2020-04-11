@@ -498,10 +498,7 @@ namespace std
 
 		operator bool() const noexcept { return ptr != nullptr; }
 
-		/* Structure dereference. */
-		T* operator ->() const noexcept { return ptr; }
-		/* Indirection. */
-		T& operator *() const { return *ptr; }
+		T& operator [](std::size_t index) const { return ptr[index]; }
 
 		T* release() noexcept {
 			auto old = ptr; ptr = nullptr; return ptr;

@@ -11,5 +11,7 @@ namespace std
     enum class byte : unsigned char { };
 
 	using nullptr_t = decltype(nullptr);
+
+    #define offsetof(struct, member) __builtin_offsetof(struct, member)
 }
 }
