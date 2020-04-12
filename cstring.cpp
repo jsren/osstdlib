@@ -40,4 +40,14 @@ void* std::memset(void* ptr, int value, size_t num)
     }
     return _dest;
 }
+
+int std::strcmp(const char* lhs, const char* rhs)
+{
+    for (std::size_t i = 0; ; i++)
+    {
+        int diff = static_cast<int>(lhs[i]) - rhs[i];
+        if (diff != 0) return diff;
+        else if (lhs[i] == '\0') return 0;
+    }
+}
 }

@@ -13,5 +13,7 @@ namespace std
     inline char* strcpy(char* dest, const char* src) {
         memcpy(dest, src, strlen(src)); return dest;
     }
+
+    int strcmp(const char* lhs, const char* rhs);
 }
 }
