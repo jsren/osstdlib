@@ -23,19 +23,19 @@ namespace std
         template<class T> struct enable_if<true, T> { typedef T type; };
 
         template<typename T>
-        using is_integral_v = is_same_v<T, signed char>::value ||
-                              is_same_v<T, signed short>::value ||
-                              is_same_v<T, signed int>::value ||
-                              is_same_v<T, signed long int>::value ||
-                              is_same_v<T, signed long long int>::value ||
-                              is_same_v<T, unsigned char>::value ||
-                              is_same_v<T, unsigned short>::value ||
-                              is_same_v<T, unsigned int>::value ||
-                              is_same_v<T, unsigned long int>::value ||
-                              is_same_v<T, unsigned long long int>::value;
+        constexpr bool is_integral_v = is_same_v<T, signed char> ||
+                                       is_same_v<T, signed short> ||
+                                       is_same_v<T, signed int> ||
+                                       is_same_v<T, signed long int> ||
+                                       is_same_v<T, signed long long int> ||
+                                       is_same_v<T, unsigned char> ||
+                                       is_same_v<T, unsigned short> ||
+                                       is_same_v<T, unsigned int> ||
+                                       is_same_v<T, unsigned long int> ||
+                                       is_same_v<T, unsigned long long int>;
 
         template<typename T, typename Y=void>
-        using en_if_int = typename enable_if<std::is_integral<T>::value, Y>;
+        using en_if_int = typename enable_if<is_integral_v<T>, Y>::type;
 
         constexpr auto to_int(std::byte value) noexcept {
             return static_cast<__underlying_type(std::byte)>(value);
